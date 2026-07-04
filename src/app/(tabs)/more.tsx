@@ -3,6 +3,7 @@ import {
   Camera,
   ChevronRight,
   HelpCircle,
+  LogOut,
   Mail,
   MessageSquare,
   MessagesSquare,
@@ -18,6 +19,7 @@ import {
 import { Pressable, Text, View } from "react-native";
 
 import { Card, Screen } from "@/components/Screen";
+import { useAuth } from "@/lib/auth";
 import { useTheme, type TextSize, type ThemeMode } from "@/theme/ThemeContext";
 
 function GroupLabel({ children }: { children: string }) {
@@ -127,6 +129,7 @@ function Segmented<T extends string>({
 
 export default function MoreScreen() {
   const { colors, fontScale, mode, setMode, textSize, setTextSize } = useTheme();
+  const { signOut } = useAuth();
   return (
     <Screen title="More">
       <GroupLabel>Appearance</GroupLabel>
@@ -182,10 +185,31 @@ export default function MoreScreen() {
       </Card>
 
       <GroupLabel>App</GroupLabel>
-      <Card style={{ paddingVertical: 4, marginBottom: 8 }}>
+      <Card style={{ paddingVertical: 4 }}>
         <Row icon={Settings} label="Settings" note="Phase 1" />
         <Row icon={Share2} label="Share View" note="Phase 1" />
         <Row icon={MessageSquare} label="Feedback" note="Phase 1" last />
+      </Card>
+
+      <GroupLabel>Account</GroupLabel>
+      <Card style={{ paddingVertical: 4, marginBottom: 8 }}>
+        <Pressable
+          onPress={() => void signOut()}
+          style={{ flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 4 }}
+        >
+          <LogOut color={colors.destructiveRed} size={20} />
+          <Text
+            style={{
+              flex: 1,
+              fontSize: 15 * fontScale,
+              color: colors.destructiveRed,
+              marginLeft: 12,
+              fontWeight: "500",
+            }}
+          >
+            Sign Out
+          </Text>
+        </Pressable>
       </Card>
     </Screen>
   );

@@ -1,10 +1,17 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { BookOpen, LayoutDashboard, MapPin, Menu, Sun } from "lucide-react-native";
 
+import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/theme/ThemeContext";
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+  const { token, isLoading } = useAuth();
+
+  // Wait for SecureStore hydration before deciding — avoids a sign-in flash
+  if (isLoading) return null;
+  if (!token) return <Redirect href="/auth" />;
+
   return (
     <Tabs
       screenOptions={{
