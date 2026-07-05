@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import {
   createContext,
@@ -8,10 +9,26 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Platform } from "react-native";
 
 import { apiFetch } from "./api";
 
 const TOKEN_KEY = "auth.token";
+
+// SecureStore has no web implementation — fall back to AsyncStorage there
+// (web is only used for design previews, never as the shipped client).
+const tokenStore =
+  Platform.OS === "web"
+    ? {
+        get: () => AsyncStorage.getItem(TOKEN_KEY),
+        set: (value: string) => AsyncStorage.setItem(TOKEN_KEY, value),
+        remove: () => AsyncStorage.removeItem(TOKEN_KEY),
+      }
+    : {
+        get: () => SecureStore.getItemAsync(TOKEN_KEY),
+        set: (value: string) => SecureStore.setItemAsync(TOKEN_KEY, value),
+        remove: () => SecureStore.deleteItemAsync(TOKEN_KEY),
+      };
 
 export type MobileUser = {
   id: string;
@@ -70,8 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const stored = await SecureStore.getItemAsync(TOKEN_KEY);
+        const stored = await tokenStore.get();
         if (stored) setToken(stored);
+      } catch {
+        // Unreadable token store — treat as signed out
       } finally {
         setIsLoading(false);
       }
@@ -83,13 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: "POST",
       body: { email, password, twoFactorCode },
     });
-    await SecureStore.setItemAsync(TOKEN_KEY, res.token);
+    await tokenStore.set(res.token);
     setUser(res.user);
     setToken(res.token);
   }, []);
 
   const signOut = useCallback(async () => {
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await tokenStore.remove();
     setToken(null);
     setUser(null);
   }, []);
