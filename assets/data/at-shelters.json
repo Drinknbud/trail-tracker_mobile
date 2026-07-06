@@ -1,0 +1,1583 @@
+[
+  {
+    "name": "Amicalola Falls (Max Epperson) Shelter",
+    "mile": 0,
+    "confidence": "projected"
+  },
+  {
+    "name": "Black Gap Shelter",
+    "mile": 0,
+    "confidence": "projected"
+  },
+  {
+    "name": "Springer Mtn Shelter",
+    "mile": 0.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Stover Creek Shelter",
+    "mile": 2.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Hawk Mtn Shelter",
+    "mile": 7.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Gooch Mtn Shelter",
+    "mile": 15.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lance Creek Campsite",
+    "mile": 24.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Woods Hole Shelter",
+    "mile": 27.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Blood Mtn Shelter",
+    "mile": 28.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Whitley Gap Shelter",
+    "mile": 38.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Low Gap Shelter",
+    "mile": 43.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Blue Mtn Shelter",
+    "mile": 50.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Tray Mtn Shelter",
+    "mile": 58.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Addis Gap Shelter",
+    "mile": 62.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Deep Gap Shelter",
+    "mile": 65.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Plumorchard Shelter",
+    "mile": 73.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Muskrat Creek Shelter",
+    "mile": 81.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Standing Indian Shelter",
+    "mile": 86.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Carter Gap Shelter",
+    "mile": 93.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Long Branch Shelter",
+    "mile": 102.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rock Gap Shelter",
+    "mile": 105.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Siler Bald Shelter",
+    "mile": 113.8,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wayah Shelter",
+    "mile": 120.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cold Spring Shelter",
+    "mile": 125.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wesser Bald Shelter",
+    "mile": 131.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "A. Rufus Morgan Shelter",
+    "mile": 136.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Sassafras Gap Shelter",
+    "mile": 144.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cheoh Bald Shelter",
+    "mile": 152.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Brown Fork Gap Shelter",
+    "mile": 153.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cable Gap Shelter",
+    "mile": 159.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Fontana Dam Shelter",
+    "mile": 165.3,
+    "confidence": "projected"
+  },
+  {
+    "name": "Mollies Ridge Shelter",
+    "mile": 178.0,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Russell Field Shelter",
+    "mile": 181.1,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Spence Field Shelter",
+    "mile": 182.9,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "projected"
+  },
+  {
+    "name": "Derrick Knob Shelter",
+    "mile": 190.1,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Silers Bald Shelter",
+    "mile": 195.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Double Spring Gap Shelter",
+    "mile": 197.5,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mt. Collins Shelter",
+    "mile": 202.7,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "projected"
+  },
+  {
+    "name": "Icewater Spring Shelter",
+    "mile": 211.1,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pecks Corner Shelter",
+    "mile": 217.2,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "projected"
+  },
+  {
+    "name": "Tri-Corner Knob Shelter",
+    "mile": 222.6,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "projected"
+  },
+  {
+    "name": "Cosby Knob Shelter",
+    "mile": 231.4,
+    "notes": "\u26a0 GSMNP advance reservation required (recreation.gov). Sleeps 12. Dogs not allowed in park.",
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Davenport Gap Shelter",
+    "mile": 238.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Groundhog Creek Shelter",
+    "mile": 249,
+    "confidence": "projected"
+  },
+  {
+    "name": "Roaring Fork Shelter",
+    "mile": 257.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Walnut Mtn Shelter",
+    "mile": 264.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Bluff Mountain Shelter",
+    "mile": 264.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "Apple House Shelter",
+    "mile": 269.6,
+    "confidence": "projected"
+  },
+  {
+    "name": "Deer Park Mtn Shelter",
+    "mile": 272.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Spring Mtn Shelter",
+    "mile": 284.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Spring Mountain Shelter",
+    "mile": 286.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Little Laurel Shelter",
+    "mile": 294.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Jerry Cabin Shelter",
+    "mile": 302.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Flint Mtn Shelter",
+    "mile": 308.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Hogback Ridge Shelter",
+    "mile": 317.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bald Mtn Shelter",
+    "mile": 326.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Bald Mountain Shelter",
+    "mile": 327.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "No Business Knob Shelter",
+    "mile": 338.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Curley Maple Gap Shelter",
+    "mile": 348.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Beauty Spot (campsite)",
+    "mile": 355.2,
+    "confidence": "projected"
+  },
+  {
+    "name": "Cherry Gap Shelter",
+    "mile": 360.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Clyde Smith Shelter",
+    "mile": 370.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Roan High Knob Shelter",
+    "mile": 378.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Pond Mountain Shelter",
+    "mile": 380.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Stan Murray Shelter",
+    "mile": 384.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Overmountain Shelter",
+    "mile": 384.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Watauga Lake Shelter",
+    "mile": 392.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Mountaineer Falls Shelter",
+    "mile": 404.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Laurel Fork Shelter",
+    "mile": 408.2,
+    "confidence": "projected"
+  },
+  {
+    "name": "Moreland Gap Shelter",
+    "mile": 414,
+    "confidence": "projected"
+  },
+  {
+    "name": "Vandeventer Shelter",
+    "mile": 438.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Iron Mtn Shelter",
+    "mile": 444.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Double Springs Shelter",
+    "mile": 450.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "McQueen's Knob (Emergency) Shelter",
+    "mile": 457.6,
+    "confidence": "projected"
+  },
+  {
+    "name": "Abingdon Gap Shelter",
+    "mile": 460.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Saunders Shelter",
+    "mile": 480.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lost Mtn Shelter",
+    "mile": 487.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Thomas Knob Shelter",
+    "mile": 499.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wise Shelter",
+    "mile": 502.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Old Orchard Shelter",
+    "mile": 510.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Hurricane Mtn Shelter",
+    "mile": 515.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Trimpi Shelter",
+    "mile": 524.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Partnership Shelter",
+    "mile": 534.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Chatfield Memorial Shelter",
+    "mile": 539.6,
+    "confidence": "projected"
+  },
+  {
+    "name": "Knot Maul Branch Shelter",
+    "mile": 560.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Chestnut Knob Shelter",
+    "mile": 570.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Jenkins Shelter",
+    "mile": 580.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Johns Creek Shelter",
+    "mile": 584.6,
+    "confidence": "projected"
+  },
+  {
+    "name": "Helveys Mill Shelter",
+    "mile": 594.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Jenny Knob Shelter",
+    "mile": 604.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wapiti Shelter",
+    "mile": 618.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Doc's Knob Shelter",
+    "mile": 628.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rice Field Shelter",
+    "mile": 644.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pine Swamp Branch Shelter",
+    "mile": 657.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bailey Gap Shelter",
+    "mile": 660.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "War Spur Shelter",
+    "mile": 670.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Laurel Creek Shelter",
+    "mile": 676.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Sarver Hollow Shelter",
+    "mile": 682.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Niday Shelter",
+    "mile": 688.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pickle Branch Shelter",
+    "mile": 698.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Johns Spring Shelter",
+    "mile": 712.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Catawba Mtn Shelter",
+    "mile": 713.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Campbell Shelter",
+    "mile": 715.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lamberts Meadow Shelter",
+    "mile": 721.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Marble Spring Shelter",
+    "mile": 722.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "Fullhardt Knob Shelter",
+    "mile": 736.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wilson Creek Shelter",
+    "mile": 742.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bobblets Gap Shelter",
+    "mile": 749.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cove Mtn (VA) Shelter",
+    "mile": 756.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cold Mountain Shelter",
+    "mile": 762.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Bryant Ridge Shelter",
+    "mile": 763.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cornelius Creek Shelter",
+    "mile": 768.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Thunder Hill Shelter",
+    "mile": 773.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Matts Creek Shelter",
+    "mile": 785.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Johns Hollow Shelter",
+    "mile": 789.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Punchbowl Shelter",
+    "mile": 798.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Brown Mtn Creek Shelter",
+    "mile": 808.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cow Camp Gap Shelter",
+    "mile": 812.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Seeley-Woodworth Shelter",
+    "mile": 823.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "The Priest Shelter",
+    "mile": 830.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Harpers Creek Shelter",
+    "mile": 838.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Maupin Field Shelter",
+    "mile": 844.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Dick's Dome",
+    "mile": 846.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Paul C. Wolfe Shelter",
+    "mile": 863.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Calf Mtn Shelter",
+    "mile": 873.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Blackrock Hut Shelter",
+    "mile": 885.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pinefield Hut Shelter",
+    "mile": 899.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Hightop Hut Shelter",
+    "mile": 907.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bearfence Mtn Hut Shelter",
+    "mile": 919.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rock Spring Hut Shelter",
+    "mile": 933.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Byrds Nest 3 Hut Shelter",
+    "mile": 942.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pass Mtn Hut Shelter",
+    "mile": 946.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Gravel Springs Hut Shelter",
+    "mile": 959.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Tom Floyd Wayside Shelter",
+    "mile": 975.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Jim and Molly Denton Shelter",
+    "mile": 978.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Manassas Gap Shelter",
+    "mile": 983.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Whiskey Hollow Shelter",
+    "mile": 988.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rod Hollow Shelter",
+    "mile": 996.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Sam Moore Shelter",
+    "mile": 1005,
+    "confidence": "projected"
+  },
+  {
+    "name": "David Lesser Memorial Shelter",
+    "mile": 1017.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Ed Garvey Shelter",
+    "mile": 1033.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Crampton Gap Shelter",
+    "mile": 1037.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rocky Run Shelter",
+    "mile": 1042.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rocky Run Shelter 2",
+    "mile": 1042.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rocky Run Shelter 1",
+    "mile": 1042.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pine Knob Shelter",
+    "mile": 1050.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Ensign Cowall Shelter",
+    "mile": 1058.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Raven Rock Shelter",
+    "mile": 1064.2,
+    "confidence": "projected"
+  },
+  {
+    "name": "Deer Lick Shelter 2",
+    "mile": 1073.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Deer Lick Shelter 1",
+    "mile": 1073.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Tumbling Run Shelter 1",
+    "mile": 1076.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Tumbling Run Shelter 2",
+    "mile": 1076.7,
+    "confidence": "projected"
+  },
+  {
+    "name": "Rocky Mtn Shelter 2",
+    "mile": 1083,
+    "confidence": "projected"
+  },
+  {
+    "name": "Rocky Mtn Shelter 1",
+    "mile": 1083.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Quarry Gap Shelter",
+    "mile": 1087.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Birch Run Shelter",
+    "mile": 1096.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Toms Run Shelter",
+    "mile": 1102.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "James Fry at Tagg Run Shelter",
+    "mile": 1112.3,
+    "confidence": "projected"
+  },
+  {
+    "name": "Alec Kennedy Shelter",
+    "mile": 1121.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Thelma Marks Shelter",
+    "mile": 1128,
+    "confidence": "projected"
+  },
+  {
+    "name": "Darlington Shelter",
+    "mile": 1139.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cove Mtn (PA) Shelter",
+    "mile": 1146.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Clarks Ferry Shelter",
+    "mile": 1155.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Peters Mtn Shelter",
+    "mile": 1161.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rausch Gap Shelter",
+    "mile": 1179.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "William Penn Shelter",
+    "mile": 1191.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "501 Shelter",
+    "mile": 1195.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Eagles Nest Shelter",
+    "mile": 1210.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Windsor Furnace Shelter",
+    "mile": 1226.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Eckville Shelter",
+    "mile": 1234.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "Allentown Shelter",
+    "mile": 1242.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Bake Oven Knob Shelter",
+    "mile": 1253.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "George W. Outerbridge Shelter",
+    "mile": 1260.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Leroy A. Smith Shelter",
+    "mile": 1277.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Kirkridge Shelter",
+    "mile": 1291.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Brink Rd Shelter",
+    "mile": 1322.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Gren Anderson Shelter",
+    "mile": 1329.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mashipacong Shelter",
+    "mile": 1335.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rutherford Shelter",
+    "mile": 1337.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "High Point Shelter",
+    "mile": 1342.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pochuck Mtn Shelter",
+    "mile": 1354.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wawayanda Shelter",
+    "mile": 1366.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wildcat Shelter",
+    "mile": 1378.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Fingerboard Shelter",
+    "mile": 1393.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "West Mtn Shelter",
+    "mile": 1397.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "William Brien Memorial Shelter",
+    "mile": 1398.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "RPH Shelter",
+    "mile": 1426.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Morgan Stewart Shelter",
+    "mile": 1444.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Telephone Pioneers Shelter",
+    "mile": 1451.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wiley Shelter",
+    "mile": 1460.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Ten Mile River Shelter",
+    "mile": 1464.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mt. Algo Shelter",
+    "mile": 1473.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Stewart Hollow Brook Shelter",
+    "mile": 1480.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pine Swamp Brook Shelter",
+    "mile": 1490.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Sage's Ravine Campsite",
+    "mile": 1496,
+    "confidence": "projected"
+  },
+  {
+    "name": "Limestone Spring Shelter",
+    "mile": 1503.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Riga Shelter",
+    "mile": 1511.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Brassie Brook Shelter",
+    "mile": 1512.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "The Hemlocks Shelter",
+    "mile": 1520.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Glen Brook Shelter",
+    "mile": 1520.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Tom Leonard Shelter",
+    "mile": 1525.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "Mt. Wilcox South Shelter 1",
+    "mile": 1540.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mt. Wilcox South Shelter 2",
+    "mile": 1540.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mt. Wilcox North Shelter",
+    "mile": 1540.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Upper Goose Pond Cabin Shelter",
+    "mile": 1546.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "October Mtn Shelter",
+    "mile": 1565.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Kay Wood Shelter",
+    "mile": 1573.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mark Noepel Shelter",
+    "mile": 1590.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wilbur Clearing Shelter",
+    "mile": 1597.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Seth Warner Shelter",
+    "mile": 1609.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Congdon Shelter",
+    "mile": 1614.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Melville Nauheim Shelter",
+    "mile": 1620.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Kid Gore Shelter",
+    "mile": 1622.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Goddard Shelter",
+    "mile": 1628.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "GMC Caretaker Hut Shelter",
+    "mile": 1634.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Story Spring Shelter",
+    "mile": 1637.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Stratton Pond Shelter",
+    "mile": 1644.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "William B. Douglas Shelter",
+    "mile": 1652.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Spruce Peak Shelter",
+    "mile": 1655.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bromley Shelter",
+    "mile": 1660.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Little Rock Pond Shelter",
+    "mile": 1667.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Peru Peak Shelter",
+    "mile": 1668.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lost Pond Shelter",
+    "mile": 1673.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Old Job Shelter",
+    "mile": 1674.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Big Branch Shelter",
+    "mile": 1675.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Greenwall Shelter",
+    "mile": 1683.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Minerva Hinchey Shelter",
+    "mile": 1688.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Clarendon Shelter",
+    "mile": 1692.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cooper Lodge Shelter",
+    "mile": 1692.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Pico Camp Shelter",
+    "mile": 1695.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Governor Clement Shelter",
+    "mile": 1698.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Churchill Scott Shelter",
+    "mile": 1706.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lula Tye",
+    "mile": 1709.1,
+    "confidence": "projected"
+  },
+  {
+    "name": "Winturri Shelter",
+    "mile": 1718.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Stony Brook Shelter",
+    "mile": 1718.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Montclair Glen Lodge",
+    "mile": 1734,
+    "confidence": "projected"
+  },
+  {
+    "name": "Thistle Hill Shelter",
+    "mile": 1740.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bamforth Ridge Shelter",
+    "mile": 1748,
+    "confidence": "projected"
+  },
+  {
+    "name": "Happy Hill Shelter",
+    "mile": 1749.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Taft Lodge",
+    "mile": 1756,
+    "confidence": "projected"
+  },
+  {
+    "name": "Velvet Rocks Shelter",
+    "mile": 1757.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Moose Mtn Shelter",
+    "mile": 1765.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Smarts Mtn Fire Warden's Cabin Shelter",
+    "mile": 1769.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Buchanan Shelter",
+    "mile": 1772,
+    "confidence": "projected"
+  },
+  {
+    "name": "Trapper John Shelter",
+    "mile": 1772.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Hexacuba Shelter",
+    "mile": 1784.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Birch Glen Camp",
+    "mile": 1794,
+    "confidence": "projected"
+  },
+  {
+    "name": "Jeffers Brook Shelter",
+    "mile": 1799.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cowles Cove Shelter",
+    "mile": 1802,
+    "confidence": "projected"
+  },
+  {
+    "name": "Beaver Brook Shelter",
+    "mile": 1806.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Tillotson Camp",
+    "mile": 1808,
+    "confidence": "projected"
+  },
+  {
+    "name": "Eliza Brook Shelter",
+    "mile": 1815.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Hazen's Notch Camp",
+    "mile": 1816,
+    "confidence": "projected"
+  },
+  {
+    "name": "Kinsman Pond Shelter",
+    "mile": 1819.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lonesome Lake Hut",
+    "mile": 1821.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Shooting Star Shelter",
+    "mile": 1831,
+    "confidence": "projected"
+  },
+  {
+    "name": "Garfield Ridge Shelter",
+    "mile": 1834.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Galehead Hut",
+    "mile": 1837.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Guyot Shelter",
+    "mile": 1840.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Centennial Shelter",
+    "mile": 1843,
+    "confidence": "projected"
+  },
+  {
+    "name": "Ethan Pond Shelter",
+    "mile": 1849.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "The Perch Shelter",
+    "mile": 1858,
+    "confidence": "projected"
+  },
+  {
+    "name": "Imp Shelter",
+    "mile": 1891.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Imp Campsite",
+    "mile": 1891.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rattle River Shelter",
+    "mile": 1899.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Gentian Pond Shelter",
+    "mile": 1911.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Carlo Col Shelter",
+    "mile": 1916.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Full Goose Shelter",
+    "mile": 1921.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Speck Pond Shelter",
+    "mile": 1925.9,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Baldpate Lean-to Shelter",
+    "mile": 1932.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Frye Notch Lean-to Shelter",
+    "mile": 1936.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Mizpah Spring Hut",
+    "mile": 1940,
+    "confidence": "projected"
+  },
+  {
+    "name": "Hall Mtn Lean-to Shelter",
+    "mile": 1945.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pinkham Notch Camp",
+    "mile": 1953.5,
+    "confidence": "projected"
+  },
+  {
+    "name": "Bemis Mtn Lean-to Shelter",
+    "mile": 1959.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Madison Spring Hut",
+    "mile": 1960.8,
+    "confidence": "projected"
+  },
+  {
+    "name": "Sabbath Day Pond Lean-to Shelter",
+    "mile": 1967.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Lakes of the Clouds Hut",
+    "mile": 1968.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Piazza Rock Lean-to Shelter",
+    "mile": 1979.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Zealand Falls Hut",
+    "mile": 1987.2,
+    "confidence": "projected"
+  },
+  {
+    "name": "Poplar Ridge Lean-to Shelter",
+    "mile": 1988.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Spaulding Mtn Lean-to Shelter",
+    "mile": 1996.0,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Horns Pond Day Use Shelter",
+    "mile": 1998.9,
+    "confidence": "projected"
+  },
+  {
+    "name": "Horns Pond Lean-to Shelter 2",
+    "mile": 2014.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Horns Pond Lean-to Shelter 1",
+    "mile": 2014.4,
+    "confidence": "projected"
+  },
+  {
+    "name": "Little Bigelow Lean-to Shelter",
+    "mile": 2024.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "West Carry Pond Lean-to Shelter",
+    "mile": 2031.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Squirrel Rock Lean-to",
+    "mile": 2037,
+    "confidence": "projected"
+  },
+  {
+    "name": "Pierce Pond Lean-to Shelter",
+    "mile": 2042.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Old Blue Mountain Lean-to",
+    "mile": 2044,
+    "confidence": "projected"
+  },
+  {
+    "name": "Pleasant Pond Lean-to Shelter",
+    "mile": 2052.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Pleasant Ridge Lean-to",
+    "mile": 2052.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bald Mtn Brook Lean-to Shelter",
+    "mile": 2061.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Moxie Bald Lean-to Shelter",
+    "mile": 2065.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Horseshoe Canyon Lean-to Shelter",
+    "mile": 2074.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Leeman Brook Lean-to Shelter",
+    "mile": 2086.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wilson Valley Lean-to Shelter",
+    "mile": 2093.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Long Pond Stream Lean-to Shelter",
+    "mile": 2098.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cloud Pond Lean-to Shelter",
+    "mile": 2102.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Bigelow Col Campsite",
+    "mile": 2106,
+    "confidence": "projected"
+  },
+  {
+    "name": "Chairback Gap Lean-to Shelter",
+    "mile": 2109.4,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Carl A. Newhall Lean-to Shelter",
+    "mile": 2115.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Logan Brook Lean-to Shelter",
+    "mile": 2125.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "East Branch (Pleasant River) Lean-to Shelter",
+    "mile": 2128.5,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Cooper Brook Falls Lean-to Shelter",
+    "mile": 2136.2,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Potaywadjo Spring Lean-to Shelter",
+    "mile": 2149.6,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Nahmakanta Stream Lean-to Shelter",
+    "mile": 2154.1,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Wadleigh Stream Lean-to Shelter",
+    "mile": 2159.7,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rainbow Stream Lean-to Shelter",
+    "mile": 2167.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Rainbow Spring Campsite",
+    "mile": 2167.8,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "The Birches Lean-to Shelter 1",
+    "mile": 2174.6,
+    "confidence": "projected"
+  },
+  {
+    "name": "The Birches Lean-to Shelter 2",
+    "mile": 2174.6,
+    "confidence": "projected"
+  },
+  {
+    "name": "Hurd Brook Lean-to Shelter",
+    "mile": 2179.3,
+    "confidence": "confirmed"
+  },
+  {
+    "name": "Baxter Peak (Katahdin summit)",
+    "mile": 2198,
+    "confidence": "projected"
+  }
+]
