@@ -3,6 +3,7 @@ import type {
   DayLogRow,
   ElevationProfile,
   NightLogRow,
+  OutboxRow,
   PoiRow,
   SectionDetailRow,
   SectionRow,
@@ -26,7 +27,8 @@ const briefings = new Map<string, BriefingRow[]>();
 const pois = new Map<string, PoiRow[]>();
 const elevations = new Map<string, ElevationProfile>();
 const downloads = new Map<string, TripDownloadRow>();
-const outbox: unknown[] = [];
+const outbox: OutboxRow[] = [];
+let outboxNextId = 1;
 
 function countsFor(sectionId: string): TripCounts {
   return {
@@ -106,5 +108,87 @@ export const memoryStore: TripStore = {
 
   async getOutboxCount() {
     return outbox.length;
+  },
+
+  async getSectionDetail(id) {
+    const s = sections.get(id);
+    if (!s) return null;
+    return {
+      notes: null,
+      itinerary: null,
+      details: null,
+      plannedCamps: null,
+      plannedCampMiles: null,
+      plannedWaterStops: null,
+      ...s,
+    };
+  },
+
+  async listPois(sectionId) {
+    return pois.get(sectionId) ?? [];
+  },
+
+  async listNightLogs(sectionId) {
+    return [...(nightLogs.get(sectionId) ?? [])].sort((a, b) =>
+      (a.date ?? "").localeCompare(b.date ?? "")
+    );
+  },
+
+  async listDayLogs(sectionId) {
+    return [...(dayLogs.get(sectionId) ?? [])].sort((a, b) =>
+      (a.date ?? "").localeCompare(b.date ?? "")
+    );
+  },
+
+  async upsertNightLog(n) {
+    const list = nightLogs.get(n.sectionId) ?? [];
+    const idx = list.findIndex((x) => x.id === n.id);
+    if (idx >= 0) list[idx] = n;
+    else list.push(n);
+    nightLogs.set(n.sectionId, list);
+  },
+
+  async upsertDayLog(d) {
+    const list = dayLogs.get(d.sectionId) ?? [];
+    const idx = list.findIndex((x) => x.id === d.id);
+    if (idx >= 0) list[idx] = d;
+    else list.push(d);
+    dayLogs.set(d.sectionId, list);
+  },
+
+  async setSectionStatus(id, status) {
+    const s = sections.get(id);
+    if (s) sections.set(id, { ...s, status, updatedAt: new Date().toISOString() });
+  },
+
+  async outboxEnqueue(entry) {
+    if (outbox.some((e) => e.idempotencyKey === entry.idempotencyKey)) return;
+    outbox.push({
+      id: outboxNextId++,
+      endpoint: entry.endpoint,
+      method: entry.method,
+      payload: entry.payload,
+      idempotencyKey: entry.idempotencyKey,
+      createdAt: new Date().toISOString(),
+      attempts: 0,
+      lastError: null,
+    });
+  },
+
+  async outboxPending(maxAttempts) {
+    return outbox.filter((e) => e.attempts < maxAttempts);
+  },
+
+  async outboxDelete(id) {
+    const idx = outbox.findIndex((e) => e.id === id);
+    if (idx >= 0) outbox.splice(idx, 1);
+  },
+
+  async outboxRecordFailure(id, error) {
+    const e = outbox.find((x) => x.id === id);
+    if (e) {
+      e.attempts += 1;
+      e.lastError = error;
+    }
   },
 };

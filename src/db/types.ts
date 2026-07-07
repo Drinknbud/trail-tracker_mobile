@@ -123,6 +123,17 @@ export type TripStatusEntry = TripDownloadRow & {
   liveCounts: TripCounts;
 };
 
+export type OutboxRow = {
+  id: number;
+  endpoint: string;
+  method: string;
+  payload: Record<string, unknown>;
+  idempotencyKey: string;
+  createdAt: string;
+  attempts: number;
+  lastError: string | null;
+};
+
 export interface TripStore {
   init(): Promise<void>;
   upsertSections(rows: SectionRow[]): Promise<void>;
@@ -136,4 +147,24 @@ export interface TripStore {
   listTripDownloads(): Promise<TripDownloadRow[]>;
   getTripStatus(): Promise<TripStatusEntry[]>;
   getOutboxCount(): Promise<number>;
+
+  // Section detail + journal (all reads/writes are local-first)
+  getSectionDetail(id: string): Promise<SectionDetailRow | null>;
+  listPois(sectionId: string): Promise<PoiRow[]>;
+  listNightLogs(sectionId: string): Promise<NightLogRow[]>;
+  listDayLogs(sectionId: string): Promise<DayLogRow[]>;
+  upsertNightLog(row: NightLogRow): Promise<void>;
+  upsertDayLog(row: DayLogRow): Promise<void>;
+  setSectionStatus(id: string, status: string): Promise<void>;
+
+  // Outbox (docs §4.3)
+  outboxEnqueue(entry: {
+    endpoint: string;
+    method: string;
+    payload: Record<string, unknown>;
+    idempotencyKey: string;
+  }): Promise<void>;
+  outboxPending(maxAttempts: number): Promise<OutboxRow[]>;
+  outboxDelete(id: number): Promise<void>;
+  outboxRecordFailure(id: number, error: string): Promise<void>;
 }

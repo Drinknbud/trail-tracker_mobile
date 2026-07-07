@@ -353,4 +353,169 @@ export const nativeStore: TripStore = {
       (getDb().getFirstSync<{ n: number }>("SELECT COUNT(*) AS n FROM outbox")?.n ?? 0) as number
     );
   },
+
+  async getSectionDetail(id) {
+    const r = getDb().getFirstSync<
+      SectionDbRow & {
+        notes: string | null;
+        itinerary: string | null;
+        details: string | null;
+        planned_camps: string | null;
+        planned_camp_miles: string | null;
+        planned_water_stops: string | null;
+      }
+    >("SELECT * FROM sections WHERE id = ?", id);
+    if (!r) return null;
+    return {
+      ...toSectionRow(r),
+      notes: r.notes,
+      itinerary: r.itinerary,
+      details: r.details,
+      plannedCamps: r.planned_camps,
+      plannedCampMiles: r.planned_camp_miles,
+      plannedWaterStops: r.planned_water_stops,
+    };
+  },
+
+  async listPois(sectionId) {
+    const rows = getDb().getAllSync<{
+      type: string;
+      name: string;
+      mile: number | null;
+      meta_json: string | null;
+    }>("SELECT type, name, mile, meta_json FROM pois WHERE section_id = ? ORDER BY mile ASC", sectionId);
+    return rows.map((r) => ({
+      type: r.type,
+      name: r.name,
+      mile: r.mile ?? 0,
+      meta: r.meta_json ? (JSON.parse(r.meta_json) as Record<string, unknown>) : {},
+    }));
+  },
+
+  async listNightLogs(sectionId) {
+    return getDb()
+      .getAllSync<{
+        id: string;
+        section_id: string;
+        date: string | null;
+        camped_at: string | null;
+        camped_with: string | null;
+        arrived_at: string | null;
+        left_at: string | null;
+        notes: string | null;
+        updated_at: string;
+      }>("SELECT * FROM night_logs WHERE section_id = ? ORDER BY date ASC, updated_at ASC", sectionId)
+      .map((r) => ({
+        id: r.id,
+        sectionId: r.section_id,
+        date: r.date,
+        campedAt: r.camped_at,
+        campedWith: r.camped_with,
+        arrivedAt: r.arrived_at,
+        leftAt: r.left_at,
+        notes: r.notes,
+        updatedAt: r.updated_at,
+      }));
+  },
+
+  async listDayLogs(sectionId) {
+    return getDb()
+      .getAllSync<{
+        id: string;
+        section_id: string;
+        date: string | null;
+        miles_hiked: number | null;
+        start_time: string | null;
+        end_time: string | null;
+        terrain_notes: string | null;
+        mood: number | null;
+        updated_at: string;
+      }>("SELECT * FROM day_logs WHERE section_id = ? ORDER BY date ASC, updated_at ASC", sectionId)
+      .map((r) => ({
+        id: r.id,
+        sectionId: r.section_id,
+        date: r.date,
+        milesHiked: r.miles_hiked,
+        startTime: r.start_time,
+        endTime: r.end_time,
+        terrainNotes: r.terrain_notes,
+        mood: r.mood,
+        updatedAt: r.updated_at,
+      }));
+  },
+
+  async upsertNightLog(n) {
+    getDb().runSync(
+      `INSERT INTO night_logs (id, section_id, date, camped_at, camped_with, arrived_at, left_at, notes, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         date = excluded.date, camped_at = excluded.camped_at, camped_with = excluded.camped_with,
+         arrived_at = excluded.arrived_at, left_at = excluded.left_at, notes = excluded.notes,
+         updated_at = excluded.updated_at`,
+      n.id, n.sectionId, n.date, n.campedAt, n.campedWith, n.arrivedAt, n.leftAt, n.notes, n.updatedAt
+    );
+  },
+
+  async upsertDayLog(d) {
+    getDb().runSync(
+      `INSERT INTO day_logs (id, section_id, date, miles_hiked, start_time, end_time, terrain_notes, mood, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         date = excluded.date, miles_hiked = excluded.miles_hiked, start_time = excluded.start_time,
+         end_time = excluded.end_time, terrain_notes = excluded.terrain_notes, mood = excluded.mood,
+         updated_at = excluded.updated_at`,
+      d.id, d.sectionId, d.date, d.milesHiked, d.startTime, d.endTime, d.terrainNotes, d.mood, d.updatedAt
+    );
+  },
+
+  async setSectionStatus(id, status) {
+    getDb().runSync(
+      "UPDATE sections SET status = ?, updated_at = ? WHERE id = ?",
+      status, new Date().toISOString(), id
+    );
+  },
+
+  async outboxEnqueue(entry) {
+    getDb().runSync(
+      `INSERT OR IGNORE INTO outbox (endpoint, method, payload_json, idempotency_key, created_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      entry.endpoint, entry.method, JSON.stringify(entry.payload), entry.idempotencyKey,
+      new Date().toISOString()
+    );
+  },
+
+  async outboxPending(maxAttempts) {
+    return getDb()
+      .getAllSync<{
+        id: number;
+        endpoint: string;
+        method: string;
+        payload_json: string;
+        idempotency_key: string;
+        created_at: string;
+        attempts: number;
+        last_error: string | null;
+      }>("SELECT * FROM outbox WHERE attempts < ? ORDER BY id ASC", maxAttempts)
+      .map((r) => ({
+        id: r.id,
+        endpoint: r.endpoint,
+        method: r.method,
+        payload: JSON.parse(r.payload_json) as Record<string, unknown>,
+        idempotencyKey: r.idempotency_key,
+        createdAt: r.created_at,
+        attempts: r.attempts,
+        lastError: r.last_error,
+      }));
+  },
+
+  async outboxDelete(id) {
+    getDb().runSync("DELETE FROM outbox WHERE id = ?", id);
+  },
+
+  async outboxRecordFailure(id, error) {
+    getDb().runSync(
+      "UPDATE outbox SET attempts = attempts + 1, last_error = ? WHERE id = ?",
+      error, id
+    );
+  },
 };

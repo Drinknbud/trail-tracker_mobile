@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { CheckCircle2, CloudDownload, WifiOff } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -113,28 +114,33 @@ export default function JournalScreen() {
           return (
             <Card key={s.id} style={{ marginBottom: 10, paddingVertical: 12 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: STATUS_COLORS[s.status] ?? colors.muted,
-                    marginRight: 10,
-                  }}
-                />
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{ fontSize: 15 * fontScale, fontWeight: "600", color: colors.text }}
-                    numberOfLines={1}
-                  >
-                    {s.name}
-                  </Text>
-                  <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 2 }}>
-                    {s.miles.toFixed(1)} mi
-                    {s.startDate ? ` · ${s.startDate.slice(0, 10)}` : ""}
-                    {s.difficulty ? ` · ${s.difficulty}` : ""}
-                  </Text>
-                </View>
+                <Pressable
+                  onPress={() => router.push(`/section/${s.id}`)}
+                  style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+                >
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: STATUS_COLORS[s.status] ?? colors.muted,
+                      marginRight: 10,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{ fontSize: 15 * fontScale, fontWeight: "600", color: colors.text }}
+                      numberOfLines={1}
+                    >
+                      {s.name}
+                    </Text>
+                    <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 2 }}>
+                      {s.miles.toFixed(1)} mi
+                      {s.startDate ? ` · ${s.startDate.slice(0, 10)}` : ""}
+                      {s.difficulty ? ` · ${s.difficulty}` : ""}
+                    </Text>
+                  </View>
+                </Pressable>
                 {download?.verified ? (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginRight: 8 }}>
                     <CheckCircle2 color={colors.completed} size={16} />

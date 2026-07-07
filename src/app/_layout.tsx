@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { OutboxSyncManager } from "@/components/OutboxSyncManager";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
@@ -28,6 +29,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
+          <OutboxSyncManager />
           <RootNavigator />
         </AuthProvider>
       </ThemeProvider>

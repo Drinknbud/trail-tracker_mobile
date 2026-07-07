@@ -5,6 +5,8 @@ import { Pressable, Text, View } from "react-native";
 
 import { Card, Screen } from "@/components/Screen";
 import { tripStore, type TripStatusEntry } from "@/db";
+import { useAuth } from "@/lib/auth";
+import { flushOutbox } from "@/lib/outbox";
 import { useTheme } from "@/theme/ThemeContext";
 
 function formatBytes(n: number): string {
@@ -23,8 +25,10 @@ const COUNT_LABELS: [keyof TripStatusEntry["liveCounts"], string][] = [
 
 export default function TripStatusScreen() {
   const { colors, fontScale } = useTheme();
+  const { token } = useAuth();
   const [entries, setEntries] = useState<TripStatusEntry[]>([]);
   const [outboxCount, setOutboxCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
 
   const load = useCallback(async () => {
     await tripStore.init();
@@ -57,11 +61,41 @@ export default function TripStatusScreen() {
         What&apos;s stored on this device for offline use.
       </Text>
 
-      <Card style={{ marginBottom: 12, flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={{ fontSize: 14 * fontScale, color: colors.text }}>Pending sync (outbox)</Text>
-        <Text style={{ fontSize: 14 * fontScale, fontWeight: "700", color: colors.text }}>
-          {outboxCount}
-        </Text>
+      <Card style={{ marginBottom: 12 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ fontSize: 14 * fontScale, color: colors.text }}>
+            Pending sync (outbox)
+          </Text>
+          <Text style={{ fontSize: 14 * fontScale, fontWeight: "700", color: colors.text }}>
+            {outboxCount}
+          </Text>
+        </View>
+        {outboxCount > 0 ? (
+          <Pressable
+            onPress={async () => {
+              setSyncing(true);
+              try {
+                await flushOutbox(token);
+              } finally {
+                setSyncing(false);
+                await load();
+              }
+            }}
+            disabled={syncing}
+            style={{
+              backgroundColor: colors.accent,
+              borderRadius: 8,
+              paddingVertical: 10,
+              alignItems: "center",
+              marginTop: 10,
+              opacity: syncing ? 0.6 : 1,
+            }}
+          >
+            <Text style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 13 * fontScale }}>
+              {syncing ? "Syncing…" : "Sync now"}
+            </Text>
+          </Pressable>
+        ) : null}
       </Card>
 
       {entries.length === 0 ? (
