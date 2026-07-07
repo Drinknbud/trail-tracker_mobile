@@ -9,9 +9,9 @@ import type {
   TripStore,
 } from "./types";
 
-// v2 added gps_sessions/gps_points. All DDL is CREATE IF NOT EXISTS, so
-// upgrades are a re-run of the full DDL.
-const SCHEMA_VERSION = 2;
+// v2 added gps_sessions/gps_points; v3 photos_queue/trail_mail. All DDL is
+// CREATE IF NOT EXISTS, so upgrades are a re-run of the full DDL.
+const SCHEMA_VERSION = 3;
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS trails (
@@ -72,6 +72,16 @@ CREATE TABLE IF NOT EXISTS gps_points (
   ts INTEGER NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL, alt REAL
 );
 CREATE INDEX IF NOT EXISTS idx_gps_points_session ON gps_points(session_id);
+CREATE TABLE IF NOT EXISTS photos_queue (
+  id TEXT PRIMARY KEY, section_id TEXT, uri TEXT NOT NULL,
+  lat REAL, lon REAL, taken_at TEXT NOT NULL,
+  uploaded INTEGER NOT NULL DEFAULT 0, error TEXT
+);
+CREATE TABLE IF NOT EXISTS trail_mail (
+  id TEXT PRIMARY KEY, sender_name TEXT, message TEXT NOT NULL,
+  photo_urls TEXT NOT NULL DEFAULT '[]', is_public INTEGER NOT NULL DEFAULT 0,
+  is_read INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
+);
 `;
 
 let db: SQLiteDatabase | null = null;
@@ -654,5 +664,73 @@ export const nativeStore: TripStore = {
 
   async gpsMarkSynced(id) {
     getDb().runSync("UPDATE gps_sessions SET synced = 1 WHERE id = ?", id);
+  },
+
+  async photoEnqueue(p) {
+    getDb().runSync(
+      `INSERT OR REPLACE INTO photos_queue (id, section_id, uri, lat, lon, taken_at, uploaded, error)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      p.id, p.sectionId, p.uri, p.lat, p.lon, p.takenAt, p.uploaded ? 1 : 0, p.error
+    );
+  },
+
+  async photoList() {
+    return getDb()
+      .getAllSync<{
+        id: string; section_id: string | null; uri: string; lat: number | null;
+        lon: number | null; taken_at: string; uploaded: number; error: string | null;
+      }>("SELECT * FROM photos_queue ORDER BY taken_at DESC")
+      .map((r) => ({
+        id: r.id, sectionId: r.section_id, uri: r.uri, lat: r.lat, lon: r.lon,
+        takenAt: r.taken_at, uploaded: r.uploaded === 1, error: r.error,
+      }));
+  },
+
+  async photoPending() {
+    return (await this.photoList()).filter((p) => !p.uploaded);
+  },
+
+  async photoMarkUploaded(id) {
+    getDb().runSync("UPDATE photos_queue SET uploaded = 1, error = NULL WHERE id = ?", id);
+  },
+
+  async photoMarkError(id, error) {
+    getDb().runSync("UPDATE photos_queue SET error = ? WHERE id = ?", error, id);
+  },
+
+  async upsertTrailMail(rows) {
+    const dbh = getDb();
+    dbh.withTransactionSync(() => {
+      for (const m of rows) {
+        // Preserve a locally-set read flag: offline reads must survive a
+        // refresh that still carries the server's stale isRead=false.
+        dbh.runSync(
+          `INSERT INTO trail_mail (id, sender_name, message, photo_urls, is_public, is_read, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(id) DO UPDATE SET
+             sender_name = excluded.sender_name, message = excluded.message,
+             photo_urls = excluded.photo_urls, is_public = excluded.is_public,
+             is_read = MAX(trail_mail.is_read, excluded.is_read),
+             created_at = excluded.created_at`,
+          m.id, m.senderName, m.message, m.photoUrls, m.isPublic ? 1 : 0, m.isRead ? 1 : 0, m.createdAt
+        );
+      }
+    });
+  },
+
+  async listTrailMail() {
+    return getDb()
+      .getAllSync<{
+        id: string; sender_name: string | null; message: string; photo_urls: string;
+        is_public: number; is_read: number; created_at: string;
+      }>("SELECT * FROM trail_mail ORDER BY created_at DESC")
+      .map((r) => ({
+        id: r.id, senderName: r.sender_name, message: r.message, photoUrls: r.photo_urls,
+        isPublic: r.is_public === 1, isRead: r.is_read === 1, createdAt: r.created_at,
+      }));
+  },
+
+  async markTrailMailRead(id) {
+    getDb().runSync("UPDATE trail_mail SET is_read = 1 WHERE id = ?", id);
   },
 };

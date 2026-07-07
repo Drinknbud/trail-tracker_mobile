@@ -140,6 +140,27 @@ export type GpsPointRow = {
   alt: number | null;
 };
 
+export type PhotoQueueRow = {
+  id: string;
+  sectionId: string | null;
+  uri: string;
+  lat: number | null;
+  lon: number | null;
+  takenAt: string;
+  uploaded: boolean;
+  error: string | null;
+};
+
+export type TrailMailRow = {
+  id: string;
+  senderName: string | null;
+  message: string;
+  photoUrls: string; // JSON string[]
+  isPublic: boolean;
+  isRead: boolean;
+  createdAt: string;
+};
+
 export type OutboxRow = {
   id: number;
   endpoint: string;
@@ -188,6 +209,18 @@ export interface TripStore {
   gpsSessionPoints(sessionId: string): Promise<GpsPointRow[]>;
   gpsListSessions(limit: number): Promise<GpsSessionRow[]>;
   gpsMarkSynced(id: string): Promise<void>;
+
+  // Photo capture queue (F12)
+  photoEnqueue(row: PhotoQueueRow): Promise<void>;
+  photoList(): Promise<PhotoQueueRow[]>;
+  photoPending(): Promise<PhotoQueueRow[]>;
+  photoMarkUploaded(id: string): Promise<void>;
+  photoMarkError(id: string, error: string): Promise<void>;
+
+  // Trail mail cache (F14)
+  upsertTrailMail(rows: TrailMailRow[]): Promise<void>;
+  listTrailMail(): Promise<TrailMailRow[]>;
+  markTrailMailRead(id: string): Promise<void>;
 
   // Outbox (docs §4.3)
   outboxEnqueue(entry: {

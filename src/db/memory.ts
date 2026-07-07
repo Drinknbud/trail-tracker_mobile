@@ -6,12 +6,14 @@ import type {
   GpsSessionRow,
   NightLogRow,
   OutboxRow,
+  PhotoQueueRow,
   PoiRow,
   SectionDetailRow,
   SectionRow,
   TrailRow,
   TripCounts,
   TripDownloadRow,
+  TrailMailRow,
   TripPackage,
   TripStatusEntry,
   TripStore,
@@ -33,6 +35,8 @@ const outbox: OutboxRow[] = [];
 let outboxNextId = 1;
 const gpsSessions = new Map<string, Omit<GpsSessionRow, "pointCount">>();
 const gpsPoints = new Map<string, GpsPointRow[]>();
+const photos = new Map<string, PhotoQueueRow>();
+const mail = new Map<string, TrailMailRow>();
 
 // Sunrise midpoints live on elevation_profiles in SQLite; the memory store
 // keeps them alongside the profile.
@@ -263,5 +267,43 @@ export const memoryStore: TripStore = {
   async gpsMarkSynced(id) {
     const s = gpsSessions.get(id);
     if (s) gpsSessions.set(id, { ...s, synced: true });
+  },
+
+  async photoEnqueue(p) {
+    photos.set(p.id, p);
+  },
+
+  async photoList() {
+    return [...photos.values()].sort((a, b) => b.takenAt.localeCompare(a.takenAt));
+  },
+
+  async photoPending() {
+    return (await this.photoList()).filter((p) => !p.uploaded);
+  },
+
+  async photoMarkUploaded(id) {
+    const p = photos.get(id);
+    if (p) photos.set(id, { ...p, uploaded: true, error: null });
+  },
+
+  async photoMarkError(id, error) {
+    const p = photos.get(id);
+    if (p) photos.set(id, { ...p, error });
+  },
+
+  async upsertTrailMail(rows) {
+    for (const m of rows) {
+      const existing = mail.get(m.id);
+      mail.set(m.id, { ...m, isRead: m.isRead || (existing?.isRead ?? false) });
+    }
+  },
+
+  async listTrailMail() {
+    return [...mail.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+
+  async markTrailMailRead(id) {
+    const m = mail.get(id);
+    if (m) mail.set(id, { ...m, isRead: true });
   },
 };

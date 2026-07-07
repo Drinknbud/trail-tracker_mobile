@@ -1,5 +1,7 @@
+import * as Crypto from "expo-crypto";
+import * as Location from "expo-location";
 import { router } from "expo-router";
-import { ArrowLeft, CircleDot, Play, RefreshCw, Square } from "lucide-react-native";
+import { ArrowLeft, CircleDot, Play, RefreshCw, Square, WifiOff } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -7,6 +9,8 @@ import { Card, Screen } from "@/components/Screen";
 import { tripStore, type GpsSessionRow } from "@/db";
 import { useAuth } from "@/lib/auth";
 import { GPS_MODES, isTracking, startTracking, stopTracking, syncGpsSessions, type GpsMode } from "@/lib/gps";
+import { enqueueWrite } from "@/lib/outbox";
+import { getShareLocation } from "@/lib/prefs";
 import { useTheme } from "@/theme/ThemeContext";
 
 export default function GpsScreen() {
@@ -54,7 +58,7 @@ export default function GpsScreen() {
     setBusy(true);
     try {
       await stopTracking();
-      const res = await syncGpsSessions(token);
+      const res = await syncGpsSessions(token, await getShareLocation());
       setNotice(
         res.sessions > 0
           ? `Session saved — synced ${res.points} points to the server.`
@@ -66,10 +70,40 @@ export default function GpsScreen() {
     }
   };
 
+  const onReportDeadZone = async () => {
+    if (busy) return;
+    setBusy(true);
+    setNotice(null);
+    try {
+      const perm = await Location.requestForegroundPermissionsAsync();
+      if (!perm.granted) throw new Error("Location permission denied");
+      const pos = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      await enqueueWrite(
+        "/api/mobile/dead-zones",
+        {
+          id: `dz_${Crypto.randomUUID()}`,
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          trailKey: "at",
+          accuracy: pos.coords.accuracy ?? undefined,
+        },
+        `dz-${Date.now()}`,
+        token
+      );
+      setNotice("Dead zone reported — syncs when you have signal.");
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Could not get a GPS fix");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const onSync = async () => {
     setBusy(true);
     try {
-      const res = await syncGpsSessions(token);
+      const res = await syncGpsSessions(token, await getShareLocation());
       setNotice(
         res.sessions > 0
           ? `Synced ${res.sessions} session${res.sessions === 1 ? "" : "s"} (${res.points} points).`
@@ -196,6 +230,28 @@ export default function GpsScreen() {
           </Pressable>
         </>
       )}
+
+      <Pressable
+        onPress={onReportDeadZone}
+        disabled={busy}
+        style={{
+          borderColor: colors.offlineAmber,
+          borderWidth: 1,
+          borderRadius: 8,
+          paddingVertical: 12,
+          alignItems: "center",
+          marginBottom: 12,
+          flexDirection: "row",
+          justifyContent: "center",
+          gap: 8,
+          opacity: busy ? 0.6 : 1,
+        }}
+      >
+        <WifiOff color={colors.offlineAmber} size={16} />
+        <Text style={{ color: colors.offlineAmber, fontWeight: "600", fontSize: 14 * fontScale }}>
+          Report dead zone here
+        </Text>
+      </Pressable>
 
       {notice ? (
         <Text style={{ fontSize: 13 * fontScale, color: colors.offlineAmber, marginBottom: 12 }}>

@@ -1,8 +1,16 @@
 import * as Crypto from "expo-crypto";
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, CheckCircle2, Moon, Plus, Sun } from "lucide-react-native";
+import {
+  ArrowLeft,
+  Camera as CameraIcon,
+  CheckCircle2,
+  ImagePlus,
+  Moon,
+  Plus,
+  Sun,
+} from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 import { FormField } from "@/components/FormField";
 import { Card, Screen } from "@/components/Screen";
@@ -11,11 +19,13 @@ import {
   tripStore,
   type DayLogRow,
   type NightLogRow,
+  type PhotoQueueRow,
   type PoiRow,
   type SectionDetailRow,
 } from "@/db";
 import { useAuth } from "@/lib/auth";
 import { enqueueWrite } from "@/lib/outbox";
+import { capturePhoto } from "@/lib/photos";
 import { useTheme } from "@/theme/ThemeContext";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -60,6 +70,8 @@ export default function SectionDetailScreen() {
   const [dayDraft, setDayDraft] = useState<DayDraft | null>(null);
   const [celebrate, setCelebrate] = useState(false);
   const [showItinerary, setShowItinerary] = useState(false);
+  const [photos, setPhotos] = useState<PhotoQueueRow[]>([]);
+  const [photoNotice, setPhotoNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -68,6 +80,7 @@ export default function SectionDetailScreen() {
     setPois(await tripStore.listPois(id));
     setNights(await tripStore.listNightLogs(id));
     setDays(await tripStore.listDayLogs(id));
+    setPhotos((await tripStore.photoList()).filter((p) => p.sectionId === id));
   }, [id]);
 
   useEffect(() => {
@@ -489,6 +502,69 @@ export default function SectionDetailScreen() {
             </Pressable>
           </View>
         </Card>
+      ) : null}
+
+      {/* Photos */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginTop: 20,
+          marginBottom: 8,
+          gap: 10,
+        }}
+      >
+        <Text style={{ flex: 1, fontSize: 14 * fontScale, fontWeight: "700", color: colors.text }}>
+          Photos
+        </Text>
+        <Pressable
+          onPress={async () => {
+            try {
+              const row = await capturePhoto(section.id, "camera");
+              if (row) setPhotoNotice("Queued for upload.");
+            } catch (err) {
+              setPhotoNotice(err instanceof Error ? err.message : "Camera unavailable");
+            }
+            await load();
+          }}
+        >
+          <CameraIcon color={colors.accent} size={18} />
+        </Pressable>
+        <Pressable
+          onPress={async () => {
+            try {
+              const row = await capturePhoto(section.id, "library");
+              if (row) setPhotoNotice("Queued for upload.");
+            } catch (err) {
+              setPhotoNotice(err instanceof Error ? err.message : "Library unavailable");
+            }
+            await load();
+          }}
+        >
+          <ImagePlus color={colors.accent} size={18} />
+        </Pressable>
+      </View>
+      {photoNotice ? (
+        <Text style={{ fontSize: 12 * fontScale, color: colors.offlineAmber, marginBottom: 6 }}>
+          {photoNotice}
+        </Text>
+      ) : null}
+      {photos.length > 0 ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+          {photos.map((p) => (
+            <Image
+              key={p.id}
+              source={{ uri: p.uri }}
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: p.uploaded ? colors.border : colors.offlineAmber,
+              }}
+            />
+          ))}
+        </View>
       ) : null}
 
       {/* POIs */}

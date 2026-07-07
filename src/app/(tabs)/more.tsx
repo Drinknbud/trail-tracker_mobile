@@ -172,9 +172,9 @@ export default function MoreScreen() {
       <GroupLabel>Trail</GroupLabel>
       <Card style={{ paddingVertical: 4 }}>
         <Row icon={Navigation} label="GPS Tracking" onPress={() => router.push("/gps")} />
-        <Row icon={Camera} label="Photos" note="Phase 1" />
+        <Row icon={Camera} label="Photos" onPress={() => router.push("/photos")} />
         <Row icon={Trophy} label="Accomplishments" note="Phase 2" />
-        <Row icon={Mail} label="Trail Mail" note="Phase 1" last />
+        <Row icon={Mail} label="Trail Mail" onPress={() => router.push("/trail-mail")} last />
       </Card>
 
       <GroupLabel>Trip Planning</GroupLabel>
@@ -195,7 +195,7 @@ export default function MoreScreen() {
       <GroupLabel>App</GroupLabel>
       <Card style={{ paddingVertical: 4 }}>
         <Row icon={Database} label="Trip Status" onPress={() => router.push("/trip-status")} />
-        <Row icon={Settings} label="Settings" note="Phase 1" />
+        <Row icon={Settings} label="Settings" onPress={() => router.push("/settings")} />
         <Row icon={Share2} label="Share View" note="Phase 1" />
         <Row icon={MessageSquare} label="Feedback" note="Phase 1" last />
       </Card>

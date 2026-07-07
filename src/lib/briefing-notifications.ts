@@ -2,9 +2,8 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import type { SectionDetailRow } from "@/db";
+import { getBriefingHour } from "./prefs";
 
-// Default briefing time until the Settings screen (M5) makes it configurable.
-const BRIEFING_HOUR = 7;
 const MAX_TRIP_DAYS = 14;
 
 if (Platform.OS !== "web") {
@@ -36,6 +35,7 @@ export async function scheduleBriefingNotifications(
 
     await Notifications.cancelAllScheduledNotificationsAsync();
 
+    const briefingHour = await getBriefingHour();
     const start = new Date(`${section.startDate.slice(0, 10)}T00:00:00`);
     const end = new Date(`${section.endDate.slice(0, 10)}T00:00:00`);
     const now = new Date();
@@ -45,7 +45,7 @@ export async function scheduleBriefingNotifications(
       const date = new Date(start);
       date.setDate(start.getDate() + day);
       if (date > end) break;
-      date.setHours(BRIEFING_HOUR, 0, 0, 0);
+      date.setHours(briefingHour, 0, 0, 0);
       if (date <= now) continue;
 
       await Notifications.scheduleNotificationAsync({
