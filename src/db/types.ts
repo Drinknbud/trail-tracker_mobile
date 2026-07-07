@@ -1,0 +1,139 @@
+// Row and payload types shared by the SQLite (native) and in-memory (web
+// preview) trip stores, mirroring the offline-package endpoint.
+
+export type SectionRow = {
+  id: string;
+  trailId: string | null;
+  name: string;
+  status: string;
+  startMile: number | null;
+  endMile: number | null;
+  startDate: string | null;
+  endDate: string | null;
+  miles: number;
+  elevGain: number | null;
+  difficulty: string | null;
+  inJournal: boolean;
+  updatedAt: string;
+};
+
+export type SectionDetailRow = SectionRow & {
+  notes: string | null;
+  itinerary: string | null;
+  details: string | null;
+  plannedCamps: string | null;
+  plannedCampMiles: string | null;
+  plannedWaterStops: string | null;
+};
+
+export type TrailRow = {
+  id: string;
+  catalogKey: string;
+  displayName: string;
+  shortName: string;
+  totalMiles: number;
+  hikeDirection: string;
+};
+
+export type NightLogRow = {
+  id: string;
+  sectionId: string;
+  date: string | null;
+  campedAt: string | null;
+  campedWith: string | null;
+  arrivedAt: string | null;
+  leftAt: string | null;
+  notes: string | null;
+  updatedAt: string;
+};
+
+export type DayLogRow = {
+  id: string;
+  sectionId: string;
+  date: string | null;
+  milesHiked: number | null;
+  startTime: string | null;
+  endTime: string | null;
+  terrainNotes: string | null;
+  mood: number | null;
+  updatedAt: string;
+};
+
+export type BriefingRow = {
+  id: string;
+  sectionId: string;
+  date: string;
+  dayIndex: number;
+  narrative: string;
+  weatherJson: string | null;
+};
+
+export type PoiRow = {
+  type: string;
+  name: string;
+  mile: number;
+  meta: Record<string, unknown>;
+};
+
+export type ElevationProfile = {
+  points: { dist: number; elev: number }[];
+  coords: [number, number][];
+  mapCoords: [number, number][];
+  avgElevM: number;
+};
+
+export type TripCounts = {
+  nightLogs: number;
+  dayLogs: number;
+  briefings: number;
+  pois: number;
+  elevationPoints: number;
+};
+
+export type TripPackage = {
+  version: number;
+  generatedAt: string;
+  checksum: string;
+  counts: TripCounts;
+  data: {
+    section: SectionDetailRow;
+    trail: TrailRow | null;
+    nightLogs: NightLogRow[];
+    dayLogs: DayLogRow[];
+    briefings: BriefingRow[];
+    pois: PoiRow[];
+    elevationProfile: ElevationProfile | null;
+    sunrise: { midLat: number; midLon: number } | null;
+  };
+};
+
+export type TripDownloadRow = {
+  sectionId: string;
+  downloadedAt: string;
+  verified: boolean;
+  packageVersion: number;
+  checksum: string;
+  bytes: number;
+  counts: TripCounts;
+  error: string | null;
+};
+
+export type TripStatusEntry = TripDownloadRow & {
+  sectionName: string;
+  liveCounts: TripCounts;
+};
+
+export interface TripStore {
+  init(): Promise<void>;
+  upsertSections(rows: SectionRow[]): Promise<void>;
+  listSections(): Promise<SectionRow[]>;
+  /**
+   * Insert a downloaded package transactionally, verify row counts against
+   * pkg.counts, and record the download. Throws (and records the failure)
+   * on any mismatch — no silent partial saves.
+   */
+  applyTripPackage(pkg: TripPackage, bytes: number): Promise<void>;
+  listTripDownloads(): Promise<TripDownloadRow[]>;
+  getTripStatus(): Promise<TripStatusEntry[]>;
+  getOutboxCount(): Promise<number>;
+}

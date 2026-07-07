@@ -1,7 +1,9 @@
+import { router } from "expo-router";
 import {
   Bot,
   Camera,
   ChevronRight,
+  Database,
   HelpCircle,
   LogOut,
   Mail,
@@ -46,15 +48,19 @@ function Row({
   label,
   note,
   last = false,
+  onPress,
 }: {
   icon: LucideIcon;
   label: string;
   note?: string;
   last?: boolean;
+  onPress?: () => void;
 }) {
   const { colors, fontScale } = useTheme();
   return (
-    <View
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -74,7 +80,7 @@ function Row({
         </Text>
       ) : null}
       <ChevronRight color={colors.muted} size={16} />
-    </View>
+    </Pressable>
   );
 }
 
@@ -186,6 +192,7 @@ export default function MoreScreen() {
 
       <GroupLabel>App</GroupLabel>
       <Card style={{ paddingVertical: 4 }}>
+        <Row icon={Database} label="Trip Status" onPress={() => router.push("/trip-status")} />
         <Row icon={Settings} label="Settings" note="Phase 1" />
         <Row icon={Share2} label="Share View" note="Phase 1" />
         <Row icon={MessageSquare} label="Feedback" note="Phase 1" last />
