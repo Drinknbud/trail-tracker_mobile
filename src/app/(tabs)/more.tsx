@@ -6,6 +6,7 @@ import {
   Database,
   HelpCircle,
   LogOut,
+  Navigation,
   Mail,
   MessageSquare,
   MessagesSquare,
@@ -170,6 +171,7 @@ export default function MoreScreen() {
 
       <GroupLabel>Trail</GroupLabel>
       <Card style={{ paddingVertical: 4 }}>
+        <Row icon={Navigation} label="GPS Tracking" onPress={() => router.push("/gps")} />
         <Row icon={Camera} label="Photos" note="Phase 1" />
         <Row icon={Trophy} label="Accomplishments" note="Phase 2" />
         <Row icon={Mail} label="Trail Mail" note="Phase 1" last />

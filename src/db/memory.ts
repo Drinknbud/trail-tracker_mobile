@@ -2,6 +2,8 @@ import type {
   BriefingRow,
   DayLogRow,
   ElevationProfile,
+  GpsPointRow,
+  GpsSessionRow,
   NightLogRow,
   OutboxRow,
   PoiRow,
@@ -29,6 +31,12 @@ const elevations = new Map<string, ElevationProfile>();
 const downloads = new Map<string, TripDownloadRow>();
 const outbox: OutboxRow[] = [];
 let outboxNextId = 1;
+const gpsSessions = new Map<string, Omit<GpsSessionRow, "pointCount">>();
+const gpsPoints = new Map<string, GpsPointRow[]>();
+
+// Sunrise midpoints live on elevation_profiles in SQLite; the memory store
+// keeps them alongside the profile.
+const elevationMids = new Map<string, { midLat: number | null; midLon: number | null }>();
 
 function countsFor(sectionId: string): TripCounts {
   return {
@@ -65,8 +73,13 @@ export const memoryStore: TripStore = {
     pois.set(section.id, pkg.data.pois);
     if (pkg.data.elevationProfile) {
       elevations.set(section.id, pkg.data.elevationProfile);
+      elevationMids.set(section.id, {
+        midLat: pkg.data.sunrise?.midLat ?? null,
+        midLon: pkg.data.sunrise?.midLon ?? null,
+      });
     } else {
       elevations.delete(section.id);
+      elevationMids.delete(section.id);
     }
 
     const live = countsFor(section.id);
@@ -190,5 +203,65 @@ export const memoryStore: TripStore = {
       e.attempts += 1;
       e.lastError = error;
     }
+  },
+
+  async listBriefings(sectionId) {
+    return [...(briefings.get(sectionId) ?? [])].sort((a, b) => a.dayIndex - b.dayIndex);
+  },
+
+  async getElevationProfile(sectionId) {
+    const profile = elevations.get(sectionId);
+    if (!profile) return null;
+    const mid = elevationMids.get(sectionId);
+    return { ...profile, midLat: mid?.midLat ?? null, midLon: mid?.midLon ?? null };
+  },
+
+  async gpsStartSession(entry) {
+    gpsSessions.set(entry.id, {
+      id: entry.id,
+      mode: entry.mode,
+      sectionId: entry.sectionId,
+      startedAt: new Date().toISOString(),
+      endedAt: null,
+      synced: false,
+    });
+    gpsPoints.set(entry.id, []);
+  },
+
+  async gpsEndSession(id) {
+    const s = gpsSessions.get(id);
+    if (s) gpsSessions.set(id, { ...s, endedAt: new Date().toISOString() });
+  },
+
+  async gpsActiveSession() {
+    const active = [...gpsSessions.values()]
+      .filter((s) => !s.endedAt)
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
+    if (!active) return null;
+    return { ...active, pointCount: gpsPoints.get(active.id)?.length ?? 0 };
+  },
+
+  async gpsAddPoints(sessionId, points) {
+    const list = gpsPoints.get(sessionId) ?? [];
+    list.push(...points);
+    gpsPoints.set(sessionId, list);
+    const s = gpsSessions.get(sessionId);
+    if (s) gpsSessions.set(sessionId, { ...s, synced: false });
+  },
+
+  async gpsSessionPoints(sessionId) {
+    return [...(gpsPoints.get(sessionId) ?? [])].sort((a, b) => a.timestamp - b.timestamp);
+  },
+
+  async gpsListSessions(limit) {
+    return [...gpsSessions.values()]
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
+      .slice(0, limit)
+      .map((s) => ({ ...s, pointCount: gpsPoints.get(s.id)?.length ?? 0 }));
+  },
+
+  async gpsMarkSynced(id) {
+    const s = gpsSessions.get(id);
+    if (s) gpsSessions.set(id, { ...s, synced: true });
   },
 };

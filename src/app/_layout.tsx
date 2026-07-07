@@ -1,5 +1,8 @@
-import { Stack } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { OutboxSyncManager } from "@/components/OutboxSyncManager";
@@ -8,6 +11,16 @@ import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
 function RootNavigator() {
   const { scheme, colors } = useTheme();
+
+  // Tapping a morning-briefing notification lands on the Briefing tab
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    const sub = Notifications.addNotificationResponseReceivedListener(() => {
+      router.push("/briefing");
+    });
+    return () => sub.remove();
+  }, []);
+
   return (
     <>
       <StatusBar style={scheme === "dark" ? "light" : "dark"} />

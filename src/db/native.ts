@@ -9,7 +9,9 @@ import type {
   TripStore,
 } from "./types";
 
-const SCHEMA_VERSION = 1;
+// v2 added gps_sessions/gps_points. All DDL is CREATE IF NOT EXISTS, so
+// upgrades are a re-run of the full DDL.
+const SCHEMA_VERSION = 2;
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS trails (
@@ -61,6 +63,15 @@ CREATE TABLE IF NOT EXISTS outbox (
   payload_json TEXT NOT NULL, idempotency_key TEXT NOT NULL UNIQUE,
   created_at TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, last_error TEXT
 );
+CREATE TABLE IF NOT EXISTS gps_sessions (
+  id TEXT PRIMARY KEY, mode TEXT NOT NULL, section_id TEXT,
+  started_at TEXT NOT NULL, ended_at TEXT, synced INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS gps_points (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL,
+  ts INTEGER NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL, alt REAL
+);
+CREATE INDEX IF NOT EXISTS idx_gps_points_session ON gps_points(session_id);
 `;
 
 let db: SQLiteDatabase | null = null;
@@ -517,5 +528,131 @@ export const nativeStore: TripStore = {
       "UPDATE outbox SET attempts = attempts + 1, last_error = ? WHERE id = ?",
       error, id
     );
+  },
+
+  async listBriefings(sectionId) {
+    return getDb()
+      .getAllSync<{
+        id: string;
+        section_id: string;
+        date: string;
+        day_index: number;
+        narrative: string;
+        weather_json: string | null;
+      }>("SELECT * FROM briefings WHERE section_id = ? ORDER BY day_index ASC", sectionId)
+      .map((r) => ({
+        id: r.id,
+        sectionId: r.section_id,
+        date: r.date,
+        dayIndex: r.day_index,
+        narrative: r.narrative,
+        weatherJson: r.weather_json,
+      }));
+  },
+
+  async getElevationProfile(sectionId) {
+    const r = getDb().getFirstSync<{
+      points_json: string;
+      coords_json: string;
+      map_coords_json: string;
+      avg_elev_m: number | null;
+      mid_lat: number | null;
+      mid_lon: number | null;
+    }>("SELECT * FROM elevation_profiles WHERE section_id = ?", sectionId);
+    if (!r) return null;
+    return {
+      points: JSON.parse(r.points_json),
+      coords: JSON.parse(r.coords_json),
+      mapCoords: JSON.parse(r.map_coords_json),
+      avgElevM: r.avg_elev_m ?? 0,
+      midLat: r.mid_lat,
+      midLon: r.mid_lon,
+    };
+  },
+
+  async gpsStartSession(entry) {
+    getDb().runSync(
+      "INSERT INTO gps_sessions (id, mode, section_id, started_at) VALUES (?, ?, ?, ?)",
+      entry.id, entry.mode, entry.sectionId, new Date().toISOString()
+    );
+  },
+
+  async gpsEndSession(id) {
+    getDb().runSync(
+      "UPDATE gps_sessions SET ended_at = ? WHERE id = ?",
+      new Date().toISOString(), id
+    );
+  },
+
+  async gpsActiveSession() {
+    const r = getDb().getFirstSync<{
+      id: string;
+      mode: string;
+      section_id: string | null;
+      started_at: string;
+      ended_at: string | null;
+      synced: number;
+    }>("SELECT * FROM gps_sessions WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1");
+    if (!r) return null;
+    return {
+      id: r.id,
+      mode: r.mode,
+      sectionId: r.section_id,
+      startedAt: r.started_at,
+      endedAt: r.ended_at,
+      pointCount: (getDb().getFirstSync<{ n: number }>(
+        "SELECT COUNT(*) AS n FROM gps_points WHERE session_id = ?", r.id
+      )?.n ?? 0) as number,
+      synced: r.synced === 1,
+    };
+  },
+
+  async gpsAddPoints(sessionId, points) {
+    const dbh = getDb();
+    dbh.withTransactionSync(() => {
+      for (const p of points) {
+        dbh.runSync(
+          "INSERT INTO gps_points (session_id, ts, lat, lon, alt) VALUES (?, ?, ?, ?, ?)",
+          sessionId, p.timestamp, p.lat, p.lon, p.alt
+        );
+      }
+      dbh.runSync("UPDATE gps_sessions SET synced = 0 WHERE id = ?", sessionId);
+    });
+  },
+
+  async gpsSessionPoints(sessionId) {
+    return getDb()
+      .getAllSync<{ ts: number; lat: number; lon: number; alt: number | null }>(
+        "SELECT ts, lat, lon, alt FROM gps_points WHERE session_id = ? ORDER BY ts ASC",
+        sessionId
+      )
+      .map((r) => ({ timestamp: r.ts, lat: r.lat, lon: r.lon, alt: r.alt }));
+  },
+
+  async gpsListSessions(limit) {
+    return getDb()
+      .getAllSync<{
+        id: string;
+        mode: string;
+        section_id: string | null;
+        started_at: string;
+        ended_at: string | null;
+        synced: number;
+      }>("SELECT * FROM gps_sessions ORDER BY started_at DESC LIMIT ?", limit)
+      .map((r) => ({
+        id: r.id,
+        mode: r.mode,
+        sectionId: r.section_id,
+        startedAt: r.started_at,
+        endedAt: r.ended_at,
+        pointCount: (getDb().getFirstSync<{ n: number }>(
+          "SELECT COUNT(*) AS n FROM gps_points WHERE session_id = ?", r.id
+        )?.n ?? 0) as number,
+        synced: r.synced === 1,
+      }));
+  },
+
+  async gpsMarkSynced(id) {
+    getDb().runSync("UPDATE gps_sessions SET synced = 1 WHERE id = ?", id);
   },
 };

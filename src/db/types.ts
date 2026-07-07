@@ -123,6 +123,23 @@ export type TripStatusEntry = TripDownloadRow & {
   liveCounts: TripCounts;
 };
 
+export type GpsSessionRow = {
+  id: string; // client-generated sessionKey — the server idempotency key
+  mode: string;
+  sectionId: string | null;
+  startedAt: string;
+  endedAt: string | null;
+  pointCount: number;
+  synced: boolean;
+};
+
+export type GpsPointRow = {
+  timestamp: number; // epoch ms
+  lat: number;
+  lon: number;
+  alt: number | null;
+};
+
 export type OutboxRow = {
   id: number;
   endpoint: string;
@@ -156,6 +173,21 @@ export interface TripStore {
   upsertNightLog(row: NightLogRow): Promise<void>;
   upsertDayLog(row: DayLogRow): Promise<void>;
   setSectionStatus(id: string, status: string): Promise<void>;
+
+  // Briefing + elevation reads (M4, all offline)
+  listBriefings(sectionId: string): Promise<BriefingRow[]>;
+  getElevationProfile(
+    sectionId: string
+  ): Promise<(ElevationProfile & { midLat: number | null; midLon: number | null }) | null>;
+
+  // GPS tracking (docs F8)
+  gpsStartSession(entry: { id: string; mode: string; sectionId: string | null }): Promise<void>;
+  gpsEndSession(id: string): Promise<void>;
+  gpsActiveSession(): Promise<GpsSessionRow | null>;
+  gpsAddPoints(sessionId: string, points: GpsPointRow[]): Promise<void>;
+  gpsSessionPoints(sessionId: string): Promise<GpsPointRow[]>;
+  gpsListSessions(limit: number): Promise<GpsSessionRow[]>;
+  gpsMarkSynced(id: string): Promise<void>;
 
   // Outbox (docs §4.3)
   outboxEnqueue(entry: {

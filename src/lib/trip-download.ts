@@ -2,6 +2,7 @@ import * as Crypto from "expo-crypto";
 
 import { tripStore, type TripPackage } from "@/db";
 import { API_URL } from "./api";
+import { scheduleBriefingNotifications } from "./briefing-notifications";
 
 /**
  * Trip Download (docs §4.2): fetch the section's offline package, verify its
@@ -34,4 +35,7 @@ export async function downloadTrip(sectionId: string, token: string | null): Pro
   }
 
   await tripStore.applyTripPackage(parsed, text.length);
+
+  // Trip is verified on-device — arm the morning briefing notifications (F5).
+  await scheduleBriefingNotifications(parsed.data.section);
 }

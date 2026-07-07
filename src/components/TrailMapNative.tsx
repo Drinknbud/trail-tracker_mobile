@@ -4,6 +4,7 @@ import {
   Layer,
   Map as MapLibreMap,
   OfflineManager,
+  UserLocation,
 } from "@maplibre/maplibre-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -80,6 +81,7 @@ export function TrailMapNative() {
             paint={{ "line-color": colors.accent, "line-width": 3 }}
           />
         </GeoJSONSource>
+        <UserLocation />
         <GeoJSONSource id="at-shelters" data={SHELTER_COLLECTION}>
           <Layer
             id="at-shelter-dots"
