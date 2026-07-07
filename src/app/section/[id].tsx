@@ -26,6 +26,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { enqueueWrite } from "@/lib/outbox";
 import { capturePhoto } from "@/lib/photos";
+import { usePremium } from "@/lib/usePremium";
 import { useTheme } from "@/theme/ThemeContext";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -61,6 +62,7 @@ export default function SectionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, fontScale } = useTheme();
   const { token } = useAuth();
+  const { isPremium } = usePremium();
 
   const [section, setSection] = useState<SectionDetailRow | null>(null);
   const [pois, setPois] = useState<PoiRow[]>([]);
@@ -260,7 +262,7 @@ export default function SectionDetailScreen() {
           Night Logs
         </Text>
         <Pressable
-          onPress={() => setNightDraft({})}
+          onPress={() => (isPremium ? setNightDraft({}) : router.push("/upgrade"))}
           style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
         >
           <Plus color={colors.accent} size={16} />

@@ -4,7 +4,9 @@ import { Pressable, Text, View } from "react-native";
 import * as SunCalc from "suncalc";
 
 import { ElevationChart } from "@/components/ElevationChart";
+import { PremiumGate } from "@/components/PremiumGate";
 import { Card, Screen } from "@/components/Screen";
+import { usePremium } from "@/lib/usePremium";
 import {
   tripStore,
   type BriefingRow,
@@ -62,6 +64,7 @@ function fmtTime(d: Date): string {
 
 export default function BriefingScreen() {
   const { colors, fontScale } = useTheme();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
 
   const [section, setSection] = useState<SectionDetailRow | null>(null);
   const [briefings, setBriefings] = useState<BriefingRow[]>([]);
@@ -114,7 +117,17 @@ export default function BriefingScreen() {
     void load();
   }, [load]);
 
-  if (!loaded) return <Screen title="Morning Briefing">{null}</Screen>;
+  if (!loaded || premiumLoading) return <Screen title="Morning Briefing">{null}</Screen>;
+
+  // F5: morning briefing is premium — gate reads from the offline-cached
+  // entitlement so paying hikers keep it in airplane mode
+  if (!isPremium) {
+    return (
+      <Screen title="Morning Briefing">
+        <PremiumGate feature="Morning Briefing" />
+      </Screen>
+    );
+  }
 
   if (!section || briefings.length === 0) {
     return (

@@ -4,8 +4,10 @@ import { AppState } from "react-native";
 
 import { tripStore } from "@/db";
 import { useAuth } from "@/lib/auth";
+import { refreshEntitlement } from "@/lib/entitlement";
 import { flushOutbox } from "@/lib/outbox";
 import { syncPhotos } from "@/lib/photos";
+import { configurePurchases } from "@/lib/purchases";
 
 /**
  * Invisible component mounted at the root: flushes the outbox on app
@@ -21,6 +23,8 @@ export function OutboxSyncManager() {
     const flushAll = async () => {
       await flushOutbox(token);
       await syncPhotos(token);
+      const entitlement = await refreshEntitlement(token);
+      if (entitlement) await configurePurchases(entitlement.userId);
     };
     void tripStore.init().then(flushAll);
 

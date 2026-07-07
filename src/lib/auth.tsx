@@ -109,6 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await tokenStore.remove();
+    // Entitlement is account-scoped — drop it with the session
+    const { clearEntitlement } = await import("./entitlement");
+    await clearEntitlement();
     setToken(null);
     setUser(null);
   }, []);
