@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Wordmark } from "@/components/Wordmark";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -88,16 +89,9 @@ export default function AuthScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <Text
-          style={{
-            fontSize: 30 * fontScale,
-            fontWeight: "700",
-            color: colors.accent,
-            textAlign: "center",
-          }}
-        >
-          Trail Tracker
-        </Text>
+        <View style={{ alignItems: "center" }}>
+          <Wordmark height={32} />
+        </View>
         <Text
           style={{
             fontSize: 14 * fontScale,

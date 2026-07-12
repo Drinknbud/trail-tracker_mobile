@@ -1,6 +1,8 @@
 // Design tokens ported from the Trail Tracker web app (docs/mobile-app-requirements.md §7.1).
 // Keep in sync with the web Tailwind config until a shared package exists.
 
+export const DEFAULT_ACCENT = "#2D6A4F";
+
 export const palettes = {
   light: {
     bg: "#FFFFFF",
@@ -41,6 +43,6 @@ export const fixed = {
 export type SchemeColors = { [K in keyof (typeof palettes)["light"]]: string };
 export type ThemeColors = SchemeColors & { [K in keyof typeof fixed]: string };
 
-export function colorsForScheme(scheme: "light" | "dark"): ThemeColors {
-  return { ...palettes[scheme], ...fixed };
+export function colorsForScheme(scheme: "light" | "dark", accent?: string): ThemeColors {
+  return { ...palettes[scheme], ...fixed, accent: accent ?? palettes[scheme].accent };
 }

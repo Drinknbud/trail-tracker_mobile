@@ -10,7 +10,7 @@ import {
 import { useColorScheme } from "react-native";
 
 import { storage } from "@/lib/storage";
-import { colorsForScheme, type ThemeColors } from "./colors";
+import { colorsForScheme, DEFAULT_ACCENT, type ThemeColors } from "./colors";
 
 export type ThemeMode = "light" | "dark" | "system";
 export type TextSize = "standard" | "large" | "xlarge";
@@ -24,6 +24,7 @@ export const TEXT_SCALE: Record<TextSize, number> = {
 
 const MODE_KEY = "theme.mode";
 const TEXT_SIZE_KEY = "theme.textSize";
+const ACCENT_KEY = "theme.accentColor";
 
 type ThemeContextValue = {
   mode: ThemeMode;
@@ -33,6 +34,8 @@ type ThemeContextValue = {
   textSize: TextSize;
   setTextSize: (size: TextSize) => void;
   fontScale: number;
+  /** Sets the user's custom accent color (mirrors web's per-user accentColor). Pass null to reset to the trail-green default. */
+  setAccentColor: (hex: string | null) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -42,12 +45,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemScheme: "light" | "dark" = rawScheme === "dark" ? "dark" : "light";
   const [mode, setModeState] = useState<ThemeMode>("system");
   const [textSize, setTextSizeState] = useState<TextSize>("standard");
+  const [accent, setAccentState] = useState<string>(DEFAULT_ACCENT);
 
   useEffect(() => {
     (async () => {
-      const [storedMode, storedSize] = await Promise.all([
+      const [storedMode, storedSize, storedAccent] = await Promise.all([
         storage.get(MODE_KEY),
         storage.get(TEXT_SIZE_KEY),
+        storage.get(ACCENT_KEY),
       ]);
       if (storedMode === "light" || storedMode === "dark" || storedMode === "system") {
         setModeState(storedMode);
@@ -55,6 +60,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       if (storedSize === "standard" || storedSize === "large" || storedSize === "xlarge") {
         setTextSizeState(storedSize);
       }
+      if (storedAccent) setAccentState(storedAccent);
     })();
   }, []);
 
@@ -68,6 +74,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     void storage.set(TEXT_SIZE_KEY, next);
   }, []);
 
+  const setAccentColor = useCallback((hex: string | null) => {
+    const next = hex ?? DEFAULT_ACCENT;
+    setAccentState(next);
+    void storage.set(ACCENT_KEY, next);
+  }, []);
+
   const scheme = mode === "system" ? systemScheme : mode;
 
   const value = useMemo<ThemeContextValue>(
@@ -75,12 +87,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       mode,
       setMode,
       scheme,
-      colors: colorsForScheme(scheme),
+      colors: colorsForScheme(scheme, accent),
       textSize,
       setTextSize,
       fontScale: TEXT_SCALE[textSize],
+      setAccentColor,
     }),
-    [mode, setMode, scheme, textSize, setTextSize]
+    [mode, setMode, scheme, accent, textSize, setTextSize, setAccentColor]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
