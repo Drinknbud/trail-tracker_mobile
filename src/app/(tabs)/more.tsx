@@ -180,7 +180,7 @@ export default function MoreScreen() {
       <GroupLabel>Trip Planning</GroupLabel>
       <Card style={{ paddingVertical: 4 }}>
         <Row icon={Bot} label="Planner" note="Phase 2" />
-        <Row icon={UtensilsCrossed} label="Meals" note="Phase 2" last />
+        <Row icon={UtensilsCrossed} label="Meals" note="Phase 4" last />
       </Card>
 
       <GroupLabel>Community</GroupLabel>
