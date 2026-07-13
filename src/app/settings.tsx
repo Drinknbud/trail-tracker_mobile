@@ -2,14 +2,21 @@ import { router } from "expo-router";
 import {
   ArrowLeft,
   Check,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Copy,
   Crown,
+  Plus,
   ShieldCheck,
+  Star,
+  Trash2,
+  Trophy,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -26,12 +33,20 @@ import { Card } from "@/components/Screen";
 import { ACCENT_PRESETS, CARRIER_OPTIONS, carrierLabel } from "@/lib/carriers";
 import { GPS_MODES, fromWebPowerMode, toWebPowerMode, type GpsMode } from "@/lib/gps";
 import { useAuth } from "@/lib/auth";
+import { directionsFor, VISIBLE_TRAILS } from "@/lib/trailCatalog";
 import {
+  activateTrail,
+  addTrail,
+  deleteTrail,
   disable2fa,
+  fetchTrails,
   generateShareSlug,
   start2faSetup,
+  toggleTrailComplete,
+  updateTrailDirection,
   updateWebUser,
   verify2fa,
+  type WebTrail,
   type WebUser,
   type WebUserUpdate,
 } from "@/lib/webApi";
@@ -281,6 +296,339 @@ export default function SettingsScreen() {
   );
 }
 
+// ─── My Trails ───────────────────────────────────────────────────────────────
+
+function MyTrailsSection() {
+  const { colors, fontScale } = useTheme();
+  const { token } = useAuth();
+  const [trails, setTrails] = useState<WebTrail[] | null>(null);
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [search, setSearch] = useState("");
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async () => {
+    if (!token) return;
+    try {
+      setTrails(await fetchTrails(token));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't load trails");
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, [token]);
+
+  const filteredCatalog = VISIBLE_TRAILS.filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      c.name.toLowerCase().includes(q) || c.states.some((s) => s.toLowerCase().includes(q))
+    );
+  }).filter((c) => !trails?.some((t) => t.catalogKey === c.key));
+
+  const onAdd = async (catalogKey: string) => {
+    if (!token) return;
+    setAddingKey(catalogKey);
+    try {
+      await addTrail(token, catalogKey);
+      await load();
+      setShowCatalog(false);
+      setSearch("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't add trail");
+    } finally {
+      setAddingKey(null);
+    }
+  };
+
+  const onActivate = async (id: string) => {
+    if (!token) return;
+    setBusyId(id);
+    try {
+      await activateTrail(token, id);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't switch trail");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const onToggleComplete = async (id: string) => {
+    if (!token) return;
+    setBusyId(id);
+    try {
+      await toggleTrailComplete(token, id);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't update trail");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const onDirection = async (id: string, direction: string) => {
+    if (!token) return;
+    setTrails((prev) => prev?.map((t) => (t.id === id ? { ...t, hikeDirection: direction } : t)) ?? prev);
+    await updateTrailDirection(token, id, direction);
+  };
+
+  const onDelete = (id: string, name: string) => {
+    Alert.alert(
+      "Remove trail?",
+      `Remove ${name} and all its sections? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            if (!token) return;
+            setBusyId(id);
+            try {
+              await deleteTrail(token, id);
+              await load();
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Couldn't remove trail");
+            } finally {
+              setBusyId(null);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <Card style={{ marginBottom: 16 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+        <Text style={{ flex: 1, fontSize: 15 * fontScale, fontWeight: "700", color: colors.text }}>
+          My Trails
+        </Text>
+        <Pressable
+          onPress={() => setShowCatalog((s) => !s)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+            borderWidth: 1,
+            borderColor: colors.accent,
+            borderRadius: 999,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+          }}
+        >
+          <Plus color={colors.accent} size={14} />
+          <Text style={{ fontSize: 12 * fontScale, color: colors.accent, fontWeight: "600" }}>
+            Add Trail
+          </Text>
+          {showCatalog ? (
+            <ChevronUp color={colors.accent} size={14} />
+          ) : (
+            <ChevronDown color={colors.accent} size={14} />
+          )}
+        </Pressable>
+      </View>
+
+      {error ? (
+        <Text style={{ fontSize: 12 * fontScale, color: colors.destructiveRed, marginBottom: 8 }}>
+          {error}
+        </Text>
+      ) : null}
+
+      {showCatalog ? (
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 8,
+            marginBottom: 12,
+            maxHeight: 260,
+            overflow: "hidden",
+          }}
+        >
+          <View style={{ padding: 8, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+            <FormField
+              label=""
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search trails by name or state…"
+              autoFocus
+            />
+          </View>
+          <ScrollView style={{ maxHeight: 200 }}>
+            {filteredCatalog.length === 0 ? (
+              <Text
+                style={{
+                  fontSize: 13 * fontScale,
+                  color: colors.muted,
+                  textAlign: "center",
+                  padding: 16,
+                }}
+              >
+                No trails found
+              </Text>
+            ) : (
+              filteredCatalog.map((c) => (
+                <View
+                  key={c.key}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.border,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 13 * fontScale, fontWeight: "600", color: colors.text }}>
+                      {c.name}
+                    </Text>
+                    <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
+                      {c.totalMiles} mi · {c.states.join(", ")}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => onAdd(c.key)}
+                    disabled={addingKey === c.key}
+                    style={{
+                      backgroundColor: colors.accent,
+                      borderRadius: 6,
+                      paddingHorizontal: 10,
+                      paddingVertical: 5,
+                      opacity: addingKey === c.key ? 0.6 : 1,
+                    }}
+                  >
+                    <Text style={{ color: "#FFFFFF", fontSize: 12 * fontScale, fontWeight: "600" }}>
+                      {addingKey === c.key ? "…" : "Add"}
+                    </Text>
+                  </Pressable>
+                </View>
+              ))
+            )}
+          </ScrollView>
+        </View>
+      ) : null}
+
+      {trails === null ? (
+        <ActivityIndicator color={colors.accent} />
+      ) : trails.length === 0 ? (
+        <Text style={{ fontSize: 13 * fontScale, color: colors.muted }}>No trails added yet.</Text>
+      ) : (
+        trails.map((t) => {
+          const pct = Math.min(Math.round((t.completedMiles / t.totalMiles) * 100), 100);
+          const isCompleted = !!t.completedAt;
+          const dirs = directionsFor(t.catalogKey);
+          const busy = busyId === t.id;
+          return (
+            <View
+              key={t.id}
+              style={{
+                borderWidth: 1,
+                borderColor: t.isActive ? colors.accent : colors.border,
+                borderRadius: 10,
+                padding: 12,
+                marginBottom: 10,
+                opacity: busy ? 0.6 : 1,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 6 }}>
+                <View style={{ flex: 1, flexDirection: "row", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                  <Text style={{ fontSize: 14 * fontScale, fontWeight: "700", color: colors.text }}>
+                    {t.displayName}
+                  </Text>
+                  {t.isActive ? (
+                    <View style={{ backgroundColor: colors.accent, borderRadius: 999, paddingHorizontal: 6, paddingVertical: 1 }}>
+                      <Text style={{ fontSize: 9 * fontScale, color: "#FFFFFF", fontWeight: "700" }}>ACTIVE</Text>
+                    </View>
+                  ) : null}
+                  {isCompleted ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: colors.badgeGold + "33", borderRadius: 999, paddingHorizontal: 6, paddingVertical: 1 }}>
+                      <Trophy color={colors.badgeGold} size={9} />
+                      <Text style={{ fontSize: 9 * fontScale, color: colors.badgeGold, fontWeight: "700" }}>
+                        COMPLETED
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  {!t.isActive ? (
+                    <Pressable onPress={() => onActivate(t.id)} disabled={busy}>
+                      <Text style={{ fontSize: 12 * fontScale, color: colors.accent, fontWeight: "600" }}>
+                        Switch
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  <Pressable onPress={() => onDelete(t.id, t.displayName)} disabled={busy}>
+                    <Trash2 color={colors.muted} size={15} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginBottom: 6 }}>
+                {t.startPoint} → {t.endPoint} · {t.totalMiles} mi
+              </Text>
+
+              <View style={{ height: 6, borderRadius: 999, backgroundColor: colors.border, marginBottom: 4, overflow: "hidden" }}>
+                <View style={{ height: "100%", width: `${pct}%`, backgroundColor: colors.accent }} />
+              </View>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
+                <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
+                  {t.completedMiles} / {t.totalMiles} mi ({pct}%)
+                </Text>
+                <Pressable onPress={() => onToggleComplete(t.id)} disabled={busy}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                    {isCompleted ? (
+                      <Trophy color={colors.badgeGold} size={11} />
+                    ) : (
+                      <Star color={colors.muted} size={11} />
+                    )}
+                    <Text style={{ fontSize: 11 * fontScale, color: isCompleted ? colors.badgeGold : colors.muted }}>
+                      {isCompleted ? "Unmark" : "Mark Complete"}
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+
+              {dirs.length > 1 ? (
+                <View style={{ flexDirection: "row", gap: 6 }}>
+                  {dirs.map(({ value, label }) => {
+                    const active = t.hikeDirection === value;
+                    return (
+                      <Pressable
+                        key={value}
+                        onPress={() => onDirection(t.id, value)}
+                        style={{
+                          flex: 1,
+                          paddingVertical: 6,
+                          borderRadius: 6,
+                          borderWidth: 1,
+                          borderColor: active ? colors.accent : colors.border,
+                          backgroundColor: active ? colors.accent : "transparent",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={{ fontSize: 11 * fontScale, color: active ? "#FFFFFF" : colors.muted, fontWeight: active ? "700" : "400" }}>
+                          {label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
+            </View>
+          );
+        })
+      )}
+    </Card>
+  );
+}
+
 // ─── Trail Mode ──────────────────────────────────────────────────────────────
 
 function TrailModeTab({
@@ -327,6 +675,8 @@ function TrailModeTab({
 
   return (
     <View>
+      <MyTrailsSection />
+
       <Card style={{ marginBottom: 16 }}>
         <SectionLabel>On Trail</SectionLabel>
         <ToggleRow

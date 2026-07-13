@@ -80,6 +80,11 @@ export type WebTrail = {
   displayName: string;
   shortName: string;
   totalMiles: number;
+  startPoint: string;
+  endPoint: string;
+  completedAt: string | null;
+  completedMiles: number;
+  sectionCount: number;
   hikeDirection: string;
   isActive: boolean;
   plannedCompletionDate: string | null;
@@ -95,6 +100,33 @@ export async function fetchWebUser(token: string): Promise<WebUser> {
 
 export async function fetchTrails(token: string): Promise<WebTrail[]> {
   return apiFetch<WebTrail[]>("/api/trails", { token });
+}
+
+export async function addTrail(token: string, catalogKey: string): Promise<WebTrail> {
+  return apiFetch<WebTrail>("/api/trails", { method: "POST", token, body: { catalogKey } });
+}
+
+export async function activateTrail(token: string, trailId: string): Promise<void> {
+  await apiFetch(`/api/trails/${trailId}/activate`, { method: "PATCH", token });
+}
+
+export async function deleteTrail(token: string, trailId: string): Promise<void> {
+  await apiFetch(`/api/trails/${trailId}`, { method: "DELETE", token });
+}
+
+export async function toggleTrailComplete(
+  token: string,
+  trailId: string
+): Promise<{ completedAt: string | null }> {
+  return apiFetch(`/api/trails/${trailId}/complete`, { method: "PATCH", token });
+}
+
+export async function updateTrailDirection(
+  token: string,
+  trailId: string,
+  hikeDirection: string
+): Promise<void> {
+  await apiFetch(`/api/trails/${trailId}`, { method: "PATCH", token, body: { hikeDirection } });
 }
 
 // Two-factor authentication (TOTP) — same endpoints as the web Security tab.
