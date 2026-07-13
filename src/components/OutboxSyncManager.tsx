@@ -20,19 +20,37 @@ export function OutboxSyncManager() {
     if (!token) return;
 
     let mounted = true;
+    let inFlight = false;
     const flushAll = async () => {
-      await flushOutbox(token);
-      await syncPhotos(token);
-      const entitlement = await refreshEntitlement(token);
-      if (entitlement) await configurePurchases(entitlement.userId);
+      // Both listeners can re-fire while already connected/foregrounded
+      // (react-native-web's NetInfo shim especially) — without this guard
+      // a flaky trail connection turns into a request storm against the
+      // exact battery/data budget this sync exists to protect.
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        await flushOutbox(token);
+        await syncPhotos(token);
+        const entitlement = await refreshEntitlement(token);
+        if (entitlement) await configurePurchases(entitlement.userId);
+      } finally {
+        inFlight = false;
+      }
     };
     void tripStore.init().then(flushAll);
 
+    let wasActive = AppState.currentState === "active";
     const appStateSub = AppState.addEventListener("change", (state) => {
-      if (mounted && state === "active") void flushAll();
+      const becameActive = state === "active" && !wasActive;
+      wasActive = state === "active";
+      if (mounted && becameActive) void flushAll();
     });
+
+    let wasConnected = true;
     const netInfoUnsub = NetInfo.addEventListener((state) => {
-      if (mounted && state.isConnected) void flushAll();
+      const becameConnected = !!state.isConnected && !wasConnected;
+      wasConnected = !!state.isConnected;
+      if (mounted && becameConnected) void flushAll();
     });
 
     return () => {

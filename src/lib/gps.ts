@@ -15,6 +15,30 @@ export const GPS_MODES = {
 } as const;
 export type GpsMode = keyof typeof GPS_MODES;
 
+// The persisted User.gpsPowerMode field (web Settings > Trail Mode) uses its
+// own naming — translate both directions so the mobile default picks up
+// whatever was set on web, and vice versa.
+const WEB_POWER_MODE: Record<GpsMode, string> = {
+  standard: "standard",
+  low: "lowPower",
+  extraLow: "extraLowPower",
+  superLow: "superLowPower",
+};
+const FROM_WEB_POWER_MODE: Record<string, GpsMode> = {
+  standard: "standard",
+  lowPower: "low",
+  extraLowPower: "extraLow",
+  superLowPower: "superLow",
+};
+
+export function toWebPowerMode(mode: GpsMode): string {
+  return WEB_POWER_MODE[mode];
+}
+
+export function fromWebPowerMode(value: string | null | undefined): GpsMode {
+  return (value && FROM_WEB_POWER_MODE[value]) || "standard";
+}
+
 const TASK_NAME = "trail-tracker-gps";
 
 async function recordLocations(locations: Location.LocationObject[]): Promise<void> {

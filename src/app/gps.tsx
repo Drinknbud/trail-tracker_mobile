@@ -7,8 +7,17 @@ import { Pressable, Text, View } from "react-native";
 
 import { Card, Screen } from "@/components/Screen";
 import { tripStore, type GpsSessionRow } from "@/db";
+import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { GPS_MODES, isTracking, startTracking, stopTracking, syncGpsSessions, type GpsMode } from "@/lib/gps";
+import {
+  GPS_MODES,
+  fromWebPowerMode,
+  isTracking,
+  startTracking,
+  stopTracking,
+  syncGpsSessions,
+  type GpsMode,
+} from "@/lib/gps";
 import { enqueueWrite } from "@/lib/outbox";
 import { getShareLocation } from "@/lib/prefs";
 import { useTheme } from "@/theme/ThemeContext";
@@ -18,6 +27,7 @@ export default function GpsScreen() {
   const { token } = useAuth();
 
   const [mode, setMode] = useState<GpsMode>("standard");
+  const [modeTouched, setModeTouched] = useState(false);
   const [active, setActive] = useState<GpsSessionRow | null>(null);
   const [sessions, setSessions] = useState<GpsSessionRow[]>([]);
   const [busy, setBusy] = useState(false);
@@ -33,6 +43,15 @@ export default function GpsScreen() {
     const interval = setInterval(refresh, 4000);
     return () => clearInterval(interval);
   }, [refresh]);
+
+  // Prefill from the persisted default (Settings > Trail Mode) unless the
+  // user has already picked a different mode this screen visit.
+  useEffect(() => {
+    if (!token || modeTouched) return;
+    apiFetch<{ gpsPowerMode: string | null }>("/api/user", { token })
+      .then((u) => setMode(fromWebPowerMode(u.gpsPowerMode)))
+      .catch(() => {});
+  }, [token, modeTouched]);
 
   const onStart = async () => {
     if (busy) return;
@@ -176,7 +195,7 @@ export default function GpsScreen() {
             const m = GPS_MODES[key];
             const selected = key === mode;
             return (
-              <Pressable key={key} onPress={() => setMode(key)}>
+              <Pressable key={key} onPress={() => { setMode(key); setModeTouched(true); }}>
                 <Card
                   style={{
                     marginBottom: 8,

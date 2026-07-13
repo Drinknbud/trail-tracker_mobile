@@ -28,13 +28,51 @@ export type WebStats = {
 export type WebUser = {
   id: string;
   name: string | null;
+  email: string;
+  bio: string | null;
   trailName: string | null;
   heroImage: string | null;
   heroImagePosition: string | null;
   accentColor: string | null;
+  homeZip: string | null;
+  carrierProvider: string | null;
   distanceUnit: string;
+  tempUnit: string;
+  weightUnit: string;
+  dateFormat: string;
+  timeFormat: string;
   shareSlug: string | null;
+  gpsTrackingEnabled: boolean;
+  gpsPowerMode: string | null;
+  onTrailMode: boolean;
+  daysAheadForBriefings: number | null;
+  shareShowPhotos: boolean;
+  shareShowDayLogs: boolean;
+  shareShowNightLogs: boolean;
+  shareShowNotes: boolean;
+  shareShowLocation: boolean;
+  twoFactorEnabled: boolean;
+  subscriptionStatus: string | null;
+  subscriptionTier: string;
+  hasStripeSubscription: boolean;
+  trialUsed: boolean;
+  typicalDailyMiles: number | null;
+  hikingSpeedMph: number | null;
 };
+
+// Partial update — same shape PATCH /api/user accepts (a subset is fine,
+// only provided keys are written).
+export type WebUserUpdate = Partial<
+  Omit<WebUser, "id" | "email" | "shareSlug" | "twoFactorEnabled" | "subscriptionStatus" | "subscriptionTier" | "hasStripeSubscription" | "trialUsed">
+>;
+
+export async function updateWebUser(token: string, patch: WebUserUpdate): Promise<WebUser> {
+  return apiFetch<WebUser>("/api/user", { method: "PATCH", token, body: patch });
+}
+
+export async function generateShareSlug(token: string): Promise<{ shareSlug: string }> {
+  return apiFetch<{ shareSlug: string }>("/api/user/share-slug", { method: "POST", token });
+}
 
 export type WebTrail = {
   id: string;
@@ -57,4 +95,19 @@ export async function fetchWebUser(token: string): Promise<WebUser> {
 
 export async function fetchTrails(token: string): Promise<WebTrail[]> {
   return apiFetch<WebTrail[]>("/api/trails", { token });
+}
+
+// Two-factor authentication (TOTP) — same endpoints as the web Security tab.
+export async function start2faSetup(
+  token: string
+): Promise<{ secret: string; qrCodeDataUrl: string }> {
+  return apiFetch("/api/user/2fa/setup", { method: "POST", token });
+}
+
+export async function verify2fa(token: string, code: string, secret: string): Promise<void> {
+  await apiFetch("/api/user/2fa/verify", { method: "POST", token, body: { code, secret } });
+}
+
+export async function disable2fa(token: string, code: string): Promise<void> {
+  await apiFetch("/api/user/2fa/disable", { method: "POST", token, body: { code } });
 }
