@@ -1,3 +1,4 @@
+import { Image as ExpoImage } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
@@ -31,6 +32,7 @@ import { TrailBadge } from "@/components/TrailBadge";
 import { Wordmark } from "@/components/Wordmark";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
+import { heroContentPosition } from "@/lib/heroPosition";
 import { fetchStats, fetchTrails, fetchWebUser, type WebStats, type WebTrail, type WebUser } from "@/lib/webApi";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -125,10 +127,11 @@ export default function DashboardScreen() {
       {/* Hero / header */}
       {user?.heroImage ? (
         <View style={{ height: 220, width: "100%" }}>
-          <Image
+          <ExpoImage
             source={{ uri: user.heroImage }}
             style={{ position: "absolute", width: "100%", height: "100%" }}
-            resizeMode="cover"
+            contentFit="cover"
+            contentPosition={heroContentPosition(user.heroImagePosition ?? "50% 50%")}
           />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.65)"]}

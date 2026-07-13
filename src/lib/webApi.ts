@@ -23,12 +23,15 @@ export type WebStats = {
   nextPlannedSection: { name: string; miles: number; startDate?: string } | null;
   milesRemaining: number;
   milesThisYear: number;
+  /** Cosmetic-unlock gate for avatar/hero-image/accent-color (see BADGE_UNLOCKS). */
+  earnedBadgeCount: number;
 };
 
 export type WebUser = {
   id: string;
   name: string | null;
   email: string;
+  image: string | null;
   bio: string | null;
   trailName: string | null;
   heroImage: string | null;
@@ -65,6 +68,24 @@ export type WebUser = {
 export type WebUserUpdate = Partial<
   Omit<WebUser, "id" | "email" | "shareSlug" | "twoFactorEnabled" | "subscriptionStatus" | "subscriptionTier" | "hasStripeSubscription" | "trialUsed">
 >;
+
+// Cosmetic features unlock via earned badge milestones, or automatically for
+// Premium (mirrors BADGE_UNLOCKS in app/settings/page.tsx).
+export const BADGE_UNLOCKS = { avatar: 5, heroImage: 10, accentColor: 15 } as const;
+
+export async function uploadAvatar(token: string, dataUrl: string): Promise<{ url: string }> {
+  return apiFetch<{ url: string }>("/api/user/avatar", { method: "POST", token, body: { dataUrl } });
+}
+
+export async function uploadHeroImage(token: string, dataUrl: string): Promise<{ url: string }> {
+  return apiFetch<{ url: string }>("/api/user/hero-image", { method: "POST", token, body: { dataUrl } });
+}
+
+export type MyPhoto = { id: string; storageUrl: string | null; baseUrl: string; thumbnailUrl: string };
+
+export async function fetchMyPhotos(token: string): Promise<MyPhoto[]> {
+  return apiFetch<MyPhoto[]>("/api/photos", { token });
+}
 
 export async function updateWebUser(token: string, patch: WebUserUpdate): Promise<WebUser> {
   return apiFetch<WebUser>("/api/user", { method: "PATCH", token, body: patch });

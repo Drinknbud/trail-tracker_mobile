@@ -27,7 +27,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AvatarPicker } from "@/components/AvatarPicker";
+import { BadgeGate } from "@/components/BadgeGate";
 import { FormField } from "@/components/FormField";
+import { HeroImagePicker } from "@/components/HeroImagePicker";
 import { PickerModal } from "@/components/PickerModal";
 import { Card } from "@/components/Screen";
 import { ACCENT_PRESETS, CARRIER_OPTIONS, carrierLabel } from "@/lib/carriers";
@@ -37,8 +40,10 @@ import { directionsFor, VISIBLE_TRAILS } from "@/lib/trailCatalog";
 import {
   activateTrail,
   addTrail,
+  BADGE_UNLOCKS,
   deleteTrail,
   disable2fa,
+  fetchStats,
   fetchTrails,
   generateShareSlug,
   start2faSetup,
@@ -211,6 +216,7 @@ export default function SettingsScreen() {
   const { token } = useAuth();
   const [tab, setTab] = useState<Tab>("trailMode");
   const [user, setUser] = useState<WebUser | null>(null);
+  const [earnedBadgeCount, setEarnedBadgeCount] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -221,6 +227,11 @@ export default function SettingsScreen() {
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Couldn't load your profile");
       }
+      // Badge count drives the avatar/hero-image/accent-color unlock gates —
+      // best-effort, no user-facing error if it fails (gates just stay locked).
+      fetchStats(token)
+        .then((s) => setEarnedBadgeCount(s.earnedBadgeCount))
+        .catch(() => {});
     })();
   }, [token]);
 
@@ -286,8 +297,12 @@ export default function SettingsScreen() {
         ) : (
           <>
             {tab === "trailMode" ? <TrailModeTab user={user} setUser={setUser} /> : null}
-            {tab === "profile" ? <ProfileTab user={user} setUser={setUser} /> : null}
-            {tab === "appearance" ? <AppearanceTab user={user} setUser={setUser} /> : null}
+            {tab === "profile" ? (
+              <ProfileTab user={user} setUser={setUser} earnedBadgeCount={earnedBadgeCount} />
+            ) : null}
+            {tab === "appearance" ? (
+              <AppearanceTab user={user} setUser={setUser} earnedBadgeCount={earnedBadgeCount} />
+            ) : null}
             {tab === "account" ? <AccountTab user={user} setUser={setUser} /> : null}
           </>
         )}
@@ -759,12 +774,15 @@ function TrailModeTab({
 function ProfileTab({
   user,
   setUser,
+  earnedBadgeCount,
 }: {
   user: WebUser;
   setUser: (u: WebUser) => void;
+  earnedBadgeCount: number;
 }) {
   const { colors, fontScale } = useTheme();
   const { token } = useAuth();
+  const isPremium = user.subscriptionTier === "premium";
   const [name, setName] = useState(user.name ?? "");
   const [trailName, setTrailName] = useState(user.trailName ?? "");
   const [bio, setBio] = useState(user.bio ?? "");
@@ -784,6 +802,8 @@ function ProfileTab({
   });
   const [shareSlug, setShareSlug] = useState(user.shareSlug);
   const [generatingSlug, setGeneratingSlug] = useState(false);
+  const [heroImage, setHeroImage] = useState(user.heroImage ?? "");
+  const [heroPosition, setHeroPosition] = useState(user.heroImagePosition ?? "50% 50%");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -799,6 +819,8 @@ function ProfileTab({
         carrierProvider: carrier || null,
         typicalDailyMiles: dailyMiles ? Number(dailyMiles) : null,
         hikingSpeedMph: speed ? Number(speed) : null,
+        heroImage: heroImage || null,
+        heroImagePosition: heroPosition,
         ...visibility,
       } as WebUserUpdate);
       setUser(updated);
@@ -828,6 +850,31 @@ function ProfileTab({
     <View>
       <Card style={{ marginBottom: 16 }}>
         <SectionLabel>Profile</SectionLabel>
+
+        <View style={{ marginBottom: 14 }}>
+          <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginBottom: 6 }}>
+            Avatar
+            {!isPremium && earnedBadgeCount < BADGE_UNLOCKS.avatar ? (
+              <Text style={{ color: colors.muted }}>
+                {"  🏅 "}
+                {earnedBadgeCount}/{BADGE_UNLOCKS.avatar} badges
+              </Text>
+            ) : null}
+          </Text>
+          <BadgeGate
+            earned={earnedBadgeCount}
+            required={BADGE_UNLOCKS.avatar}
+            isPremium={isPremium}
+            feature="Custom Avatar"
+          >
+            <AvatarPicker
+              imageUrl={user.image}
+              token={token}
+              onUploaded={(url) => setUser({ ...user, image: url })}
+            />
+          </BadgeGate>
+        </View>
+
         <FormField label="Display Name" value={name} onChangeText={setName} placeholder="Your name" />
         <FormField
           label="Trail Name / Thru-hiker Name"
@@ -874,6 +921,30 @@ function ProfileTab({
           <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 4 }}>
             Helps filter dead zone reports to ones that affect your carrier.
           </Text>
+        </View>
+
+        <View>
+          {!isPremium && earnedBadgeCount < BADGE_UNLOCKS.heroImage ? (
+            <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginBottom: 6 }}>
+              🏅 {earnedBadgeCount}/{BADGE_UNLOCKS.heroImage} badges to unlock hero image
+            </Text>
+          ) : null}
+          <BadgeGate
+            earned={earnedBadgeCount}
+            required={BADGE_UNLOCKS.heroImage}
+            isPremium={isPremium}
+            feature="Custom Hero Image"
+          >
+            <HeroImagePicker
+              url={heroImage}
+              position={heroPosition}
+              token={token}
+              onChange={(url, pos) => {
+                setHeroImage(url);
+                setHeroPosition(pos);
+              }}
+            />
+          </BadgeGate>
         </View>
       </Card>
 
@@ -1012,12 +1083,15 @@ function ProfileTab({
 function AppearanceTab({
   user,
   setUser,
+  earnedBadgeCount,
 }: {
   user: WebUser;
   setUser: (u: WebUser) => void;
+  earnedBadgeCount: number;
 }) {
   const { colors, fontScale, mode, setMode, textSize, setTextSize, setAccentColor } = useTheme();
   const { token } = useAuth();
+  const isPremium = user.subscriptionTier === "premium";
   const [distanceUnit, setDistanceUnit] = useState(user.distanceUnit);
   const [tempUnit, setTempUnit] = useState(user.tempUnit);
   const [weightUnit, setWeightUnit] = useState(user.weightUnit);
@@ -1145,40 +1219,52 @@ function AppearanceTab({
 
       <Card style={{ marginBottom: 16 }}>
         <SectionLabel>Accent Color</SectionLabel>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
-          {ACCENT_PRESETS.map(({ hex, label }) => {
-            const active = accentHex.toLowerCase() === hex.toLowerCase();
-            return (
-              <Pressable key={hex} onPress={() => applyAccent(hex)} accessibilityLabel={label}>
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    backgroundColor: hex,
-                    borderWidth: active ? 3 : 0,
-                    borderColor: colors.text,
-                  }}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
-        <FormField
-          label="Custom hex"
-          value={accentHex}
-          onChangeText={(v) => setAccentHex(v)}
-          onBlur={() => isValidHex && setAccentColor(accentHex)}
-          placeholder="#2D6A4F"
-          autoCapitalize="none"
-        />
-        {accentHex.toLowerCase() !== DEFAULT_ACCENT.toLowerCase() ? (
-          <Pressable onPress={() => applyAccent(DEFAULT_ACCENT)}>
-            <Text style={{ fontSize: 12 * fontScale, color: colors.muted, textDecorationLine: "underline" }}>
-              Reset to default
-            </Text>
-          </Pressable>
+        {!isPremium && earnedBadgeCount < BADGE_UNLOCKS.accentColor ? (
+          <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginBottom: 10 }}>
+            🏅 {earnedBadgeCount}/{BADGE_UNLOCKS.accentColor} badges to unlock
+          </Text>
         ) : null}
+        <BadgeGate
+          earned={earnedBadgeCount}
+          required={BADGE_UNLOCKS.accentColor}
+          isPremium={isPremium}
+          feature="Custom Accent Color"
+        >
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
+            {ACCENT_PRESETS.map(({ hex, label }) => {
+              const active = accentHex.toLowerCase() === hex.toLowerCase();
+              return (
+                <Pressable key={hex} onPress={() => applyAccent(hex)} accessibilityLabel={label}>
+                  <View
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: hex,
+                      borderWidth: active ? 3 : 0,
+                      borderColor: colors.text,
+                    }}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+          <FormField
+            label="Custom hex"
+            value={accentHex}
+            onChangeText={(v) => setAccentHex(v)}
+            onBlur={() => isValidHex && setAccentColor(accentHex)}
+            placeholder="#2D6A4F"
+            autoCapitalize="none"
+          />
+          {accentHex.toLowerCase() !== DEFAULT_ACCENT.toLowerCase() ? (
+            <Pressable onPress={() => applyAccent(DEFAULT_ACCENT)}>
+              <Text style={{ fontSize: 12 * fontScale, color: colors.muted, textDecorationLine: "underline" }}>
+                Reset to default
+              </Text>
+            </Pressable>
+          ) : null}
+        </BadgeGate>
       </Card>
 
       <Card style={{ marginBottom: 16 }}>
