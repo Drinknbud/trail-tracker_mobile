@@ -232,3 +232,62 @@ export async function fetchChallengeCompletions(token: string): Promise<Challeng
 export async function claimSystemChallenge(token: string, challengeKey: string): Promise<ChallengeCompletion> {
   return apiFetch<ChallengeCompletion>("/api/challenge-completions", { method: "POST", token, body: { challengeKey } });
 }
+
+// Scout trip planner — POST /api/scout/plan returns a server-validated plan:
+// every stop resolved against the trail database, every mileage computed from
+// official mile markers. The client renders ONLY the canonical plan.
+
+export type PlanStop = {
+  name: string;
+  mile: number;
+  kind: "shelter" | "tentsite" | "developed" | "nps_required" | "dispersed" | "town" | "trailhead";
+  approximate: boolean;
+};
+
+export type PlanDay = {
+  day: number;
+  from: PlanStop;
+  to: PlanStop;
+  miles: number;
+  permitRequired: boolean;
+  note: string | null;
+  warnings: string[];
+};
+
+export type CanonicalPlan = {
+  name: string;
+  direction: "NOBO" | "SOBO";
+  start: PlanStop;
+  end: PlanStop;
+  totalMiles: number;
+  days: PlanDay[];
+  warnings: string[];
+};
+
+export type ScoutTurn = { role: "user" | "assistant"; content: string };
+
+export type ScoutPlanResponse = { note: string; plan: CanonicalPlan | null; violations?: string[] };
+
+export async function scoutPlan(
+  token: string,
+  input: { message: string; history: ScoutTurn[]; plan: CanonicalPlan | null }
+): Promise<ScoutPlanResponse> {
+  return apiFetch<ScoutPlanResponse>("/api/scout/plan", { method: "POST", token, body: input });
+}
+
+export async function createSection(
+  token: string,
+  input: {
+    name: string;
+    status: string;
+    startMile: number;
+    endMile: number;
+    miles: number;
+    notes?: string;
+    itinerary?: string;
+    plannedCamps?: string[];
+    plannedCampMiles?: (number | null)[];
+  }
+): Promise<{ id: string }> {
+  return apiFetch<{ id: string }>("/api/sections", { method: "POST", token, body: input });
+}
