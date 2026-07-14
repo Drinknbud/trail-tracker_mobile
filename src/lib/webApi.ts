@@ -23,8 +23,27 @@ export type WebStats = {
   nextPlannedSection: { name: string; miles: number; startDate?: string } | null;
   milesRemaining: number;
   milesThisYear: number;
+  sectionsThisYear: number;
+  daysOnTrailThisYear: number;
+  milesThisMonth: number;
+  sectionsThisMonth: number;
+  daysOnTrailThisMonth: number;
+  milesThisWeek: number;
+  sectionsThisWeek: number;
   /** Cosmetic-unlock gate for avatar/hero-image/accent-color (see BADGE_UNLOCKS). */
   earnedBadgeCount: number;
+  // Gamification extras — drive the Accomplishments screen's badge grid.
+  photoCount: number;
+  poiCount: number;
+  conditionReportCount: number;
+  communityContributions: number;
+  beatClockCount: number;
+  minPackWeight: number | null;
+  packWeightLogged: boolean;
+  atRegionCoverage?: Record<string, number>;
+  trailsStarted?: number;
+  trailsCompleted?: number;
+  hasTripleCrown?: boolean;
 };
 
 export type WebUser = {
@@ -163,4 +182,53 @@ export async function verify2fa(token: string, code: string, secret: string): Pr
 
 export async function disable2fa(token: string, code: string): Promise<void> {
   await apiFetch("/api/user/2fa/disable", { method: "POST", token, body: { code } });
+}
+
+// Accomplishments — personal goals ("challenges") and system-challenge claims.
+// Same endpoints/shapes as the web Accomplishments page.
+
+export type UserChallenge = {
+  id: string;
+  title: string;
+  targetType: "miles" | "sections" | "days" | "custom";
+  targetValue: number | null;
+  deadline: string | null;
+  status: "active" | "completed" | "abandoned";
+  completedAt: string | null;
+  createdAt: string;
+};
+
+export type ChallengeCompletion = {
+  id: string;
+  challengeKey: string;
+  title: string;
+  completedAt: string;
+  metadata: string | null;
+};
+
+export async function fetchChallenges(token: string): Promise<UserChallenge[]> {
+  return apiFetch<UserChallenge[]>("/api/challenges", { token });
+}
+
+export async function createChallenge(
+  token: string,
+  input: { title: string; targetType: UserChallenge["targetType"]; targetValue?: number | null; deadline?: string | null }
+): Promise<UserChallenge> {
+  return apiFetch<UserChallenge>("/api/challenges", { method: "POST", token, body: input });
+}
+
+export async function completeChallenge(token: string, id: string): Promise<UserChallenge> {
+  return apiFetch<UserChallenge>(`/api/challenges/${id}`, { method: "PATCH", token, body: { status: "completed" } });
+}
+
+export async function deleteChallenge(token: string, id: string): Promise<void> {
+  await apiFetch(`/api/challenges/${id}`, { method: "DELETE", token });
+}
+
+export async function fetchChallengeCompletions(token: string): Promise<ChallengeCompletion[]> {
+  return apiFetch<ChallengeCompletion[]>("/api/challenge-completions", { token });
+}
+
+export async function claimSystemChallenge(token: string, challengeKey: string): Promise<ChallengeCompletion> {
+  return apiFetch<ChallengeCompletion>("/api/challenge-completions", { method: "POST", token, body: { challengeKey } });
 }

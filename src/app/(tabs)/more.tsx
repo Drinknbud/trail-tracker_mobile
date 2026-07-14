@@ -173,7 +173,7 @@ export default function MoreScreen() {
       <Card style={{ paddingVertical: 4 }}>
         <Row icon={Navigation} label="GPS Tracking" onPress={() => router.push("/gps")} />
         <Row icon={Camera} label="Photos" onPress={() => router.push("/photos")} />
-        <Row icon={Trophy} label="Accomplishments" note="Phase 2" />
+        <Row icon={Trophy} label="Accomplishments" onPress={() => router.push("/accomplishments")} />
         <Row icon={Mail} label="Trail Mail" onPress={() => router.push("/trail-mail")} last />
       </Card>
 
