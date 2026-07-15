@@ -1,12 +1,10 @@
 import { router } from "expo-router";
 import {
-  ArrowLeft,
   ArrowUp,
   Bot,
   Check,
   Compass,
   Home,
-  Lock,
   Mountain,
   RotateCcw,
   Tent,
@@ -166,9 +164,6 @@ export default function ScoutScreen() {
 
   const header = (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
-      <Pressable onPress={() => router.back()} style={{ padding: 4 }}>
-        <ArrowLeft color={colors.accent} size={22} />
-      </Pressable>
       <View
         style={{
           width: 34, height: 34, borderRadius: 17,
@@ -366,10 +361,11 @@ export default function ScoutScreen() {
         </ScrollView>
 
         {/* Input bar */}
+        {/* Tab bar sits below, so no safe-area inset needed here */}
         <View
           style={{
             flexDirection: "row", alignItems: "flex-end", gap: 8,
-            paddingTop: 8, paddingBottom: Math.max(insets.bottom, 12),
+            paddingTop: 8, paddingBottom: 12,
           }}
         >
           <TextInput

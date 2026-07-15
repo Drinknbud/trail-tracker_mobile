@@ -1,12 +1,10 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import {
   Bot,
   Camera,
-  ChevronRight,
   Database,
   HelpCircle,
   LogOut,
-  Navigation,
   Mail,
   MessageSquare,
   MessagesSquare,
@@ -14,16 +12,23 @@ import {
   Search,
   Settings,
   Share2,
+  Tent,
   Trophy,
   Users,
   UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { useCallback, useState } from "react";
+import { Pressable, Switch, Text, View } from "react-native";
 
 import { Card, Screen } from "@/components/Screen";
+import { tripStore } from "@/db";
 import { useAuth } from "@/lib/auth";
+import { useOnTrail } from "@/lib/onTrail";
 import { useTheme, type TextSize, type ThemeMode } from "@/theme/ThemeContext";
+
+// Hub launcher (nav redesign): tile grid instead of a buried flat list, with
+// the On Trail switch on top since it now drives the adaptive tab bar.
 
 function GroupLabel({ children }: { children: string }) {
   const { colors, fontScale } = useTheme();
@@ -44,44 +49,82 @@ function GroupLabel({ children }: { children: string }) {
   );
 }
 
-function Row({
+function Tile({
   icon: Icon,
   label,
   note,
-  last = false,
+  badge,
   onPress,
 }: {
   icon: LucideIcon;
   label: string;
   note?: string;
-  last?: boolean;
+  badge?: number;
   onPress?: () => void;
 }) {
   const { colors, fontScale } = useTheme();
+  const disabled = !onPress;
   return (
     <Pressable
       onPress={onPress}
-      disabled={!onPress}
+      disabled={disabled}
       style={{
-        flexDirection: "row",
+        width: "31%",
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+        paddingVertical: 14,
+        paddingHorizontal: 6,
         alignItems: "center",
-        paddingVertical: 12,
-        paddingHorizontal: 4,
-        borderBottomWidth: last ? 0 : 1,
-        borderBottomColor: colors.border,
+        opacity: disabled ? 0.45 : 1,
       }}
     >
-      <Icon color={colors.accent} size={20} />
-      <Text style={{ flex: 1, fontSize: 15 * fontScale, color: colors.text, marginLeft: 12 }}>
+      <View>
+        <Icon color={disabled ? colors.muted : colors.accent} size={22} />
+        {badge ? (
+          <View
+            style={{
+              position: "absolute",
+              top: -6,
+              right: -12,
+              minWidth: 18,
+              height: 18,
+              borderRadius: 9,
+              paddingHorizontal: 4,
+              backgroundColor: colors.accent,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "700" }}>
+              {badge > 99 ? "99+" : badge}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+      <Text
+        style={{
+          fontSize: 12 * fontScale,
+          fontWeight: "600",
+          color: colors.text,
+          marginTop: 8,
+          textAlign: "center",
+        }}
+        numberOfLines={2}
+      >
         {label}
       </Text>
       {note ? (
-        <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginRight: 6 }}>
-          {note}
-        </Text>
+        <Text style={{ fontSize: 10 * fontScale, color: colors.muted, marginTop: 2 }}>{note}</Text>
       ) : null}
-      <ChevronRight color={colors.muted} size={16} />
     </Pressable>
+  );
+}
+
+function TileGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>{children}</View>
   );
 }
 
@@ -137,8 +180,93 @@ function Segmented<T extends string>({
 export default function MoreScreen() {
   const { colors, fontScale, mode, setMode, textSize, setTextSize } = useTheme();
   const { signOut } = useAuth();
+  const { onTrail, setOnTrail, requestOnTrail } = useOnTrail();
+  const [mailUnread, setMailUnread] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          await tripStore.init();
+          const mail = await tripStore.listTrailMail();
+          if (!cancelled) setMailUnread(mail.filter((m) => !m.isRead).length);
+        } catch {
+          // Badge is best-effort
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []),
+  );
+
   return (
     <Screen title="More">
+      {/* On Trail switch — drives the adaptive tab bar */}
+      <Card>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              backgroundColor: onTrail ? `${colors.offlineAmber}22` : `${colors.accent}15`,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Tent color={onTrail ? colors.offlineAmber : colors.accent} size={20} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 15 * fontScale, fontWeight: "700", color: colors.text }}>
+              On Trail mode
+            </Text>
+            <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 1 }}>
+              {onTrail
+                ? "Field setup: Briefing in the tab bar, auto-sync on signal"
+                : "Home setup: Scout planner in the tab bar"}
+            </Text>
+          </View>
+          <Switch
+            value={onTrail}
+            onValueChange={(v) => (v ? requestOnTrail() : setOnTrail(false))}
+            trackColor={{ false: colors.border, true: colors.accent }}
+            thumbColor="#FFFFFF"
+          />
+        </View>
+      </Card>
+
+      <GroupLabel>Trail</GroupLabel>
+      <TileGrid>
+        <Tile icon={Camera} label="Photos" onPress={() => router.push("/photos")} />
+        <Tile icon={Trophy} label="Badges" onPress={() => router.push("/accomplishments")} />
+        <Tile icon={Mail} label="Trail Mail" badge={mailUnread} onPress={() => router.push("/trail-mail")} />
+        <Tile icon={Database} label="Trip Status" onPress={() => router.push("/trip-status")} />
+      </TileGrid>
+
+      <GroupLabel>Trip Planning</GroupLabel>
+      <TileGrid>
+        <Tile icon={Bot} label="Scout Planner" onPress={() => router.push("/scout")} />
+        <Tile icon={UtensilsCrossed} label="Meals" note="Phase 4" />
+      </TileGrid>
+
+      <GroupLabel>Community</GroupLabel>
+      <TileGrid>
+        <Tile icon={Users} label="Tribes" note="Phase 3" />
+        <Tile icon={MessagesSquare} label="Forum" note="Phase 3" />
+        <Tile icon={Repeat} label="Gear Swap" note="Phase 3" />
+        <Tile icon={HelpCircle} label="Q&A" note="Phase 3" />
+        <Tile icon={Search} label="Find Hikers" note="Phase 3" />
+      </TileGrid>
+
+      <GroupLabel>App</GroupLabel>
+      <TileGrid>
+        <Tile icon={Settings} label="Settings" onPress={() => router.push("/settings")} />
+        <Tile icon={Share2} label="Share View" note="Phase 1" />
+        <Tile icon={MessageSquare} label="Feedback" note="Phase 1" />
+      </TileGrid>
+
       <GroupLabel>Appearance</GroupLabel>
       <Card>
         <Text style={{ fontSize: 13 * fontScale, color: colors.muted, marginBottom: 8 }}>
@@ -167,37 +295,6 @@ export default function MoreScreen() {
           value={textSize}
           onChange={setTextSize}
         />
-      </Card>
-
-      <GroupLabel>Trail</GroupLabel>
-      <Card style={{ paddingVertical: 4 }}>
-        <Row icon={Navigation} label="GPS Tracking" onPress={() => router.push("/gps")} />
-        <Row icon={Camera} label="Photos" onPress={() => router.push("/photos")} />
-        <Row icon={Trophy} label="Accomplishments" onPress={() => router.push("/accomplishments")} />
-        <Row icon={Mail} label="Trail Mail" onPress={() => router.push("/trail-mail")} last />
-      </Card>
-
-      <GroupLabel>Trip Planning</GroupLabel>
-      <Card style={{ paddingVertical: 4 }}>
-        <Row icon={Bot} label="Scout Planner" onPress={() => router.push("/scout")} />
-        <Row icon={UtensilsCrossed} label="Meals" note="Phase 4" last />
-      </Card>
-
-      <GroupLabel>Community</GroupLabel>
-      <Card style={{ paddingVertical: 4 }}>
-        <Row icon={Users} label="Tribes" note="Phase 3" />
-        <Row icon={MessagesSquare} label="Forum" note="Phase 3" />
-        <Row icon={Repeat} label="Gear Swap" note="Phase 3" />
-        <Row icon={HelpCircle} label="Q&A" note="Phase 3" />
-        <Row icon={Search} label="Find Hikers" note="Phase 3" last />
-      </Card>
-
-      <GroupLabel>App</GroupLabel>
-      <Card style={{ paddingVertical: 4 }}>
-        <Row icon={Database} label="Trip Status" onPress={() => router.push("/trip-status")} />
-        <Row icon={Settings} label="Settings" onPress={() => router.push("/settings")} />
-        <Row icon={Share2} label="Share View" note="Phase 1" />
-        <Row icon={MessageSquare} label="Feedback" note="Phase 1" last />
       </Card>
 
       <GroupLabel>Account</GroupLabel>

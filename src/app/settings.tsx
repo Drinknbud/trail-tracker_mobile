@@ -36,6 +36,7 @@ import { Card } from "@/components/Screen";
 import { ACCENT_PRESETS, CARRIER_OPTIONS, carrierLabel } from "@/lib/carriers";
 import { GPS_MODES, fromWebPowerMode, toWebPowerMode, type GpsMode } from "@/lib/gps";
 import { useAuth } from "@/lib/auth";
+import { useOnTrail } from "@/lib/onTrail";
 import { directionsFor, VISIBLE_TRAILS } from "@/lib/trailCatalog";
 import {
   activateTrail,
@@ -655,6 +656,7 @@ function TrailModeTab({
 }) {
   const { colors, fontScale } = useTheme();
   const { token } = useAuth();
+  const { applyServerValue } = useOnTrail();
   const [onTrailMode, setOnTrailMode] = useState(user.onTrailMode);
   const [daysAhead, setDaysAhead] = useState(user.daysAheadForBriefings ?? 2);
   const [gpsEnabled, setGpsEnabled] = useState(user.gpsTrackingEnabled);
@@ -679,6 +681,9 @@ function TrailModeTab({
         gpsPowerMode: toWebPowerMode(powerMode),
       });
       setUser(updated);
+      // Keep the adaptive tab bar in sync. Use the form value the server just
+      // accepted — the PATCH response doesn't echo every field back.
+      applyServerValue(onTrailMode);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {
@@ -762,6 +767,24 @@ function TrailModeTab({
             })}
           </View>
         ) : null}
+        {/* GPS lives here now (removed from the nav menus) — this row opens
+            the live tracking screen for start/stop + dead-zone reporting */}
+        <Pressable
+          onPress={() => router.push("/gps")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 12,
+            paddingTop: 12,
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+          }}
+        >
+          <Text style={{ fontSize: 13 * fontScale, fontWeight: "600", color: colors.accent }}>
+            Open GPS tracking screen →
+          </Text>
+        </Pressable>
       </Card>
 
       <SaveButton onPress={save} saving={saving} saved={saved} />

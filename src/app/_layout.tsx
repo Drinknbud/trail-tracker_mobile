@@ -1,12 +1,14 @@
-import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { OnTrailActivationSheet } from "@/components/OnTrailActivationSheet";
 import { OutboxSyncManager } from "@/components/OutboxSyncManager";
 import { AuthProvider } from "@/lib/auth";
+import { getNotifications } from "@/lib/notifications-safe";
+import { OnTrailProvider } from "@/lib/onTrail";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
 
 function RootNavigator() {
@@ -15,6 +17,8 @@ function RootNavigator() {
   // Tapping a morning-briefing notification lands on the Briefing tab
   useEffect(() => {
     if (Platform.OS === "web") return;
+    const Notifications = getNotifications();
+    if (!Notifications) return;
     const sub = Notifications.addNotificationResponseReceivedListener(() => {
       router.push("/briefing");
     });
@@ -42,8 +46,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
-          <OutboxSyncManager />
-          <RootNavigator />
+          <OnTrailProvider>
+            <OutboxSyncManager />
+            <RootNavigator />
+            <OnTrailActivationSheet />
+          </OnTrailProvider>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
