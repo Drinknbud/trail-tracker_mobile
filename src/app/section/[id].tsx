@@ -15,15 +15,18 @@ import { Image, Pressable, Text, View } from "react-native";
 import { FormField } from "@/components/FormField";
 import { Card, Screen } from "@/components/Screen";
 import { SectionCelebration } from "@/components/SectionCelebration";
+import { SectionElevationProfile } from "@/components/SectionElevationProfile";
 import {
   tripStore,
   type DayLogRow,
+  type ElevationProfile,
   type NightLogRow,
   type PhotoQueueRow,
   type PoiRow,
   type SectionDetailRow,
 } from "@/db";
 import { useAuth } from "@/lib/auth";
+import { projectGpsToDist } from "@/lib/elevation";
 import { enqueueWrite } from "@/lib/outbox";
 import { capturePhoto } from "@/lib/photos";
 import { usePremium } from "@/lib/usePremium";
@@ -74,6 +77,8 @@ export default function SectionDetailScreen() {
   const [showItinerary, setShowItinerary] = useState(false);
   const [photos, setPhotos] = useState<PhotoQueueRow[]>([]);
   const [photoNotice, setPhotoNotice] = useState<string | null>(null);
+  const [elevation, setElevation] = useState<ElevationProfile | null>(null);
+  const [gpsDistMi, setGpsDistMi] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -83,6 +88,18 @@ export default function SectionDetailScreen() {
     setNights(await tripStore.listNightLogs(id));
     setDays(await tripStore.listDayLogs(id));
     setPhotos((await tripStore.photoList()).filter((p) => p.sectionId === id));
+
+    // Elevation profile + "you are here" projection (both offline-safe)
+    const profile = await tripStore.getElevationProfile(id);
+    setElevation(profile);
+    if (profile) {
+      const gps = await tripStore.gpsLatestPoint();
+      setGpsDistMi(
+        gps ? projectGpsToDist(profile.coords, profile.points, { lat: gps.lat, lon: gps.lon }) : null,
+      );
+    } else {
+      setGpsDistMi(null);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -230,6 +247,17 @@ export default function SectionDetailScreen() {
             Mark Complete
           </Text>
         </Pressable>
+      ) : null}
+
+      {elevation && elevation.points.length >= 2 ? (
+        <SectionElevationProfile
+          points={elevation.points}
+          pois={pois}
+          startMile={section.startMile}
+          sectionName={section.name}
+          miles={section.miles}
+          gpsDistMi={gpsDistMi}
+        />
       ) : null}
 
       {section.itinerary ? (

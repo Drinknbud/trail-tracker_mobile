@@ -264,6 +264,16 @@ export const memoryStore: TripStore = {
       .map((s) => ({ ...s, pointCount: gpsPoints.get(s.id)?.length ?? 0 }));
   },
 
+  async gpsLatestPoint() {
+    let latest: GpsPointRow | null = null;
+    for (const list of gpsPoints.values()) {
+      for (const p of list) {
+        if (!latest || p.timestamp > latest.timestamp) latest = p;
+      }
+    }
+    return latest;
+  },
+
   async gpsMarkSynced(id) {
     const s = gpsSessions.get(id);
     if (s) gpsSessions.set(id, { ...s, synced: true });
@@ -307,3 +317,12 @@ export const memoryStore: TripStore = {
     if (m) mail.set(id, { ...m, isRead: true });
   },
 };
+
+// Dev-only preview hook: the web memory store is never bundled into the native
+// app (native uses src/db/native.ts), so exposing it here lets browser-preview
+// verification seed rows (e.g. a GPS point to test the elevation "you are
+// here" dot) without shipping anything to devices. Guarded by __DEV__ so it's
+// stripped from any release build.
+if (__DEV__ && typeof globalThis !== "undefined") {
+  (globalThis as unknown as { __tripStore?: TripStore }).__tripStore = memoryStore;
+}

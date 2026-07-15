@@ -208,6 +208,8 @@ export interface TripStore {
   gpsAddPoints(sessionId: string, points: GpsPointRow[]): Promise<void>;
   gpsSessionPoints(sessionId: string): Promise<GpsPointRow[]>;
   gpsListSessions(limit: number): Promise<GpsSessionRow[]>;
+  /** Most recent GPS point across all sessions — powers the elevation "you are here" dot. */
+  gpsLatestPoint(): Promise<GpsPointRow | null>;
   gpsMarkSynced(id: string): Promise<void>;
 
   // Photo capture queue (F12)

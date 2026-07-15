@@ -662,6 +662,13 @@ export const nativeStore: TripStore = {
       }));
   },
 
+  async gpsLatestPoint() {
+    const r = getDb().getFirstSync<{ ts: number; lat: number; lon: number; alt: number | null }>(
+      "SELECT ts, lat, lon, alt FROM gps_points ORDER BY ts DESC LIMIT 1"
+    );
+    return r ? { timestamp: r.ts, lat: r.lat, lon: r.lon, alt: r.alt } : null;
+  },
+
   async gpsMarkSynced(id) {
     getDb().runSync("UPDATE gps_sessions SET synced = 1 WHERE id = ?", id);
   },
