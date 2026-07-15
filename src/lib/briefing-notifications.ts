@@ -1,13 +1,13 @@
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import type { SectionDetailRow } from "@/db";
+import { getNotifications } from "./notifications-safe";
 import { getBriefingHour } from "./prefs";
 
 const MAX_TRIP_DAYS = 14;
 
 if (Platform.OS !== "web") {
-  Notifications.setNotificationHandler({
+  getNotifications()?.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,
       shouldShowList: true,
@@ -28,6 +28,8 @@ export async function scheduleBriefingNotifications(
 ): Promise<number> {
   if (Platform.OS === "web") return 0;
   if (!section.startDate || !section.endDate) return 0;
+  const Notifications = getNotifications();
+  if (!Notifications) return 0; // Expo Go on Android — works in a dev build
 
   try {
     const perms = await Notifications.requestPermissionsAsync();
@@ -63,7 +65,6 @@ export async function scheduleBriefingNotifications(
     }
     return scheduled;
   } catch {
-    // Expo Go on Android can't schedule — works in the dev build
     return 0;
   }
 }
