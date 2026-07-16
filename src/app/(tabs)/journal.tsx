@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { CheckCircle2, CloudDownload, WifiOff } from "lucide-react-native";
+import { router, useFocusEffect } from "expo-router";
+import { CheckCircle2, CloudDownload, Plus, WifiOff } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
@@ -51,6 +51,15 @@ export default function JournalScreen() {
     })();
   }, [token, loadLocal]);
 
+  // Pick up sections created via the New Section screen (already written
+  // locally before it navigates back) without waiting for the next full
+  // /api/mobile/sections resync.
+  useFocusEffect(
+    useCallback(() => {
+      void loadLocal();
+    }, [loadLocal])
+  );
+
   const onDownload = async (sectionId: string) => {
     if (busyId) return;
     setBusyId(sectionId);
@@ -72,7 +81,37 @@ export default function JournalScreen() {
   };
 
   return (
-    <Screen title="Trail Journal">
+    <Screen>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <Text style={{ flex: 1, fontSize: 24 * fontScale, fontWeight: "700", color: colors.text }}>
+          Trail Journal
+        </Text>
+        <Pressable
+          onPress={() => router.push("/section/new")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 4,
+            paddingHorizontal: 10,
+            paddingVertical: 7,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.accent,
+          }}
+        >
+          <Plus color={colors.accent} size={15} />
+          <Text style={{ color: colors.accent, fontSize: 13 * fontScale, fontWeight: "600" }}>
+            Add
+          </Text>
+        </Pressable>
+      </View>
+
       {offline ? (
         <View
           style={{
