@@ -283,6 +283,9 @@ export async function createSection(
     startMile: number;
     endMile: number;
     miles: number;
+    difficulty?: string;
+    startDate?: string;
+    endDate?: string;
     notes?: string;
     itinerary?: string;
     plannedCamps?: string[];
@@ -290,4 +293,67 @@ export async function createSection(
   }
 ): Promise<{ id: string }> {
   return apiFetch<{ id: string }>("/api/sections", { method: "POST", token, body: input });
+}
+
+// ── Trailheads (manual section entry) ─────────────────────────────────────────
+// GET /api/trails/trailheads is public trail data — no bearer token needed.
+
+export type WebTrailhead = {
+  id: number;
+  name: string;
+  type: "parking" | "gap" | "trailhead";
+  mile: number;
+};
+
+export async function fetchTrailheads(catalogKey: string): Promise<WebTrailhead[]> {
+  const { trailheads } = await apiFetch<{ trailheads: WebTrailhead[] }>(
+    `/api/trails/trailheads?catalogKey=${encodeURIComponent(catalogKey)}`
+  );
+  return trailheads;
+}
+
+// ── AI section generation (online, premium) ──────────────────────────────────
+// Each hits a bearer-enabled /api/sections/[id]/generate-* endpoint. The server
+// runs the model, persists to the section, and returns the generated content.
+
+/** The six pre-hike detail buckets returned as a bulleted string each. */
+export type SectionDetails = {
+  summits: string;
+  resupply: string;
+  water: string;
+  historical: string;
+  naturalHighlights: string;
+  planAround: string;
+  gearRecommendations?: string;
+  foodRecommendations?: string;
+};
+
+export async function generateSectionDetails(
+  token: string,
+  sectionId: string
+): Promise<{ details: SectionDetails }> {
+  return apiFetch<{ details: SectionDetails }>(
+    `/api/sections/${sectionId}/generate-details`,
+    { method: "POST", token }
+  );
+}
+
+export async function generateSectionGear(
+  token: string,
+  sectionId: string
+): Promise<{ gearRecommendations: string; foodRecommendations: string }> {
+  return apiFetch<{ gearRecommendations: string; foodRecommendations: string }>(
+    `/api/sections/${sectionId}/generate-gear`,
+    { method: "POST", token }
+  );
+}
+
+export async function generateSectionItinerary(
+  token: string,
+  sectionId: string
+): Promise<{ itinerary: string; plannedCamps: string[]; plannedCampMiles: (number | null)[] }> {
+  return apiFetch<{ itinerary: string; plannedCamps: string[]; plannedCampMiles: (number | null)[] }>(
+    `/api/sections/${sectionId}/generate-itinerary`,
+    { method: "POST", token }
+  );
 }

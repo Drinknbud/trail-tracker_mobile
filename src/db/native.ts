@@ -513,6 +513,19 @@ export const nativeStore: TripStore = {
     );
   },
 
+  async updateSectionAi(id, fields) {
+    const sets: string[] = [];
+    const vals: (string | number)[] = [];
+    if (fields.details !== undefined) { sets.push("details = ?"); vals.push(fields.details); }
+    if (fields.itinerary !== undefined) { sets.push("itinerary = ?"); vals.push(fields.itinerary); }
+    if (fields.plannedCamps !== undefined) { sets.push("planned_camps = ?"); vals.push(fields.plannedCamps); }
+    if (fields.plannedCampMiles !== undefined) { sets.push("planned_camp_miles = ?"); vals.push(fields.plannedCampMiles); }
+    if (sets.length === 0) return;
+    sets.push("updated_at = ?"); vals.push(new Date().toISOString());
+    vals.push(id);
+    getDb().runSync(`UPDATE sections SET ${sets.join(", ")} WHERE id = ?`, ...vals);
+  },
+
   async outboxEnqueue(entry) {
     getDb().runSync(
       `INSERT OR IGNORE INTO outbox (endpoint, method, payload_json, idempotency_key, created_at)

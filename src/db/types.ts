@@ -198,6 +198,20 @@ export interface TripStore {
   upsertNightLog(row: NightLogRow): Promise<void>;
   upsertDayLog(row: DayLogRow): Promise<void>;
   setSectionStatus(id: string, status: string): Promise<void>;
+  /**
+   * Persist AI-generated fields locally after an online generation call
+   * (/api/sections/[id]/generate-*), so the result survives a reload without
+   * waiting for the next full trip re-download. Only provided fields are written.
+   */
+  updateSectionAi(
+    id: string,
+    fields: {
+      details?: string;
+      itinerary?: string;
+      plannedCamps?: string;
+      plannedCampMiles?: string;
+    }
+  ): Promise<void>;
 
   // Briefing + elevation reads (M4, all offline)
   listBriefings(sectionId: string): Promise<BriefingRow[]>;

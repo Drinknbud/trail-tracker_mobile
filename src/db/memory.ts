@@ -178,6 +178,19 @@ export const memoryStore: TripStore = {
     if (s) sections.set(id, { ...s, status, updatedAt: new Date().toISOString() });
   },
 
+  async updateSectionAi(id, fields) {
+    const s = sections.get(id);
+    if (!s) return;
+    sections.set(id, {
+      ...s,
+      ...(fields.details !== undefined ? { details: fields.details } : {}),
+      ...(fields.itinerary !== undefined ? { itinerary: fields.itinerary } : {}),
+      ...(fields.plannedCamps !== undefined ? { plannedCamps: fields.plannedCamps } : {}),
+      ...(fields.plannedCampMiles !== undefined ? { plannedCampMiles: fields.plannedCampMiles } : {}),
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
   async outboxEnqueue(entry) {
     if (outbox.some((e) => e.idempotencyKey === entry.idempotencyKey)) return;
     outbox.push({
