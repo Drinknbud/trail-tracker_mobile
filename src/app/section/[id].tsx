@@ -257,6 +257,8 @@ export default function SectionDetailScreen() {
           sectionName={section.name}
           miles={section.miles}
           gpsDistMi={gpsDistMi}
+          trailMinElevFt={elevation.trailMinElevFt}
+          trailMaxElevFt={elevation.trailMaxElevFt}
         />
       ) : null}
 

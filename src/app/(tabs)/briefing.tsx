@@ -286,7 +286,11 @@ export default function BriefingScreen() {
           >
             Section elevation
           </Text>
-          <ElevationChart points={profile.points} />
+          <ElevationChart
+            points={profile.points}
+            trailMinElevFt={profile.trailMinElevFt}
+            trailMaxElevFt={profile.trailMaxElevFt}
+          />
         </Card>
       ) : null}
 

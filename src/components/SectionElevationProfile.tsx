@@ -64,6 +64,8 @@ function ElevSvg({
   pois,
   gpsDistMi,
   gradeColored = false,
+  trailMinElevFt,
+  trailMaxElevFt,
 }: {
   points: ElevPoint[];
   width: number;
@@ -71,6 +73,11 @@ function ElevSvg({
   pois?: ChartPoi[];
   gpsDistMi?: number | null;
   gradeColored?: boolean;
+  /** Trail-wide elevation extremes — fixes the y-axis so sections are
+   * comparable across the whole trail. Falls back to this section's own
+   * min/max when unavailable. */
+  trailMinElevFt?: number | null;
+  trailMaxElevFt?: number | null;
 }) {
   const { colors } = useTheme();
   if (points.length < 2 || width <= 0) return <View style={{ height }} />;
@@ -83,8 +90,8 @@ function ElevSvg({
   const chartH = height - padT - padB;
 
   const elevs = points.map((p) => p.elev);
-  const minElev = Math.min(...elevs);
-  const maxElev = Math.max(...elevs);
+  const minElev = trailMinElevFt ?? Math.min(...elevs);
+  const maxElev = trailMaxElevFt ?? Math.max(...elevs);
   const range = maxElev - minElev || 1;
   const maxDist = points[points.length - 1].dist || 1;
 
@@ -167,6 +174,8 @@ export function SectionElevationProfile({
   sectionName,
   miles,
   gpsDistMi,
+  trailMinElevFt,
+  trailMaxElevFt,
 }: {
   points: ElevPoint[];
   pois: PoiRow[];
@@ -174,6 +183,8 @@ export function SectionElevationProfile({
   sectionName: string;
   miles: number;
   gpsDistMi?: number | null;
+  trailMinElevFt?: number | null;
+  trailMaxElevFt?: number | null;
 }) {
   const { colors, fontScale } = useTheme();
   const [cardWidth, setCardWidth] = useState(0);
@@ -211,7 +222,15 @@ export function SectionElevationProfile({
         </Pressable>
         <Pressable onPress={() => setModalOpen(true)} onLayout={(e) => setCardWidth(e.nativeEvent.layout.width)}>
           <View pointerEvents="none">
-            <ElevSvg points={points} width={cardWidth} height={110} pois={chartPois} gpsDistMi={gpsDistMi} />
+            <ElevSvg
+              points={points}
+              width={cardWidth}
+              height={110}
+              pois={chartPois}
+              gpsDistMi={gpsDistMi}
+              trailMinElevFt={trailMinElevFt}
+              trailMaxElevFt={trailMaxElevFt}
+            />
           </View>
         </Pressable>
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
@@ -243,6 +262,8 @@ export function SectionElevationProfile({
         sectionName={sectionName}
         miles={miles}
         gpsDistMi={gpsDistMi}
+        trailMinElevFt={trailMinElevFt}
+        trailMaxElevFt={trailMaxElevFt}
       />
     </>
   );
@@ -258,6 +279,8 @@ function ElevationModal({
   sectionName,
   miles,
   gpsDistMi,
+  trailMinElevFt,
+  trailMaxElevFt,
 }: {
   visible: boolean;
   onClose: () => void;
@@ -266,6 +289,8 @@ function ElevationModal({
   sectionName: string;
   miles: number;
   gpsDistMi?: number | null;
+  trailMinElevFt?: number | null;
+  trailMaxElevFt?: number | null;
 }) {
   const { colors, fontScale } = useTheme();
   const insets = useSafeAreaInsets();
@@ -335,7 +360,16 @@ function ElevationModal({
           <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
             {/* Chart */}
             <View style={{ paddingHorizontal: 16 }} onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
-              <ElevSvg points={points} width={chartWidth} height={240} pois={visiblePois} gpsDistMi={gpsDistMi} gradeColored />
+              <ElevSvg
+                points={points}
+                width={chartWidth}
+                height={240}
+                pois={visiblePois}
+                gpsDistMi={gpsDistMi}
+                gradeColored
+                trailMinElevFt={trailMinElevFt}
+                trailMaxElevFt={trailMaxElevFt}
+              />
             </View>
 
             {gpsDistMi != null ? (

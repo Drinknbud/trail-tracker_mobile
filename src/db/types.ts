@@ -80,6 +80,10 @@ export type ElevationProfile = {
   coords: [number, number][];
   mapCoords: [number, number][];
   avgElevM: number;
+  /** Trail-wide elevation extremes (not this section's own min/max) — fixes
+   * the chart's y-axis so sections are comparable across the whole trail. */
+  trailMinElevFt: number | null;
+  trailMaxElevFt: number | null;
 };
 
 export type TripCounts = {

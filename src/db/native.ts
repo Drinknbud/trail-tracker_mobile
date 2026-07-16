@@ -9,9 +9,12 @@ import type {
   TripStore,
 } from "./types";
 
-// v2 added gps_sessions/gps_points; v3 photos_queue/trail_mail. All DDL is
-// CREATE IF NOT EXISTS, so upgrades are a re-run of the full DDL.
-const SCHEMA_VERSION = 3;
+// v2 added gps_sessions/gps_points; v3 photos_queue/trail_mail; v4 added
+// trail_min_elev_ft/trail_max_elev_ft to elevation_profiles. All DDL is
+// CREATE IF NOT EXISTS, so upgrades are a re-run of the full DDL; the two
+// v4 columns need an explicit ALTER for installs that already have the
+// table (see init()).
+const SCHEMA_VERSION = 4;
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS trails (
@@ -50,7 +53,8 @@ CREATE TABLE IF NOT EXISTS elevation_profiles (
   section_id TEXT PRIMARY KEY, point_count INTEGER NOT NULL,
   points_json TEXT NOT NULL, coords_json TEXT NOT NULL,
   map_coords_json TEXT NOT NULL, avg_elev_m REAL,
-  mid_lat REAL, mid_lon REAL
+  mid_lat REAL, mid_lon REAL,
+  trail_min_elev_ft INTEGER, trail_max_elev_ft INTEGER
 );
 CREATE TABLE IF NOT EXISTS trip_downloads (
   section_id TEXT PRIMARY KEY, downloaded_at TEXT NOT NULL,
@@ -171,6 +175,17 @@ export const nativeStore: TripStore = {
     db = openDatabaseSync("trailtracker.db");
     db.execSync("PRAGMA journal_mode = WAL;");
     db.execSync(DDL);
+    // v4: elevation_profiles predates trail_min/max_elev_ft — CREATE TABLE IF
+    // NOT EXISTS above won't add columns to an install that already has the
+    // table, so add them explicitly. Ignore the error on installs that
+    // already have them (fresh installs via DDL, or a second init() call).
+    for (const col of ["trail_min_elev_ft", "trail_max_elev_ft"]) {
+      try {
+        db.execSync(`ALTER TABLE elevation_profiles ADD COLUMN ${col} INTEGER;`);
+      } catch {
+        // already present
+      }
+    }
     db.execSync(`PRAGMA user_version = ${SCHEMA_VERSION};`);
   },
 
@@ -297,8 +312,8 @@ export const nativeStore: TripStore = {
       dbh.runSync("DELETE FROM elevation_profiles WHERE section_id = ?", section.id);
       if (elevationProfile) {
         dbh.runSync(
-          `INSERT INTO elevation_profiles (section_id, point_count, points_json, coords_json, map_coords_json, avg_elev_m, mid_lat, mid_lon)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO elevation_profiles (section_id, point_count, points_json, coords_json, map_coords_json, avg_elev_m, mid_lat, mid_lon, trail_min_elev_ft, trail_max_elev_ft)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           section.id,
           elevationProfile.points.length,
           JSON.stringify(elevationProfile.points),
@@ -306,7 +321,9 @@ export const nativeStore: TripStore = {
           JSON.stringify(elevationProfile.mapCoords),
           elevationProfile.avgElevM,
           sunrise?.midLat ?? null,
-          sunrise?.midLon ?? null
+          sunrise?.midLon ?? null,
+          elevationProfile.trailMinElevFt ?? null,
+          elevationProfile.trailMaxElevFt ?? null
         );
       }
 
@@ -568,6 +585,8 @@ export const nativeStore: TripStore = {
       avg_elev_m: number | null;
       mid_lat: number | null;
       mid_lon: number | null;
+      trail_min_elev_ft: number | null;
+      trail_max_elev_ft: number | null;
     }>("SELECT * FROM elevation_profiles WHERE section_id = ?", sectionId);
     if (!r) return null;
     return {
@@ -577,6 +596,8 @@ export const nativeStore: TripStore = {
       avgElevM: r.avg_elev_m ?? 0,
       midLat: r.mid_lat,
       midLon: r.mid_lon,
+      trailMinElevFt: r.trail_min_elev_ft,
+      trailMaxElevFt: r.trail_max_elev_ft,
     };
   },
 
