@@ -7,13 +7,15 @@ import {
   ImagePlus,
   Moon,
   Plus,
+  Share2,
   Sun,
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
 
 import { FormField } from "@/components/FormField";
 import { Card, Screen } from "@/components/Screen";
+import { SectionAiAssistant } from "@/components/SectionAiAssistant";
 import { SectionCelebration } from "@/components/SectionCelebration";
 import { SectionElevationProfile } from "@/components/SectionElevationProfile";
 import {
@@ -29,6 +31,7 @@ import { useAuth } from "@/lib/auth";
 import { projectGpsToDist } from "@/lib/elevation";
 import { enqueueWrite } from "@/lib/outbox";
 import { capturePhoto } from "@/lib/photos";
+import { exportSectionPdf, pdfExportAvailable } from "@/lib/sectionPdf";
 import { usePremium } from "@/lib/usePremium";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -79,6 +82,7 @@ export default function SectionDetailScreen() {
   const [photoNotice, setPhotoNotice] = useState<string | null>(null);
   const [elevation, setElevation] = useState<ElevationProfile | null>(null);
   const [gpsDistMi, setGpsDistMi] = useState<number | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -180,19 +184,51 @@ export default function SectionDetailScreen() {
     await load();
   };
 
+  const onSharePdf = async () => {
+    if (!section || exportingPdf) return;
+    if (!pdfExportAvailable()) {
+      Alert.alert("Not available here", "PDF export works on the iOS/Android app, not the web preview.");
+      return;
+    }
+    setExportingPdf(true);
+    try {
+      await exportSectionPdf(section, elevation, pois);
+    } catch {
+      Alert.alert("Export failed", "Couldn't generate the PDF. Try again.");
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   const statusColor = STATUS_COLORS[section.status] ?? colors.muted;
 
   return (
     <Screen>
-      <Pressable
-        onPress={() => router.back()}
-        style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 12 }}
-      >
-        <ArrowLeft color={colors.accent} size={20} />
-        <Text style={{ color: colors.accent, fontSize: 14 * fontScale, fontWeight: "600" }}>
-          Journal
-        </Text>
-      </Pressable>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+        <Pressable
+          onPress={() => router.back()}
+          style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}
+        >
+          <ArrowLeft color={colors.accent} size={20} />
+          <Text style={{ color: colors.accent, fontSize: 14 * fontScale, fontWeight: "600" }}>
+            Journal
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={onSharePdf}
+          disabled={exportingPdf}
+          style={{ flexDirection: "row", alignItems: "center", gap: 6, opacity: exportingPdf ? 0.5 : 1 }}
+        >
+          {exportingPdf ? (
+            <ActivityIndicator size="small" color={colors.accent} />
+          ) : (
+            <Share2 color={colors.accent} size={18} />
+          )}
+          <Text style={{ color: colors.accent, fontSize: 13 * fontScale, fontWeight: "600" }}>
+            {exportingPdf ? "Exporting…" : "Share PDF"}
+          </Text>
+        </Pressable>
+      </View>
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Text
@@ -261,6 +297,8 @@ export default function SectionDetailScreen() {
           trailMaxElevFt={elevation.trailMaxElevFt}
         />
       ) : null}
+
+      <SectionAiAssistant section={section} onUpdated={load} />
 
       {section.itinerary ? (
         <Card style={{ marginTop: 12 }}>
