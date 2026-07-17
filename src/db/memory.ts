@@ -178,6 +178,11 @@ export const memoryStore: TripStore = {
     if (s) sections.set(id, { ...s, status, updatedAt: new Date().toISOString() });
   },
 
+  async setSectionInJournal(id, inJournal) {
+    const s = sections.get(id);
+    if (s) sections.set(id, { ...s, inJournal, updatedAt: new Date().toISOString() });
+  },
+
   async updateSectionAi(id, fields) {
     const s = sections.get(id);
     if (!s) return;

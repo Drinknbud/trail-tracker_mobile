@@ -9,6 +9,8 @@ import {
   Plus,
   Share2,
   Sun,
+  Tent,
+  Undo2,
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
@@ -184,6 +186,17 @@ export default function SectionDetailScreen() {
     await load();
   };
 
+  const setInJournal = async (inJournal: boolean) => {
+    await tripStore.setSectionInJournal(section.id, inJournal);
+    await enqueueWrite(
+      `/api/mobile/sections/${section.id}/journal`,
+      { inJournal },
+      `journal-${section.id}-${inJournal}`,
+      token
+    );
+    await load();
+  };
+
   const onSharePdf = async () => {
     if (!section || exportingPdf) return;
     if (!pdfExportAvailable()) {
@@ -281,6 +294,46 @@ export default function SectionDetailScreen() {
           <CheckCircle2 color="#FFFFFF" size={18} />
           <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 14 * fontScale }}>
             Mark Complete
+          </Text>
+        </Pressable>
+      ) : null}
+
+      {section.status === "planned" && !section.inJournal ? (
+        <Pressable
+          onPress={() => setInJournal(true)}
+          style={{
+            backgroundColor: STATUS_COLORS.planned,
+            borderRadius: 8,
+            paddingVertical: 12,
+            alignItems: "center",
+            marginTop: 8,
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
+          }}
+        >
+          <Tent color="#FFFFFF" size={18} />
+          <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 14 * fontScale }}>
+            Ready to Hike
+          </Text>
+        </Pressable>
+      ) : null}
+
+      {section.status === "planned" && section.inJournal ? (
+        <Pressable
+          onPress={() => setInJournal(false)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            marginTop: 8,
+            paddingVertical: 6,
+          }}
+        >
+          <Undo2 color={colors.muted} size={14} />
+          <Text style={{ color: colors.muted, fontSize: 12 * fontScale, fontWeight: "600" }}>
+            Back to Planning
           </Text>
         </Pressable>
       ) : null}

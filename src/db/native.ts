@@ -513,6 +513,13 @@ export const nativeStore: TripStore = {
     );
   },
 
+  async setSectionInJournal(id, inJournal) {
+    getDb().runSync(
+      "UPDATE sections SET in_journal = ?, updated_at = ? WHERE id = ?",
+      inJournal ? 1 : 0, new Date().toISOString(), id
+    );
+  },
+
   async updateSectionAi(id, fields) {
     const sets: string[] = [];
     const vals: (string | number)[] = [];

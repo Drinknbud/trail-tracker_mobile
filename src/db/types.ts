@@ -198,6 +198,7 @@ export interface TripStore {
   upsertNightLog(row: NightLogRow): Promise<void>;
   upsertDayLog(row: DayLogRow): Promise<void>;
   setSectionStatus(id: string, status: string): Promise<void>;
+  setSectionInJournal(id: string, inJournal: boolean): Promise<void>;
   /**
    * Persist AI-generated fields locally after an online generation call
    * (/api/sections/[id]/generate-*), so the result survives a reload without

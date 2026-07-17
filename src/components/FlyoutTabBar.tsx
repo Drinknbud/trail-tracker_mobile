@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import {
   BookOpen,
-  Bot,
   Camera,
   ChevronUp,
   Database,
@@ -18,7 +17,6 @@ import {
   Tent,
   Trophy,
   Users,
-  UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -38,7 +36,7 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-type CategoryKey = "trail" | "planning" | "community";
+type CategoryKey = "trail" | "community";
 
 interface FlyoutItem {
   icon: LucideIcon;
@@ -56,12 +54,8 @@ const FLYOUTS: Record<CategoryKey, FlyoutItem[]> = {
     { icon: Camera, label: "Photos", route: "/photos" },
     { icon: Trophy, label: "Badges", route: "/accomplishments" },
     { icon: Mail, label: "Mail", route: "/trail-mail" },
-    { icon: Tent, label: "On Trail", onTrailToggle: true },
-  ],
-  planning: [
-    { icon: Bot, label: "Scout", route: "/scout" },
     { icon: Database, label: "Trip Status", route: "/trip-status" },
-    { icon: UtensilsCrossed, label: "Meals", note: "Phase 4" },
+    { icon: Tent, label: "On Trail", onTrailToggle: true },
   ],
   community: [
     { icon: Users, label: "Tribes", note: "Phase 3" },
@@ -76,7 +70,7 @@ const FLYOUTS: Record<CategoryKey, FlyoutItem[]> = {
 const CATEGORY_OF_ROUTE: Record<string, CategoryKey> = {
   journal: "trail",
   map: "trail",
-  scout: "planning",
+  "trip-status": "trail",
 };
 
 interface TabBarState {
@@ -233,13 +227,6 @@ export function FlyoutTabBar({ state }: { state: TabBarState }) {
             caret
             active={expanded === "trail" || (!expanded && CATEGORY_OF_ROUTE[currentRoute] === "trail")}
             onPress={() => toggleCategory("trail")}
-          />
-          <BarItem
-            icon={Bot}
-            label="Planning"
-            caret
-            active={expanded === "planning" || (!expanded && CATEGORY_OF_ROUTE[currentRoute] === "planning")}
-            onPress={() => toggleCategory("planning")}
           />
           <BarItem
             icon={Users}

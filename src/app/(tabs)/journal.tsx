@@ -3,11 +3,13 @@ import { CheckCircle2, CloudDownload, Plus, WifiOff } from "lucide-react-native"
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
+import { PickerModal } from "@/components/PickerModal";
 import { Card, Screen } from "@/components/Screen";
 import { tripStore, type SectionRow, type TripDownloadRow } from "@/db";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { downloadTrip } from "@/lib/trip-download";
+import { usePremium } from "@/lib/usePremium";
 import { useTheme } from "@/theme/ThemeContext";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -23,12 +25,14 @@ type SectionsResponse = {
 export default function JournalScreen() {
   const { colors, fontScale } = useTheme();
   const { token } = useAuth();
+  const { isPremium } = usePremium();
 
   const [sections, setSections] = useState<SectionRow[]>([]);
   const [downloads, setDownloads] = useState<Map<string, TripDownloadRow>>(new Map());
   const [offline, setOffline] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rowErrors, setRowErrors] = useState<Map<string, string>>(new Map());
+  const [showAddMenu, setShowAddMenu] = useState(false);
 
   const loadLocal = useCallback(async () => {
     setSections(await tripStore.listSections());
@@ -80,6 +84,102 @@ export default function JournalScreen() {
     }
   };
 
+  // Still-drafting vs. ready-to-hike — mirrors web's app/log/page.tsx filter
+  // (mobile has no sharedBy field, so that clause is dropped).
+  const planningSections = sections.filter((s) => s.status === "planned" && !s.inJournal);
+  const journalSections = sections.filter(
+    (s) => s.status === "completed" || (s.status === "planned" && s.inJournal)
+  );
+
+  const renderSectionCard = (s: SectionRow) => {
+    const download = downloads.get(s.id);
+    const busy = busyId === s.id;
+    const rowError = rowErrors.get(s.id);
+    return (
+      <Card key={s.id} style={{ marginBottom: 10, paddingVertical: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Pressable
+            onPress={() => router.push(`/section/${s.id}`)}
+            style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+          >
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: STATUS_COLORS[s.status] ?? colors.muted,
+                marginRight: 10,
+              }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: 15 * fontScale, fontWeight: "600", color: colors.text }}
+                numberOfLines={1}
+              >
+                {s.name}
+              </Text>
+              <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 2 }}>
+                {s.miles.toFixed(1)} mi
+                {s.startDate ? ` · ${s.startDate.slice(0, 10)}` : ""}
+                {s.difficulty ? ` · ${s.difficulty}` : ""}
+              </Text>
+            </View>
+          </Pressable>
+          {download?.verified ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginRight: 8 }}>
+              <CheckCircle2 color={colors.completed} size={16} />
+              <Text style={{ fontSize: 11 * fontScale, color: colors.completed }}>Offline</Text>
+            </View>
+          ) : null}
+          <Pressable
+            onPress={() => onDownload(s.id)}
+            disabled={busy}
+            style={{
+              backgroundColor: colors.accent,
+              borderRadius: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              opacity: busy ? 0.6 : 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            {busy ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <CloudDownload color="#FFFFFF" size={16} />
+            )}
+            <Text style={{ color: "#FFFFFF", fontSize: 12 * fontScale, fontWeight: "600" }}>
+              {download?.verified ? "Update" : "Download"}
+            </Text>
+          </Pressable>
+        </View>
+        {rowError ? (
+          <Text style={{ color: colors.destructiveRed, fontSize: 12 * fontScale, marginTop: 8 }}>
+            {rowError}
+          </Text>
+        ) : null}
+      </Card>
+    );
+  };
+
+  const GroupLabel = ({ children }: { children: string }) => (
+    <Text
+      style={{
+        fontSize: 11 * fontScale,
+        fontWeight: "700",
+        color: colors.muted,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        marginBottom: 8,
+        marginTop: 4,
+      }}
+    >
+      {children}
+    </Text>
+  );
+
   return (
     <Screen>
       <View
@@ -93,7 +193,7 @@ export default function JournalScreen() {
           Trail Journal
         </Text>
         <Pressable
-          onPress={() => router.push("/section/new")}
+          onPress={() => (isPremium ? setShowAddMenu(true) : router.push("/section/new"))}
           style={{
             flexDirection: "row",
             alignItems: "center",
@@ -111,6 +211,18 @@ export default function JournalScreen() {
           </Text>
         </Pressable>
       </View>
+
+      <PickerModal
+        visible={showAddMenu}
+        title="Add Section"
+        options={[
+          { value: "scout", label: "Plan with AI (Scout)" },
+          { value: "manual", label: "Enter Manually" },
+        ]}
+        value={null}
+        onSelect={(v) => router.push(v === "scout" ? "/scout" : "/section/new")}
+        onClose={() => setShowAddMenu(false)}
+      />
 
       {offline ? (
         <View
@@ -146,82 +258,20 @@ export default function JournalScreen() {
           </Text>
         </Card>
       ) : (
-        sections.map((s) => {
-          const download = downloads.get(s.id);
-          const busy = busyId === s.id;
-          const rowError = rowErrors.get(s.id);
-          return (
-            <Card key={s.id} style={{ marginBottom: 10, paddingVertical: 12 }}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Pressable
-                  onPress={() => router.push(`/section/${s.id}`)}
-                  style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
-                >
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 5,
-                      backgroundColor: STATUS_COLORS[s.status] ?? colors.muted,
-                      marginRight: 10,
-                    }}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{ fontSize: 15 * fontScale, fontWeight: "600", color: colors.text }}
-                      numberOfLines={1}
-                    >
-                      {s.name}
-                    </Text>
-                    <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 2 }}>
-                      {s.miles.toFixed(1)} mi
-                      {s.startDate ? ` · ${s.startDate.slice(0, 10)}` : ""}
-                      {s.difficulty ? ` · ${s.difficulty}` : ""}
-                    </Text>
-                  </View>
-                </Pressable>
-                {download?.verified ? (
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginRight: 8 }}>
-                    <CheckCircle2 color={colors.completed} size={16} />
-                    <Text style={{ fontSize: 11 * fontScale, color: colors.completed }}>
-                      Offline
-                    </Text>
-                  </View>
-                ) : null}
-                <Pressable
-                  onPress={() => onDownload(s.id)}
-                  disabled={busy}
-                  style={{
-                    backgroundColor: colors.accent,
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    opacity: busy ? 0.6 : 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                >
-                  {busy ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
-                  ) : (
-                    <CloudDownload color="#FFFFFF" size={16} />
-                  )}
-                  <Text style={{ color: "#FFFFFF", fontSize: 12 * fontScale, fontWeight: "600" }}>
-                    {download?.verified ? "Update" : "Download"}
-                  </Text>
-                </Pressable>
-              </View>
-              {rowError ? (
-                <Text
-                  style={{ color: colors.destructiveRed, fontSize: 12 * fontScale, marginTop: 8 }}
-                >
-                  {rowError}
-                </Text>
-              ) : null}
-            </Card>
-          );
-        })
+        <>
+          {planningSections.length > 0 ? (
+            <View style={{ marginBottom: 16 }}>
+              <GroupLabel>Planning</GroupLabel>
+              {planningSections.map(renderSectionCard)}
+            </View>
+          ) : null}
+          {journalSections.length > 0 ? (
+            <View>
+              <GroupLabel>Trail Journal</GroupLabel>
+              {journalSections.map(renderSectionCard)}
+            </View>
+          ) : null}
+        </>
       )}
     </Screen>
   );

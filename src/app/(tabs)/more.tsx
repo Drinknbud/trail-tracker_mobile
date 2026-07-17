@@ -1,6 +1,5 @@
 import { router, useFocusEffect } from "expo-router";
 import {
-  Bot,
   Camera,
   Database,
   HelpCircle,
@@ -15,7 +14,6 @@ import {
   Tent,
   Trophy,
   Users,
-  UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react-native";
 import { useCallback, useState } from "react";
@@ -225,7 +223,7 @@ export default function MoreScreen() {
             <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 1 }}>
               {onTrail
                 ? "Field setup: Briefing in the tab bar, auto-sync on signal"
-                : "Home setup: Scout planner in the tab bar"}
+                : "Home setup: full navigation with Trail & Community categories"}
             </Text>
           </View>
           <Switch
@@ -243,12 +241,6 @@ export default function MoreScreen() {
         <Tile icon={Trophy} label="Badges" onPress={() => router.push("/accomplishments")} />
         <Tile icon={Mail} label="Trail Mail" badge={mailUnread} onPress={() => router.push("/trail-mail")} />
         <Tile icon={Database} label="Trip Status" onPress={() => router.push("/trip-status")} />
-      </TileGrid>
-
-      <GroupLabel>Trip Planning</GroupLabel>
-      <TileGrid>
-        <Tile icon={Bot} label="Scout Planner" onPress={() => router.push("/scout")} />
-        <Tile icon={UtensilsCrossed} label="Meals" note="Phase 4" />
       </TileGrid>
 
       <GroupLabel>Community</GroupLabel>
