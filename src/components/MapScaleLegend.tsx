@@ -60,8 +60,22 @@ function formatTick(value: number, unit: number): string {
   return value.toFixed(unit < 0.1 ? 2 : 1);
 }
 
+// Meters per SCREEN pixel at a given zoom/latitude.
+//
+// The familiar 156543.03392 * cos(lat) / 2^zoom constant is meters-per-pixel
+// for a 256 px tile scheme (Leaflet/XYZ raster convention). MapLibre — both GL
+// JS and Native — defines zoom against 512 px tiles, so its world is twice as
+// wide in pixels at the same zoom number and there are HALF as many meters per
+// pixel. Using the 256 px form here made the bar claim twice the distance it
+// actually spanned: a bar labeled "1 mi" measured half a mile on screen, so
+// mile markers (correctly placed) looked ~2x too far apart for the scale — the
+// long-standing "markers and scale bar disagree" bug. Hence 2^(zoom + 1).
+function metersPerScreenPixel(zoom: number, latitude: number): number {
+  return (156543.03392 * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom + 1);
+}
+
 function computeScale(zoom: number, latitude: number, targetBarPx: number) {
-  const metersPerPixel = (156543.03392 * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom);
+  const metersPerPixel = metersPerScreenPixel(zoom, latitude);
   const maxKm = (targetBarPx * metersPerPixel) / 1000;
   const niceTotalKm = niceNumberFloor(maxKm);
   const barPx = (niceTotalKm * 1000) / metersPerPixel;
