@@ -37,6 +37,7 @@ import { ACCENT_PRESETS, CARRIER_OPTIONS, carrierLabel } from "@/lib/carriers";
 import { GPS_MODES, fromWebPowerMode, toWebPowerMode, type GpsMode } from "@/lib/gps";
 import { useAuth } from "@/lib/auth";
 import { useOnTrail } from "@/lib/onTrail";
+import { useUnits } from "@/lib/units-context";
 import { directionsFor, VISIBLE_TRAILS } from "@/lib/trailCatalog";
 import {
   activateTrail,
@@ -56,7 +57,7 @@ import {
   type WebUser,
   type WebUserUpdate,
 } from "@/lib/webApi";
-import { apiFetch } from "@/lib/api";
+import { ApiError, apiFetch } from "@/lib/api";
 import { getBriefingHour, setBriefingHour } from "@/lib/prefs";
 import { DEFAULT_ACCENT } from "@/theme/colors";
 import { useTheme, type TextSize, type ThemeMode } from "@/theme/ThemeContext";
@@ -87,34 +88,55 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
-function SaveButton({ onPress, saving, saved }: { onPress: () => void; saving: boolean; saved: boolean }) {
+function SaveButton({
+  onPress,
+  saving,
+  saved,
+  error,
+}: {
+  onPress: () => void;
+  saving: boolean;
+  saved: boolean;
+  /** Shown above the button when the last save attempt failed — without this,
+   * a failed save (bad connection, wrong API host, server rejection, etc.)
+   * looked identical to a successful one: the button just goes back to
+   * "Save" with zero indication anything went wrong. */
+  error?: string | null;
+}) {
   const { colors, fontScale } = useTheme();
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={saving}
-      style={{
-        backgroundColor: colors.accent,
-        borderRadius: 8,
-        paddingVertical: 14,
-        alignItems: "center",
-        marginTop: 4,
-        marginBottom: 24,
-        flexDirection: "row",
-        justifyContent: "center",
-        gap: 8,
-        opacity: saving ? 0.6 : 1,
-      }}
-    >
-      {saving ? (
-        <ActivityIndicator color="#FFFFFF" size="small" />
-      ) : saved ? (
-        <Check color="#FFFFFF" size={16} />
+    <>
+      {error ? (
+        <Text style={{ fontSize: 13 * fontScale, color: colors.offlineAmber, marginBottom: 8 }}>
+          {error}
+        </Text>
       ) : null}
-      <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 * fontScale }}>
-        {saved ? "Saved!" : saving ? "Saving…" : "Save"}
-      </Text>
-    </Pressable>
+      <Pressable
+        onPress={onPress}
+        disabled={saving}
+        style={{
+          backgroundColor: colors.accent,
+          borderRadius: 8,
+          paddingVertical: 14,
+          alignItems: "center",
+          marginTop: 4,
+          marginBottom: 24,
+          flexDirection: "row",
+          justifyContent: "center",
+          gap: 8,
+          opacity: saving ? 0.6 : 1,
+        }}
+      >
+        {saving ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : saved ? (
+          <Check color="#FFFFFF" size={16} />
+        ) : null}
+        <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 * fontScale }}>
+          {saved ? "Saved!" : saving ? "Saving…" : "Save"}
+        </Text>
+      </Pressable>
+    </>
   );
 }
 
@@ -317,6 +339,7 @@ export default function SettingsScreen() {
 function MyTrailsSection() {
   const { colors, fontScale } = useTheme();
   const { token } = useAuth();
+  const { fmtMiles } = useUnits();
   const [trails, setTrails] = useState<WebTrail[] | null>(null);
   const [showCatalog, setShowCatalog] = useState(false);
   const [search, setSearch] = useState("");
@@ -506,7 +529,7 @@ function MyTrailsSection() {
                       {c.name}
                     </Text>
                     <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-                      {c.totalMiles} mi · {c.states.join(", ")}
+                      {fmtMiles(c.totalMiles)} · {c.states.join(", ")}
                     </Text>
                   </View>
                   <Pressable
@@ -587,7 +610,7 @@ function MyTrailsSection() {
               </View>
 
               <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginBottom: 6 }}>
-                {t.startPoint} → {t.endPoint} · {t.totalMiles} mi
+                {t.startPoint} → {t.endPoint} · {fmtMiles(t.totalMiles)}
               </Text>
 
               <View style={{ height: 6, borderRadius: 999, backgroundColor: colors.border, marginBottom: 4, overflow: "hidden" }}>
@@ -595,7 +618,7 @@ function MyTrailsSection() {
               </View>
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                 <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-                  {t.completedMiles} / {t.totalMiles} mi ({pct}%)
+                  {fmtMiles(t.completedMiles)} / {fmtMiles(t.totalMiles)} ({pct}%)
                 </Text>
                 <Pressable onPress={() => onToggleComplete(t.id)} disabled={busy}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
@@ -664,6 +687,7 @@ function TrailModeTab({
   const [briefingHour, setBriefingHourState] = useState(7);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     void getBriefingHour().then(setBriefingHourState);
@@ -672,6 +696,7 @@ function TrailModeTab({
   const save = async () => {
     if (!token) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await setBriefingHour(briefingHour);
       const updated = await updateWebUser(token, {
@@ -686,8 +711,10 @@ function TrailModeTab({
       applyServerValue(onTrailMode);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch {
-      // Non-fatal — form state stays editable
+    } catch (err) {
+      // Form state stays editable — but the user needs to actually see this
+      // failed, or a lost connection looks identical to a successful save.
+      setSaveError(err instanceof ApiError ? err.message : "Couldn't save — check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -787,7 +814,7 @@ function TrailModeTab({
         </Pressable>
       </Card>
 
-      <SaveButton onPress={save} saving={saving} saved={saved} />
+      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} />
     </View>
   );
 }
@@ -829,10 +856,12 @@ function ProfileTab({
   const [heroPosition, setHeroPosition] = useState(user.heroImagePosition ?? "50% 50%");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const save = async () => {
     if (!token) return;
     setSaving(true);
+    setSaveError(null);
     try {
       const updated = await updateWebUser(token, {
         name,
@@ -849,8 +878,11 @@ function ProfileTab({
       setUser(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch {
-      // Non-fatal
+    } catch (err) {
+      // The carrier field (and everything else on this tab) needs visible
+      // failure feedback — silently doing nothing here is exactly what made
+      // a failed save look identical to "the app just isn't saving my choice."
+      setSaveError(err instanceof ApiError ? err.message : "Couldn't save — check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -1087,7 +1119,7 @@ function ProfileTab({
         </View>
       </Card>
 
-      <SaveButton onPress={save} saving={saving} saved={saved} />
+      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} />
 
       <PickerModal
         visible={carrierPickerOpen}
@@ -1114,6 +1146,7 @@ function AppearanceTab({
 }) {
   const { colors, fontScale, mode, setMode, textSize, setTextSize, setAccentColor } = useTheme();
   const { token } = useAuth();
+  const { applyPrefs } = useUnits();
   const isPremium = user.subscriptionTier === "premium";
   const [distanceUnit, setDistanceUnit] = useState(user.distanceUnit);
   const [tempUnit, setTempUnit] = useState(user.tempUnit);
@@ -1123,6 +1156,7 @@ function AppearanceTab({
   const [accentHex, setAccentHex] = useState(user.accentColor ?? DEFAULT_ACCENT);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const applyAccent = (hex: string) => {
     setAccentHex(hex);
@@ -1132,6 +1166,7 @@ function AppearanceTab({
   const save = async () => {
     if (!token) return;
     setSaving(true);
+    setSaveError(null);
     try {
       const updated = await updateWebUser(token, {
         distanceUnit,
@@ -1142,10 +1177,13 @@ function AppearanceTab({
         accentColor: accentHex,
       });
       setUser(updated);
+      // Push the saved prefs into the app-wide units context so every screen
+      // reformats immediately without waiting for a refetch.
+      applyPrefs({ distanceUnit, tempUnit, weightUnit, timeFormat, dateFormat });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch {
-      // Non-fatal
+    } catch (err) {
+      setSaveError(err instanceof ApiError ? err.message : "Couldn't save — check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -1303,7 +1341,7 @@ function AppearanceTab({
         />
       </Card>
 
-      <SaveButton onPress={save} saving={saving} saved={saved} />
+      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} />
     </View>
   );
 }
