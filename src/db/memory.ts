@@ -196,6 +196,27 @@ export const memoryStore: TripStore = {
     });
   },
 
+  async updateSectionFields(id, fields) {
+    const s = sections.get(id);
+    const updatedAt = new Date().toISOString();
+    if (s) {
+      sections.set(id, {
+        ...s,
+        ...(fields.name !== undefined ? { name: fields.name } : {}),
+        ...(fields.status !== undefined ? { status: fields.status } : {}),
+        ...(fields.startMile !== undefined ? { startMile: fields.startMile } : {}),
+        ...(fields.endMile !== undefined ? { endMile: fields.endMile } : {}),
+        ...(fields.startDate !== undefined ? { startDate: fields.startDate } : {}),
+        ...(fields.endDate !== undefined ? { endDate: fields.endDate } : {}),
+        ...(fields.miles !== undefined ? { miles: fields.miles } : {}),
+        ...(fields.difficulty !== undefined ? { difficulty: fields.difficulty } : {}),
+        ...(fields.notes !== undefined ? { notes: fields.notes } : {}),
+        updatedAt,
+      });
+    }
+    return updatedAt;
+  },
+
   async outboxEnqueue(entry) {
     if (outbox.some((e) => e.idempotencyKey === entry.idempotencyKey)) return;
     outbox.push({

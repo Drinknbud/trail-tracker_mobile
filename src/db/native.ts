@@ -533,6 +533,27 @@ export const nativeStore: TripStore = {
     getDb().runSync(`UPDATE sections SET ${sets.join(", ")} WHERE id = ?`, ...vals);
   },
 
+  async updateSectionFields(id, fields) {
+    const sets: string[] = [];
+    const vals: (string | number | null)[] = [];
+    if (fields.name !== undefined) { sets.push("name = ?"); vals.push(fields.name); }
+    if (fields.status !== undefined) { sets.push("status = ?"); vals.push(fields.status); }
+    if (fields.startMile !== undefined) { sets.push("start_mile = ?"); vals.push(fields.startMile); }
+    if (fields.endMile !== undefined) { sets.push("end_mile = ?"); vals.push(fields.endMile); }
+    if (fields.startDate !== undefined) { sets.push("start_date = ?"); vals.push(fields.startDate); }
+    if (fields.endDate !== undefined) { sets.push("end_date = ?"); vals.push(fields.endDate); }
+    if (fields.miles !== undefined) { sets.push("miles = ?"); vals.push(fields.miles); }
+    if (fields.difficulty !== undefined) { sets.push("difficulty = ?"); vals.push(fields.difficulty); }
+    if (fields.notes !== undefined) { sets.push("notes = ?"); vals.push(fields.notes); }
+    const updatedAt = new Date().toISOString();
+    sets.push("updated_at = ?"); vals.push(updatedAt);
+    vals.push(id);
+    if (sets.length > 1) {
+      getDb().runSync(`UPDATE sections SET ${sets.join(", ")} WHERE id = ?`, ...vals);
+    }
+    return updatedAt;
+  },
+
   async outboxEnqueue(entry) {
     getDb().runSync(
       `INSERT OR IGNORE INTO outbox (endpoint, method, payload_json, idempotency_key, created_at)

@@ -12,6 +12,7 @@ import {
   computeUpsDowns,
   type ElevPoint,
 } from "@/lib/elevation";
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
 
 // Elevation profile for a section — a tappable mini card and a full-screen
@@ -187,6 +188,7 @@ export function SectionElevationProfile({
   trailMaxElevFt?: number | null;
 }) {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtElev } = useUnits();
   const [cardWidth, setCardWidth] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -235,20 +237,20 @@ export function SectionElevationProfile({
         </Pressable>
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
           <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-            min {Math.round(minElev).toLocaleString()} ft
+            min {fmtElev(minElev)}
           </Text>
           <Text style={{ fontSize: 11 * fontScale, color: colors.trailLight, fontWeight: "600" }}>
-            ↑ {Math.round(ascent).toLocaleString()} ft
+            ↑ {fmtElev(ascent)}
           </Text>
           <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-            max {Math.round(maxElev).toLocaleString()} ft
+            max {fmtElev(maxElev)}
           </Text>
         </View>
         {gpsDistMi != null ? (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6 }}>
             <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: "#3B82F6", borderWidth: 1.5, borderColor: "#FFFFFF" }} />
             <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-              You&apos;re at mile {(gpsDistMi).toFixed(1)} of {miles.toFixed(1)}
+              You&apos;re at {fmtMiles(gpsDistMi)} of {fmtMiles(miles)}
             </Text>
           </View>
         ) : null}
@@ -293,6 +295,7 @@ function ElevationModal({
   trailMaxElevFt?: number | null;
 }) {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtElev } = useUnits();
   const insets = useSafeAreaInsets();
   const [chartWidth, setChartWidth] = useState(0);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
@@ -334,15 +337,15 @@ function ElevationModal({
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 16 * fontScale, fontWeight: "700", color: colors.text }}>{sectionName}</Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 3 }}>
-                <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>{miles.toFixed(1)} mi</Text>
+                <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>{fmtMiles(miles)}</Text>
                 {ascent > 10 ? (
                   <Text style={{ fontSize: 12 * fontScale, color: colors.trailLight, fontWeight: "600" }}>
-                    ↑ {Math.round(ascent).toLocaleString()} ft
+                    ↑ {fmtElev(ascent)}
                   </Text>
                 ) : null}
                 {descent > 10 ? (
                   <Text style={{ fontSize: 12 * fontScale, color: colors.destructiveRed, fontWeight: "600" }}>
-                    ↓ {Math.round(descent).toLocaleString()} ft
+                    ↓ {fmtElev(descent)}
                   </Text>
                 ) : null}
                 {ups > 0 ? (
@@ -376,7 +379,7 @@ function ElevationModal({
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, marginTop: 8 }}>
                 <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: "#3B82F6", borderWidth: 1.5, borderColor: "#FFFFFF" }} />
                 <Text style={{ fontSize: 12 * fontScale, color: colors.text }}>
-                  Your position — mile {gpsDistMi.toFixed(1)} of {miles.toFixed(1)}
+                  Your position — {fmtMiles(gpsDistMi)} of {fmtMiles(miles)}
                 </Text>
               </View>
             ) : null}
@@ -434,7 +437,7 @@ function ElevationModal({
                     return (
                       <View key={key} style={{ width: `${pct}%`, backgroundColor: hex, opacity: 0.88, alignItems: "center", justifyContent: "center" }}>
                         {pct > 12 ? (
-                          <Text style={{ color: "#FFFFFF", fontSize: 10 * fontScale, fontWeight: "700" }}>{mi.toFixed(1)}</Text>
+                          <Text style={{ color: "#FFFFFF", fontSize: 10 * fontScale, fontWeight: "700" }}>{fmtMiles(mi)}</Text>
                         ) : null}
                         <Text style={{ position: "absolute", opacity: 0 }}>{label}</Text>
                       </View>

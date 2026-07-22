@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 import Svg, { Path, Polyline } from "react-native-svg";
 
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
 
 export function ElevationChart({
@@ -18,6 +19,7 @@ export function ElevationChart({
   trailMaxElevFt?: number | null;
 }) {
   const { colors, fontScale } = useTheme();
+  const { fmtElev } = useUnits();
   const [width, setWidth] = useState(0);
 
   if (points.length < 2) return null;
@@ -61,13 +63,13 @@ export function ElevationChart({
       )}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
         <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-          min {min.toLocaleString()} ft
+          min {fmtElev(min)}
         </Text>
         <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-          +{Math.round(gain).toLocaleString()} ft gain
+          +{fmtElev(gain)} gain
         </Text>
         <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-          max {max.toLocaleString()} ft
+          max {fmtElev(max)}
         </Text>
       </View>
     </View>

@@ -213,6 +213,25 @@ export interface TripStore {
       plannedCampMiles?: string;
     }
   ): Promise<void>;
+  /** Targeted metadata edit (name/status/miles/dates/difficulty/notes) —
+   * separate from upsertSections, which deliberately preserves these fields
+   * when syncing the list endpoint's response (see native.ts upsertSections
+   * comment). Returns the new updatedAt so the caller can send it with the
+   * outbox write for the server's LWW check. */
+  updateSectionFields(
+    id: string,
+    fields: {
+      name?: string;
+      status?: string;
+      startMile?: number | null;
+      endMile?: number | null;
+      startDate?: string | null;
+      endDate?: string | null;
+      miles?: number;
+      difficulty?: string | null;
+      notes?: string | null;
+    }
+  ): Promise<string>;
 
   // Briefing + elevation reads (M4, all offline)
   listBriefings(sectionId: string): Promise<BriefingRow[]>;
