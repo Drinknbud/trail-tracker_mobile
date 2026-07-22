@@ -1,3 +1,4 @@
+import * as Crypto from "expo-crypto";
 import { router } from "expo-router";
 import {
   ArrowUp,
@@ -31,21 +32,17 @@ import { ApiError } from "@/lib/api";
 import { usePremium } from "@/lib/usePremium";
 import {
   createSection,
-  fetchWebUser,
   scoutPlan,
   type CanonicalPlan,
   type PlanDay,
   type ScoutTurn,
 } from "@/lib/webApi";
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
 
 // Plan-first Scout: the screen IS the current plan. Each revision replaces it
 // in place — no chat transcript, no superseded tables. All numbers shown come
 // from the server-validated canonical plan, never from model prose.
-
-function fmtMiles(mi: number, unit: string): string {
-  return unit === "km" ? `${(mi * 1.60934).toFixed(1)} km` : `${mi.toFixed(1)} mi`;
-}
 
 function stopIcon(kind: PlanDay["to"]["kind"]) {
   switch (kind) {
@@ -74,6 +71,7 @@ function planToItinerary(plan: CanonicalPlan): string {
 
 export default function ScoutScreen() {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtMileMarker } = useUnits();
   const insets = useSafeAreaInsets();
   const { token } = useAuth();
   const { isPremium, isLoading: premiumLoading } = usePremium();
@@ -86,14 +84,6 @@ export default function ScoutScreen() {
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
   const [accepted, setAccepted] = useState(false);
-  const [unit, setUnit] = useState("mi");
-
-  useEffect(() => {
-    if (!token) return;
-    fetchWebUser(token)
-      .then((u) => setUnit(u.distanceUnit === "km" ? "km" : "mi"))
-      .catch(() => {}); // unit stays "mi" — display-only preference
-  }, [token]);
 
   const send = useCallback(async () => {
     const message = input.trim();
@@ -129,6 +119,7 @@ export default function ScoutScreen() {
     setAccepting(true);
     try {
       await createSection(token, {
+        id: `sec_${Crypto.randomUUID()}`,
         name: plan.name,
         status: "planned",
         startMile: Math.min(plan.start.mile, plan.end.mile),
@@ -255,7 +246,7 @@ export default function ScoutScreen() {
                   </View>
                 </View>
                 <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 3 }}>
-                  {fmtMiles(plan.totalMiles, unit)} over {plan.days.length} day{plan.days.length !== 1 ? "s" : ""} · mi {plan.start.mile} → {plan.end.mile}
+                  {fmtMiles(plan.totalMiles)} over {plan.days.length} day{plan.days.length !== 1 ? "s" : ""} · {fmtMileMarker(plan.start.mile)} → {fmtMileMarker(plan.end.mile)}
                 </Text>
               </View>
 
@@ -296,7 +287,7 @@ export default function ScoutScreen() {
                       ))}
                     </View>
                     <Text style={{ fontSize: 14 * fontScale, fontWeight: "700", color: colors.text }}>
-                      {fmtMiles(d.miles, unit)}
+                      {fmtMiles(d.miles)}
                     </Text>
                   </View>
                 );

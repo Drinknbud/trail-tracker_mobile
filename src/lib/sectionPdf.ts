@@ -2,6 +2,7 @@ import { Platform } from "react-native";
 
 import type { ElevationProfile, PoiRow, SectionDetailRow } from "@/db";
 import { computeAscentDescent } from "@/lib/elevation";
+import { fmtElev, fmtMileMarker, fmtMiles, type DistanceUnit } from "@/lib/units";
 
 // Section PDF export — mobile port of web's SectionPrintView (window.print()
 // off-screen DOM + @media print). Mobile has no window.print(), so this
@@ -136,7 +137,8 @@ function buildElevationSvg(elevation: ElevationProfile, width = 640, height = 11
 export function buildSectionPdfHtml(
   section: SectionDetailRow,
   elevation: ElevationProfile | null,
-  pois: PoiRow[]
+  pois: PoiRow[],
+  distanceUnit: DistanceUnit = "mi"
 ): string {
   const printDate = new Date().toLocaleDateString("en-US", {
     month: "long",
@@ -167,9 +169,9 @@ export function buildSectionPdfHtml(
   const sortedPois = [...pois].sort((a, b) => a.mile - b.mile);
 
   const statsRow = [
-    `<strong>${section.miles.toFixed(1)}</strong> mi`,
+    `<strong>${fmtMiles(section.miles, distanceUnit)}</strong>`,
     dateRange,
-    ascent != null ? `<strong>${ascent.toLocaleString()}</strong> ft gain` : null,
+    ascent != null ? `<strong>${fmtElev(ascent, distanceUnit)}</strong> gain` : null,
     section.difficulty,
   ]
     .filter(Boolean)
@@ -226,12 +228,12 @@ export function buildSectionPdfHtml(
   ${sortedPois.length > 0 ? `
   <div class="section-heading">Points of Interest</div>
   <table class="poi-table">
-    <thead><tr><th>Mile</th><th>Type</th><th>Name</th></tr></thead>
+    <thead><tr><th>${distanceUnit === "km" ? "Km" : "Mile"}</th><th>Type</th><th>Name</th></tr></thead>
     <tbody>
       ${sortedPois
         .map(
           (p) =>
-            `<tr><td>${p.mile}</td><td>${escapeHtml(POI_LABEL[p.type] ?? p.type)}</td><td>${escapeHtml(p.name)}</td></tr>`
+            `<tr><td>${escapeHtml(fmtMileMarker(p.mile, distanceUnit))}</td><td>${escapeHtml(POI_LABEL[p.type] ?? p.type)}</td><td>${escapeHtml(p.name)}</td></tr>`
         )
         .join("\n")}
     </tbody>
@@ -266,9 +268,10 @@ export function pdfExportAvailable(): boolean {
 export async function exportSectionPdf(
   section: SectionDetailRow,
   elevation: ElevationProfile | null,
-  pois: PoiRow[]
+  pois: PoiRow[],
+  distanceUnit: DistanceUnit = "mi"
 ): Promise<void> {
-  const html = buildSectionPdfHtml(section, elevation, pois);
+  const html = buildSectionPdfHtml(section, elevation, pois, distanceUnit);
   const Print = await import("expo-print");
   const Sharing = await import("expo-sharing");
   const { uri } = await Print.printToFileAsync({ html, base64: false });

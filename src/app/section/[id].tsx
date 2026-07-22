@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ImagePlus,
   Moon,
+  Pencil,
   Plus,
   Share2,
   Sun,
@@ -34,6 +35,8 @@ import { projectGpsToDist } from "@/lib/elevation";
 import { enqueueWrite } from "@/lib/outbox";
 import { capturePhoto } from "@/lib/photos";
 import { exportSectionPdf, pdfExportAvailable } from "@/lib/sectionPdf";
+import { miToKm } from "@/lib/units";
+import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -69,6 +72,7 @@ type DayDraft = Partial<DayLogRow>;
 export default function SectionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtElev, fmtDate, distanceUnit } = useUnits();
   const { token } = useAuth();
   const { isPremium } = usePremium();
 
@@ -205,7 +209,7 @@ export default function SectionDetailScreen() {
     }
     setExportingPdf(true);
     try {
-      await exportSectionPdf(section, elevation, pois);
+      await exportSectionPdf(section, elevation, pois, distanceUnit);
     } catch {
       Alert.alert("Export failed", "Couldn't generate the PDF. Try again.");
     } finally {
@@ -249,6 +253,13 @@ export default function SectionDetailScreen() {
         >
           {section.name}
         </Text>
+        <Pressable
+          onPress={() => router.push(`/section/new?editId=${section.id}`)}
+          hitSlop={8}
+          style={{ padding: 2 }}
+        >
+          <Pencil color={colors.muted} size={16} />
+        </Pressable>
         <View
           style={{
             backgroundColor: statusColor,
@@ -264,16 +275,18 @@ export default function SectionDetailScreen() {
       </View>
 
       <Card style={{ flexDirection: "row", marginTop: 12, paddingVertical: 12 }}>
-        <Stat value={section.miles.toFixed(1)} label="miles" />
-        <Stat value={section.elevGain ? section.elevGain.toLocaleString() : "—"} label="ft gain" />
+        <Stat value={fmtMiles(section.miles)} label="distance" />
+        <Stat value={section.elevGain ? fmtElev(section.elevGain) : "—"} label="elev gain" />
         <Stat value={section.difficulty ?? "—"} label="difficulty" />
         <Stat
           value={
             section.startMile != null && section.endMile != null
-              ? `${section.startMile}–${section.endMile}`
+              ? distanceUnit === "km"
+                ? `${Math.round(miToKm(section.startMile))}–${Math.round(miToKm(section.endMile))}`
+                : `${section.startMile}–${section.endMile}`
               : "—"
           }
-          label="AT miles"
+          label={distanceUnit === "km" ? "AT km" : "AT miles"}
         />
       </Card>
 
@@ -404,7 +417,7 @@ export default function SectionDetailScreen() {
           <Card style={{ marginBottom: 8 }}>
             <Text style={{ fontSize: 14 * fontScale, fontWeight: "600", color: colors.text }}>
               {n.campedAt ?? "Camp"}
-              {n.date ? ` · ${n.date.slice(0, 10)}` : ""}
+              {n.date ? ` · ${fmtDate(n.date)}` : ""}
             </Text>
             {n.notes ? (
               <Text
@@ -521,8 +534,8 @@ export default function SectionDetailScreen() {
         <Pressable key={d.id} onPress={() => setDayDraft(d)}>
           <Card style={{ marginBottom: 8 }}>
             <Text style={{ fontSize: 14 * fontScale, fontWeight: "600", color: colors.text }}>
-              {d.milesHiked != null ? `${d.milesHiked} mi` : "Day"}
-              {d.date ? ` · ${d.date.slice(0, 10)}` : ""}
+              {d.milesHiked != null ? fmtMiles(d.milesHiked) : "Day"}
+              {d.date ? ` · ${fmtDate(d.date)}` : ""}
               {d.mood ? ` · ${"⭐".repeat(d.mood)}` : ""}
             </Text>
             {d.terrainNotes ? (

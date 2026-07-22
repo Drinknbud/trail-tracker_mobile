@@ -1,4 +1,5 @@
-import { router } from "expo-router";
+import * as Crypto from "expo-crypto";
+import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, MapPin } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -8,20 +9,35 @@ import { Card, Screen } from "@/components/Screen";
 import { TrailheadPicker, type TrailheadOption } from "@/components/TrailheadPicker";
 import { tripStore } from "@/db";
 import { useAuth } from "@/lib/auth";
+import { enqueueWrite } from "@/lib/outbox";
 import { createSection, fetchTrailheads, fetchTrails } from "@/lib/webApi";
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
 
-// Manual section-creation screen — mobile equivalent of web's "New Section"
-// form in app/log/page.tsx (minus the Scout chat panel, which mobile already
-// covers with its own deterministic plan-first Scout screen). Journal was
-// previously read-only aside from Scout's accept flow and web-side sync;
-// this fills that gap for logging a section without invoking AI at all.
+// Manual section create/edit screen — mobile equivalent of web's "New
+// Section" form in app/log/page.tsx (minus the Scout chat panel, which
+// mobile already covers with its own deterministic plan-first Scout
+// screen). Journal was previously read-only aside from Scout's accept flow
+// and web-side sync; this fills that gap for logging a section without
+// invoking AI at all. Also handles editing an existing section's metadata
+// (name/miles/dates/difficulty/notes) — reached via ?editId=, since mobile
+// otherwise has no write path for a section's own fields at all (only
+// status and inJournal have dedicated toggles).
+//
+// Create is a direct online call — the trailhead reference data it depends
+// on isn't guaranteed to be cached, so it's not pretending to work offline.
+// Edit IS offline-safe: it only touches fields already on the downloaded
+// section, so it goes through the local write + outbox pattern (matching
+// markComplete/setInJournal in section/[id].tsx) instead of a blocking fetch.
 
 const DIFFICULTIES = ["Easy", "Moderate", "Strenuous", "Very Strenuous"];
 
 export default function NewSectionScreen() {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtMileMarker } = useUnits();
   const { token } = useAuth();
+  const { editId } = useLocalSearchParams<{ editId?: string }>();
+  const isEditing = typeof editId === "string" && editId.length > 0;
 
   const [name, setName] = useState("");
   const [status, setStatus] = useState<"planned" | "completed">("planned");
@@ -31,6 +47,7 @@ export default function NewSectionScreen() {
   const [startMile, setStartMile] = useState("");
   const [endMile, setEndMile] = useState("");
   const [miles, setMiles] = useState("");
+  const [notes, setNotes] = useState("");
 
   const [catalogKey, setCatalogKey] = useState<string | null>(null);
   const [useTrailheadEntry, setUseTrailheadEntry] = useState(false);
@@ -41,9 +58,30 @@ export default function NewSectionScreen() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingExisting, setLoadingExisting] = useState(isEditing);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isEditing) return;
+    (async () => {
+      await tripStore.init();
+      const existing = await tripStore.getSectionDetail(editId!);
+      if (existing) {
+        setName(existing.name);
+        setStatus(existing.status === "completed" ? "completed" : "planned");
+        setDifficulty(existing.difficulty ?? null);
+        setStartDate(existing.startDate?.slice(0, 10) ?? "");
+        setEndDate(existing.endDate?.slice(0, 10) ?? "");
+        setStartMile(existing.startMile != null ? String(existing.startMile) : "");
+        setEndMile(existing.endMile != null ? String(existing.endMile) : "");
+        setMiles(String(existing.miles));
+        setNotes(existing.notes ?? "");
+      }
+      setLoadingExisting(false);
+    })();
+  }, [isEditing, editId]);
+
+  useEffect(() => {
+    if (!token || isEditing) return; // trailhead entry is create-only
     (async () => {
       try {
         const trails = await fetchTrails(token);
@@ -53,7 +91,7 @@ export default function NewSectionScreen() {
         // non-fatal — trailhead entry mode just stays unavailable
       }
     })();
-  }, [token]);
+  }, [token, isEditing]);
 
   const loadTrailheads = useCallback(async () => {
     if (!catalogKey || trailheads.length > 0 || trailheadsLoading) return;
@@ -90,7 +128,40 @@ export default function NewSectionScreen() {
     return Math.round(Math.abs(e - s) * 10) / 10;
   }, [startMile, endMile]);
 
-  async function onSave() {
+  async function onSaveEdit() {
+    if (!token || saving || !editId) return;
+    if (!name.trim()) { setError("Section name is required."); return; }
+
+    setSaving(true);
+    setError(null);
+    const sMile = startMile ? Number(startMile) : null;
+    const eMile = endMile ? Number(endMile) : null;
+    const finalMiles = miles ? Number(miles) : computedMiles ?? 0;
+    const fields = {
+      name: name.trim(),
+      status,
+      startMile: sMile,
+      endMile: eMile,
+      startDate: startDate || null,
+      endDate: endDate || null,
+      miles: finalMiles,
+      difficulty: difficulty ?? null,
+      notes: notes.trim() || null,
+    };
+    // Offline-safe: local write lands immediately, the outbox flushes the
+    // server write opportunistically — never block the UI on network.
+    const updatedAt = await tripStore.updateSectionFields(editId, fields);
+    await enqueueWrite(
+      `/api/mobile/sections/${editId}`,
+      { ...fields, updatedAt },
+      `section-edit-${editId}-${updatedAt}`,
+      token
+    );
+    setSaving(false);
+    router.back();
+  }
+
+  async function onSaveCreate() {
     if (!token || saving) return;
     if (!name.trim()) { setError("Section name is required."); return; }
     const sMile = startMile ? Number(startMile) : NaN;
@@ -101,7 +172,12 @@ export default function NewSectionScreen() {
     setSaving(true);
     setError(null);
     try {
+      // Client-generated id: a retry after a dropped response (timeout,
+      // connection drop mid-request) resends the same id, and the server
+      // upserts instead of creating a duplicate section.
+      const id = `sec_${Crypto.randomUUID()}`;
       const created = await createSection(token, {
+        id,
         name: name.trim(),
         status,
         startMile: sMile,
@@ -110,9 +186,12 @@ export default function NewSectionScreen() {
         difficulty: difficulty ?? undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        notes: notes.trim() || undefined,
       });
       // Reflect locally right away so it shows in Journal before the next
-      // full /api/mobile/sections resync.
+      // full /api/mobile/sections resync. inJournal:false matches what the
+      // server actually stores (POST /api/sections never sets it) — a
+      // manually created section starts in Planning, same as web.
       await tripStore.init();
       await tripStore.upsertSections([
         {
@@ -127,10 +206,16 @@ export default function NewSectionScreen() {
           miles: finalMiles,
           elevGain: null,
           difficulty: difficulty ?? null,
-          inJournal: true,
+          inJournal: false,
           updatedAt: new Date().toISOString(),
         },
       ]);
+      // upsertSections only carries list-endpoint columns (no notes) — write
+      // it separately so a note entered at create time isn't lost locally
+      // until the next full trip re-download.
+      if (notes.trim()) {
+        await tripStore.updateSectionFields(created.id, { notes: notes.trim() });
+      }
       router.back();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save section.");
@@ -138,6 +223,8 @@ export default function NewSectionScreen() {
       setSaving(false);
     }
   }
+
+  const onSave = isEditing ? onSaveEdit : onSaveCreate;
 
   return (
     <Screen>
@@ -151,9 +238,17 @@ export default function NewSectionScreen() {
         </Text>
       </Pressable>
       <Text style={{ fontSize: 22 * fontScale, fontWeight: "700", color: colors.text, marginBottom: 16 }}>
-        New Section
+        {isEditing ? "Edit Section" : "New Section"}
       </Text>
 
+      {loadingExisting ? (
+        <View style={{ paddingVertical: 24, alignItems: "center" }}>
+          <ActivityIndicator color={colors.accent} />
+        </View>
+      ) : null}
+
+      {loadingExisting ? null : (
+      <>
       {catalogKey === "at" ? (
         <Pressable
           onPress={() => {
@@ -221,7 +316,7 @@ export default function NewSectionScreen() {
           )}
           {startTrailheadId !== "" && endTrailheadId !== "" && miles ? (
             <Text style={{ fontSize: 12 * fontScale, color: colors.accent, marginTop: 10 }}>
-              Auto-filled: {miles} mi · mi {startMile}–{endMile}
+              Auto-filled: {fmtMiles(parseFloat(miles))} · {fmtMileMarker(parseFloat(startMile))}–{fmtMileMarker(parseFloat(endMile))}
             </Text>
           ) : null}
         </Card>
@@ -344,6 +439,14 @@ export default function NewSectionScreen() {
         </View>
       </View>
 
+      <FormField
+        label="Notes (optional)"
+        value={notes}
+        onChangeText={setNotes}
+        placeholder="Anything worth remembering about this section"
+        multiline
+      />
+
       {error ? (
         <Text style={{ fontSize: 13 * fontScale, color: colors.destructiveRed, marginBottom: 10 }}>
           {error}
@@ -367,9 +470,11 @@ export default function NewSectionScreen() {
       >
         {saving ? <ActivityIndicator color="#FFFFFF" size="small" /> : null}
         <Text style={{ color: "#FFFFFF", fontSize: 15 * fontScale, fontWeight: "700" }}>
-          {saving ? "Saving…" : "Save Section"}
+          {saving ? "Saving…" : isEditing ? "Save Changes" : "Save Section"}
         </Text>
       </Pressable>
+      </>
+      )}
     </Screen>
   );
 }

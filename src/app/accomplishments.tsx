@@ -37,16 +37,12 @@ import {
   fetchChallengeCompletions,
   fetchChallenges,
   fetchStats,
-  fetchWebUser,
   type ChallengeCompletion,
   type UserChallenge,
   type WebStats,
 } from "@/lib/webApi";
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
-
-function fmtMiles(mi: number, unit: DistanceUnit): string {
-  return unit === "km" ? `${(mi * 1.60934).toFixed(1)} km` : `${mi.toFixed(1)} mi`;
-}
 
 const BASE_CATEGORIES: BadgeCategory[] = ["distance", "elevation", "sections", "pace", "community", "gear"];
 const CHALLENGE_TYPES = ["miles", "sections", "days", "custom"] as const;
@@ -62,11 +58,11 @@ function tierColors(colors: ReturnType<typeof useTheme>["colors"], tier: BadgeTi
 
 export default function AccomplishmentsScreen() {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, distanceUnit } = useUnits();
   const insets = useSafeAreaInsets();
   const { token } = useAuth();
 
   const [stats, setStats] = useState<WebStats | null>(null);
-  const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("mi");
   const [challenges, setChallenges] = useState<UserChallenge[]>([]);
   const [completions, setCompletions] = useState<ChallengeCompletion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,14 +81,12 @@ export default function AccomplishmentsScreen() {
   const load = useCallback(async () => {
     if (!token) { setLoading(false); return; }
     try {
-      const [s, u, c, h] = await Promise.all([
+      const [s, c, h] = await Promise.all([
         fetchStats(token),
-        fetchWebUser(token),
         fetchChallenges(token),
         fetchChallengeCompletions(token),
       ]);
       setStats(s);
-      setDistanceUnit(u.distanceUnit === "km" ? "km" : "mi");
       setChallenges(c);
       setCompletions(h);
     } finally {
@@ -253,10 +247,10 @@ export default function AccomplishmentsScreen() {
       {/* ── Stats row ──────────────────────────────────────────────────── */}
       {stats ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
-          <StatTile icon={Trophy} label="Hiked" value={fmtMiles(stats.milesCompleted, distanceUnit)} sub={`of ${fmtMiles(stats.totalMiles, distanceUnit)}`} accent />
+          <StatTile icon={Trophy} label="Hiked" value={fmtMiles(stats.milesCompleted)} sub={`of ${fmtMiles(stats.totalMiles)}`} accent />
           <StatTile icon={Mountain} label="Trail Complete" value={`${stats.percentComplete.toFixed(1)}%`} sub="progress" />
           <StatTile icon={Check} label="Sections Done" value={`${stats.sectionsCompleted}`} sub="completed" />
-          <StatTile icon={Clock} label={`${now.getFullYear()} ${distanceUnit === "km" ? "KM" : "Miles"}`} value={fmtMiles(stats.milesThisYear, distanceUnit)} sub="this year" />
+          <StatTile icon={Clock} label={`${now.getFullYear()} ${distanceUnit === "km" ? "KM" : "Miles"}`} value={fmtMiles(stats.milesThisYear)} sub="this year" />
         </View>
       ) : null}
 

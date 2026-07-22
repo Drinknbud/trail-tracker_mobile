@@ -56,6 +56,7 @@ export type WebUser = {
   heroImage: string | null;
   heroImagePosition: string | null;
   accentColor: string | null;
+  mapStyle: string | null;
   homeZip: string | null;
   carrierProvider: string | null;
   distanceUnit: string;
@@ -63,6 +64,8 @@ export type WebUser = {
   weightUnit: string;
   dateFormat: string;
   timeFormat: string;
+  /** False until the user (web onboarding or Settings) has explicitly chosen units — see units-context.tsx's one-time device-locale default. */
+  onboardingComplete: boolean;
   shareSlug: string | null;
   gpsTrackingEnabled: boolean;
   gpsPowerMode: string | null;
@@ -104,6 +107,25 @@ export type MyPhoto = { id: string; storageUrl: string | null; baseUrl: string; 
 
 export async function fetchMyPhotos(token: string): Promise<MyPhoto[]> {
   return apiFetch<MyPhoto[]>("/api/photos", { token });
+}
+
+// Geo-tagged photo shape for the map's Photos layer — same /api/photos payload,
+// but including the position + trail fields web's TrailMap uses to place markers
+// (GPS coords, or the section mile range as a fallback when GPS is absent).
+export type MapPhoto = {
+  id: string;
+  baseUrl: string;
+  thumbnailUrl: string;
+  lat: number | null;
+  lng: number | null;
+  takenAt: string | null;
+  trailKey: string | null;
+  sectionStartMile: number | null;
+  sectionEndMile: number | null;
+};
+
+export async function fetchMapPhotos(token: string): Promise<MapPhoto[]> {
+  return apiFetch<MapPhoto[]>("/api/photos", { token });
 }
 
 export async function updateWebUser(token: string, patch: WebUserUpdate): Promise<WebUser> {
@@ -278,6 +300,9 @@ export async function scoutPlan(
 export async function createSection(
   token: string,
   input: {
+    /** Client-generated id — lets a retry after a dropped response (or an
+     * offline-queued write) upsert instead of creating a duplicate section. */
+    id?: string;
     name: string;
     status: string;
     startMile: number;
@@ -356,4 +381,59 @@ export async function generateSectionItinerary(
     `/api/sections/${sectionId}/generate-itinerary`,
     { method: "POST", token }
   );
+}
+
+// Mirrors web's PoiPopupContent (components/PoiPopupContent.tsx) — community
+// water-flow votes, privy cleanliness ratings, and a comment thread, all keyed
+// by OSM element id so mobile and web share the same data.
+export type PoiComment = { id: string; userId: string; text: string; userName: string | null; createdAt: string };
+export type PoiData = {
+  waterVotes: { flowing: number; dry: number; lastVoteAt: string | null; stale: boolean } | null;
+  privyStats: { average: number; count: number } | null;
+  comments: PoiComment[];
+  totalComments: number;
+  myReport: { waterVote: string | null; privyRating: number | null } | null;
+};
+
+export async function fetchPoiData(osmId: string, token: string | null): Promise<PoiData> {
+  return apiFetch<PoiData>(`/api/poi/${encodeURIComponent(osmId)}`, { token });
+}
+
+type PoiMeta = { poiType: string; poiName?: string | null; lat: number; lon: number };
+
+export async function voteWaterSource(
+  token: string,
+  osmId: string,
+  waterVote: "flowing" | "dry",
+  meta: PoiMeta
+): Promise<PoiData> {
+  return apiFetch<PoiData>(`/api/poi/${encodeURIComponent(osmId)}`, {
+    method: "POST",
+    token,
+    body: { action: "vote", waterVote, ...meta },
+  });
+}
+
+export async function ratePrivy(token: string, osmId: string, privyRating: number, meta: PoiMeta): Promise<PoiData> {
+  return apiFetch<PoiData>(`/api/poi/${encodeURIComponent(osmId)}`, {
+    method: "POST",
+    token,
+    body: { action: "rate", privyRating, ...meta },
+  });
+}
+
+export async function postPoiComment(token: string, osmId: string, comment: string, meta: PoiMeta): Promise<PoiData> {
+  return apiFetch<PoiData>(`/api/poi/${encodeURIComponent(osmId)}`, {
+    method: "POST",
+    token,
+    body: { action: "comment", comment, ...meta },
+  });
+}
+
+export async function editPoiComment(token: string, commentId: string, text: string): Promise<PoiData> {
+  return apiFetch<PoiData>(`/api/poi/comment/${encodeURIComponent(commentId)}`, { method: "PATCH", token, body: { text } });
+}
+
+export async function deletePoiComment(token: string, commentId: string): Promise<PoiData> {
+  return apiFetch<PoiData>(`/api/poi/comment/${encodeURIComponent(commentId)}`, { method: "DELETE", token });
 }
