@@ -2,6 +2,7 @@
   "expo": {
     "name": "Trail Tracker",
     "slug": "trail-tracker",
+    "owner": "trail_tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -39,11 +40,18 @@
       "expo-secure-store",
       "@maplibre/maplibre-react-native",
       "expo-sqlite",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3184ac5c-41f4-4f24-b2c9-91c85bd15a8f"
+      }
     }
   }
 }
