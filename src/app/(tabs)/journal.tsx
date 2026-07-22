@@ -9,6 +9,7 @@ import { tripStore, type SectionRow, type TripDownloadRow } from "@/db";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { downloadTrip } from "@/lib/trip-download";
+import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -24,6 +25,7 @@ type SectionsResponse = {
 
 export default function JournalScreen() {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtDate } = useUnits();
   const { token } = useAuth();
   const { isPremium } = usePremium();
 
@@ -119,8 +121,8 @@ export default function JournalScreen() {
                 {s.name}
               </Text>
               <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 2 }}>
-                {s.miles.toFixed(1)} mi
-                {s.startDate ? ` · ${s.startDate.slice(0, 10)}` : ""}
+                {fmtMiles(s.miles)}
+                {s.startDate ? ` · ${fmtDate(s.startDate)}` : ""}
                 {s.difficulty ? ` · ${s.difficulty}` : ""}
               </Text>
             </View>

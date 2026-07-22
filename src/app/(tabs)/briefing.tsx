@@ -7,6 +7,7 @@ import { ElevationChart } from "@/components/ElevationChart";
 import { PremiumGate } from "@/components/PremiumGate";
 import { Card, Screen } from "@/components/Screen";
 import { usePremium } from "@/lib/usePremium";
+import { useUnits } from "@/lib/units-context";
 import {
   tripStore,
   type BriefingRow,
@@ -58,12 +59,15 @@ function WeatherTile({
   );
 }
 
-function fmtTime(d: Date): string {
+// Raw 12h "6:32 AM" rendering of a Date — piped through useUnits().fmtTime
+// below so sunrise/sunset also honor the 12h/24h setting.
+function rawTime(d: Date): string {
   return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 export default function BriefingScreen() {
   const { colors, fontScale } = useTheme();
+  const { fmtTemp, fmtMileMarker, fmtTime } = useUnits();
   const { isPremium, isLoading: premiumLoading } = usePremium();
 
   const [section, setSection] = useState<SectionDetailRow | null>(null);
@@ -212,12 +216,12 @@ export default function BriefingScreen() {
         <WeatherTile
           icon={<Thermometer color={colors.planned} size={18} />}
           label="Low"
-          value={weather.tempMin != null ? `${weather.tempMin}°` : "—"}
+          value={weather.tempMin != null ? fmtTemp(weather.tempMin) : "—"}
         />
         <WeatherTile
           icon={<Thermometer color={colors.destructiveRed} size={18} />}
           label="High"
-          value={weather.tempMax != null ? `${weather.tempMax}°` : "—"}
+          value={weather.tempMax != null ? fmtTemp(weather.tempMax) : "—"}
         />
         <WeatherTile
           icon={<CloudRain color={precipColor ?? colors.muted} size={18} />}
@@ -246,7 +250,7 @@ export default function BriefingScreen() {
           >
             <Sunrise color={colors.celebrationYellow} size={18} />
             <Text style={{ fontSize: 13 * fontScale, color: colors.text, fontWeight: "600" }}>
-              {fmtTime(sunTimes.sunrise)}
+              {fmtTime(rawTime(sunTimes.sunrise))}
             </Text>
           </Card>
           <Card
@@ -260,7 +264,7 @@ export default function BriefingScreen() {
           >
             <Sunset color={colors.bugOrange} size={18} />
             <Text style={{ fontSize: 13 * fontScale, color: colors.text, fontWeight: "600" }}>
-              {fmtTime(sunTimes.sunset)}
+              {fmtTime(rawTime(sunTimes.sunset))}
             </Text>
           </Card>
         </View>
@@ -322,7 +326,7 @@ export default function BriefingScreen() {
                 {p.name}
               </Text>
               <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>
-                mi {p.mile}
+                {fmtMileMarker(p.mile)}
               </Text>
             </View>
           ))}

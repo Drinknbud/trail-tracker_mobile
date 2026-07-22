@@ -17,6 +17,7 @@ import { useAuth } from "@/lib/auth";
 import { GPS_MODES, fromWebPowerMode, startTracking, toWebPowerMode, type GpsMode } from "@/lib/gps";
 import { useOnTrail } from "@/lib/onTrail";
 import { downloadTrip } from "@/lib/trip-download";
+import { useUnits } from "@/lib/units-context";
 import { fetchWebUser } from "@/lib/webApi";
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -29,6 +30,12 @@ type SectionsResponse = { sections: SectionRow[] };
 
 const GPS_MODE_KEYS = Object.keys(GPS_MODES) as GpsMode[];
 
+// Deliberately NOT using the dateFormat setting here — this is a compact
+// "Jul 4 – Jul 8" list-item label (no year), and fmtDate's MDY/DMY output
+// always includes the year, which would make this picker row much longer.
+// Unambiguous short-month-name dates like this don't need the MDY/DMY
+// distinction anyway (matches web, which also always uses this fixed style
+// for compact date ranges rather than the dateFormat setting).
 function fmtRange(startDate: string | null, endDate: string | null): string {
   if (!startDate) return "";
   const fmt = (d: string) =>
@@ -43,6 +50,7 @@ function fmtRange(startDate: string | null, endDate: string | null): string {
 
 export function OnTrailActivationSheet() {
   const { colors, fontScale } = useTheme();
+  const { fmtMiles } = useUnits();
   const insets = useSafeAreaInsets();
   const { token } = useAuth();
   const { activationVisible, cancelActivation, applyServerValue } = useOnTrail();
@@ -188,7 +196,7 @@ export function OnTrailActivationSheet() {
             {s.name}
           </Text>
           <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-            {s.miles.toFixed(1)} mi{dates ? ` · ${dates}` : ""}
+            {fmtMiles(s.miles)}{dates ? ` · ${dates}` : ""}
           </Text>
         </View>
       </Pressable>

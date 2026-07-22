@@ -8,10 +8,12 @@ import { tripStore, type TrailMailRow } from "@/db";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { enqueueWrite } from "@/lib/outbox";
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
 
 export default function TrailMailScreen() {
   const { colors, fontScale } = useTheme();
+  const { fmtDate } = useUnits();
   const { token } = useAuth();
   const [mail, setMail] = useState<TrailMailRow[]>([]);
   const [offline, setOffline] = useState(false);
@@ -102,7 +104,7 @@ export default function TrailMailScreen() {
                     {m.senderName || "Anonymous"}
                   </Text>
                   <Text style={{ fontSize: 11 * fontScale, color: colors.muted }}>
-                    {m.createdAt.slice(0, 10)}
+                    {fmtDate(m.createdAt)}
                   </Text>
                 </View>
                 <Text

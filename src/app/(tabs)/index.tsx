@@ -34,14 +34,12 @@ import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { heroContentPosition } from "@/lib/heroPosition";
 import { fetchStats, fetchTrails, fetchWebUser, type WebStats, type WebTrail, type WebUser } from "@/lib/webApi";
+import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
-
-function fmtMiles(mi: number, unit: string): string {
-  return unit === "km" ? `${(mi * 1.60934).toFixed(1)} km` : `${mi.toFixed(1)} mi`;
-}
 
 export default function DashboardScreen() {
   const { colors, fontScale, setAccentColor } = useTheme();
+  const { fmtMiles, fmtElev, distanceUnit } = useUnits();
   const insets = useSafeAreaInsets();
   const { token } = useAuth();
 
@@ -110,7 +108,6 @@ export default function DashboardScreen() {
     await load();
   };
 
-  const unit = user?.distanceUnit ?? "mi";
   const pct = stats ? Math.round(stats.percentComplete) : 0;
   const displayName = user?.trailName || user?.name || "Hiker";
 
@@ -189,8 +186,8 @@ export default function DashboardScreen() {
           <View style={{ alignItems: "center", marginBottom: 12 }}>
             <RingChart
               pct={pct}
-              completedLabel={fmtMiles(stats?.milesCompleted ?? 0, unit)}
-              totalLabel={fmtMiles(stats?.totalMiles ?? 0, unit)}
+              completedLabel={fmtMiles(stats?.milesCompleted ?? 0)}
+              totalLabel={fmtMiles(stats?.totalMiles ?? 0)}
             />
           </View>
 
@@ -238,20 +235,20 @@ export default function DashboardScreen() {
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14, marginBottom: 12 }}>
             <Text style={{ fontSize: 12 * fontScale }}>
               <Text style={{ fontWeight: "700", color: colors.accent }}>
-                {fmtMiles(stats?.milesCompleted ?? 0, unit)}
+                {fmtMiles(stats?.milesCompleted ?? 0)}
               </Text>
               <Text style={{ color: colors.muted }}> done</Text>
             </Text>
             <Text style={{ fontSize: 12 * fontScale }}>
               <Text style={{ fontWeight: "700", color: colors.text }}>
-                {fmtMiles(stats?.milesRemaining ?? 0, unit)}
+                {fmtMiles(stats?.milesRemaining ?? 0)}
               </Text>
               <Text style={{ color: colors.muted }}> remaining</Text>
             </Text>
             {stats?.milesPlanned ? (
               <Text style={{ fontSize: 12 * fontScale }}>
                 <Text style={{ fontWeight: "700", color: colors.planned }}>
-                  {fmtMiles(stats.milesPlanned, unit)}
+                  {fmtMiles(stats.milesPlanned)}
                 </Text>
                 <Text style={{ color: colors.muted }}> planned</Text>
               </Text>
@@ -318,26 +315,26 @@ export default function DashboardScreen() {
           <StatTile
             icon={TrendingUp}
             label="Distance Hiked"
-            value={fmtMiles(stats?.milesCompleted ?? 0, unit)}
-            sub={`of ${fmtMiles(stats?.totalMiles ?? 0, unit)} total`}
+            value={fmtMiles(stats?.milesCompleted ?? 0)}
+            sub={`of ${fmtMiles(stats?.totalMiles ?? 0)} total`}
             accent
           />
           <StatTile
             icon={Flag}
             label="Distance Remaining"
-            value={fmtMiles(stats?.milesRemaining ?? 0, unit)}
+            value={fmtMiles(stats?.milesRemaining ?? 0)}
             sub={`${pct}% complete`}
           />
           <StatTile
             icon={Gauge}
             label="Avg Pace"
-            value={stats?.avgPaceMilesPerDay ? `${fmtMiles(stats.avgPaceMilesPerDay, unit)}/day` : "—"}
-            sub={`${unit === "km" ? "km" : "miles"} per day`}
+            value={stats?.avgPaceMilesPerDay ? `${fmtMiles(stats.avgPaceMilesPerDay)}/day` : "—"}
+            sub={`${distanceUnit === "km" ? "km" : "miles"} per day`}
           />
           <StatTile
             icon={Mountain}
             label="Elev. Gain"
-            value={stats?.elevGainTotal ? `${stats.elevGainTotal.toLocaleString()} ft` : "—"}
+            value={stats?.elevGainTotal ? fmtElev(stats.elevGainTotal) : "—"}
             sub="total accumulated"
           />
           <StatTile
@@ -349,7 +346,7 @@ export default function DashboardScreen() {
           <StatTile
             icon={Calendar}
             label={`Distance Hiked ${new Date().getFullYear()}`}
-            value={fmtMiles(stats?.milesThisYear ?? 0, unit)}
+            value={fmtMiles(stats?.milesThisYear ?? 0)}
             sub="completed sections this year"
           />
         </View>
@@ -368,7 +365,7 @@ export default function DashboardScreen() {
                 {stats.recentSection.name}
               </Text>
               <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>
-                {fmtMiles(stats.recentSection.miles, unit)}
+                {fmtMiles(stats.recentSection.miles)}
               </Text>
               {stats.recentSection.endDate ? (
                 <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 2 }}>
@@ -399,7 +396,7 @@ export default function DashboardScreen() {
                 {stats.nextPlannedSection.name}
               </Text>
               <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>
-                {fmtMiles(stats.nextPlannedSection.miles, unit)} planned
+                {fmtMiles(stats.nextPlannedSection.miles)} planned
               </Text>
               {stats.nextPlannedSection.startDate ? (
                 <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 2 }}>

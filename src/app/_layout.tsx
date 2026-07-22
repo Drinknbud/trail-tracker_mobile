@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { OnTrailActivationSheet } from "@/components/OnTrailActivationSheet";
 import { OutboxSyncManager } from "@/components/OutboxSyncManager";
 import { AuthProvider } from "@/lib/auth";
+import { UnitsProvider } from "@/lib/units-context";
 import { getNotifications } from "@/lib/notifications-safe";
 import { OnTrailProvider } from "@/lib/onTrail";
 import { ThemeProvider, useTheme } from "@/theme/ThemeContext";
@@ -46,11 +47,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
-          <OnTrailProvider>
-            <OutboxSyncManager />
-            <RootNavigator />
-            <OnTrailActivationSheet />
-          </OnTrailProvider>
+          <UnitsProvider>
+            <OnTrailProvider>
+              <OutboxSyncManager />
+              <RootNavigator />
+              <OnTrailActivationSheet />
+            </OnTrailProvider>
+          </UnitsProvider>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
