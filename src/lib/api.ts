@@ -1,8 +1,11 @@
 import Constants from "expo-constants";
 
-// In development the Mac running Metro also runs the Next.js backend on :3000,
-// so derive the LAN host from Expo's hostUri. Set EXPO_PUBLIC_API_URL to point
-// anywhere else (e.g. the production Vercel URL for release builds).
+// In development the Mac running Metro also runs the Next.js backend via
+// `npm run dev` (package.json has no --port flag, so it's Next's default
+// 3000), so derive the LAN host from Expo's hostUri. Set EXPO_PUBLIC_API_URL
+// to point anywhere else (e.g. the production Vercel URL for release builds,
+// or :3200 if the web app is running under Claude Code's own preview
+// tooling, which starts it with `next dev --port 3200`).
 function defaultBaseUrl(): string {
   const host = Constants.expoConfig?.hostUri?.split(":")[0];
   return host ? `http://${host}:3000` : "http://localhost:3000";
