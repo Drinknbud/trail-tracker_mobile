@@ -3,13 +3,14 @@ import { Text, View } from "react-native";
 
 import { Card } from "@/components/Screen";
 import { useTheme } from "@/theme/ThemeContext";
+import type { TrailMapProps } from "@/components/trailMapTypes";
 
 // MapLibre is a native module and cannot load inside Expo Go — it needs a
 // development build (eas build --profile development). Detect Expo Go and
 // show guidance instead of crashing at import time.
 const isExpoGo = Constants.appOwnership === "expo";
 
-export function TrailMap() {
+export function TrailMap(props: TrailMapProps) {
   const { colors, fontScale } = useTheme();
 
   if (isExpoGo) {
@@ -30,5 +31,5 @@ export function TrailMap() {
 
   // Deferred require so Expo Go never evaluates the native module.
   const { TrailMapNative } = require("./TrailMapNative") as typeof import("./TrailMapNative");
-  return <TrailMapNative />;
+  return <TrailMapNative {...props} />;
 }

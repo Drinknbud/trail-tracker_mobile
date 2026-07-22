@@ -32,6 +32,38 @@ export function carrierLabel(value: string | null): string {
   return found && "label" in found ? found.label : value;
 }
 
+/**
+ * Maps a carrier key to the precomputed dead-zone coverage file it should
+ * use (see scripts/precompute-dead-zones.mjs) — mirrors web's
+ * lib/fccCarriers.ts CARRIER_NETWORKS, but resolved ahead of time to a single
+ * output key per carrier instead of a live per-network merge, since mobile's
+ * coverage files are already the final merged/intersected dead-zone polygons.
+ * Returns null when there's no data for that carrier (matches web exactly —
+ * "uscc" and "other" have no FCC source file on either platform).
+ */
+export type CoverageKey = "verizon" | "att" | "tmobile" | "consumercellular";
+const CARRIER_COVERAGE_KEY: Record<string, CoverageKey> = {
+  verizon: "verizon",
+  visible: "verizon",
+  usmobile_vzw: "verizon",
+  xfinity: "verizon",
+  spectrum: "verizon",
+  tmobile: "tmobile",
+  mint: "tmobile",
+  googlefi: "tmobile",
+  metro: "tmobile",
+  usmobile_tmo: "tmobile",
+  att: "att",
+  cricket: "att",
+  straighttalk: "att",
+  consumercellular: "consumercellular",
+};
+
+export function carrierCoverageKey(carrier: string | null): CoverageKey | null {
+  if (!carrier) return null;
+  return CARRIER_COVERAGE_KEY[carrier] ?? null;
+}
+
 export const ACCENT_PRESETS = [
   { hex: "#2D6A4F", label: "Trail Green" },
   { hex: "#52796F", label: "Sage" },
