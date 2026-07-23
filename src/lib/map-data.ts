@@ -9,6 +9,7 @@ import campsites from "../../assets/data/at-campsites.json";
 import parkingSpots from "../../assets/data/at-parking.json";
 import waterSources from "../../assets/data/at-water.json";
 import privies from "../../assets/data/at-privies.json";
+import towns from "../../assets/data/at-towns.json";
 
 type TrailSegment = {
   type: "Feature";
@@ -333,6 +334,70 @@ export const CAMPSITE_COLLECTION = toPointCollection(campsites as PoiRecord[], "
 export const PARKING_COLLECTION = toPointCollection(parkingSpots as PoiRecord[], "parking");
 export const WATER_COLLECTION = toPointCollection(waterSources as PoiRecord[], "water");
 export const PRIVY_COLLECTION = toPointCollection(privies as PoiRecord[], "privy");
+
+type TownRecord = {
+  name: string;
+  mile: number;
+  services?: string[];
+  notes?: string;
+  access?: string | null;
+  offTrailMiles?: number | null;
+  direction?: string | null;
+  onTrail?: boolean;
+};
+
+/**
+ * Tap-target fields for a resupply town. `services` is a JSON string rather
+ * than an array because MapLibre feature properties must be primitives —
+ * arrays survive as opaque values on web but not reliably on native, so it is
+ * serialised here and parsed back in TownDetailSheet.
+ */
+export type TownProperties = {
+  name: string;
+  atMile: number;
+  access: string | null;
+  offTrailMiles: number | null;
+  direction: string | null;
+  onTrail: boolean;
+  services: string;
+  notes: string | null;
+};
+
+export const TOWN_MINZOOM = 8;
+
+/**
+ * Resupply towns (assets/data/at-towns.json, built by the web repo's
+ * scripts/build-at-towns.mjs from the ATC Data Book — the definitive mileage
+ * source).
+ *
+ * Positioned at the A.T. mile where you LEAVE the trail for the town, not at
+ * the town itself: that junction is what a hiker plans around, and it means no
+ * geocoding is needed since the mile projects onto the centerline exactly like
+ * shelters do. Distance and direction off-trail live in the tap sheet.
+ */
+export const TOWN_COLLECTION = {
+  type: "FeatureCollection" as const,
+  features: (towns as TownRecord[])
+    .map((town) => {
+      const coord = coordinateAtMile(town.mile);
+      if (!coord) return null;
+      return {
+        type: "Feature" as const,
+        properties: {
+          name: town.name,
+          atMile: town.mile,
+          access: town.access ?? null,
+          offTrailMiles: town.offTrailMiles ?? null,
+          direction: town.direction ?? null,
+          onTrail: Boolean(town.onTrail),
+          services: JSON.stringify(town.services ?? []),
+          notes: town.notes ?? null,
+        } satisfies TownProperties,
+        geometry: { type: "Point" as const, coordinates: coord },
+      };
+    })
+    .filter((f): f is NonNullable<typeof f> => f !== null),
+};
 
 /**
  * Mile markers along the whole trail, ported from web's MileMarkers/

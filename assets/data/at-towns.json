@@ -1,0 +1,1685 @@
+[
+  {
+    "name": "Suches, GA",
+    "mile": 20.5,
+    "services": [
+      "camping",
+      "resupply",
+      "water"
+    ],
+    "access": "Woody Gap, GA-60",
+    "offTrailMiles": 2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGw",
+    "zip": "30572",
+    "state": "GA",
+    "curated": false
+  },
+  {
+    "name": "Helen, GA",
+    "mile": 52.7,
+    "services": [
+      "camping",
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Unicoi Gap, GA-75",
+    "offTrailMiles": 9,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RCGLM",
+    "zip": "30545",
+    "state": "GA",
+    "curated": false
+  },
+  {
+    "name": "Hiawassee, GA",
+    "mile": 69.4,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "First major trail town NOBO. Full resupply, multiple hostels, shuttle from Deep Gap.",
+    "access": "Dicks Creek Gap, US-76",
+    "offTrailMiles": 11,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "30546",
+    "state": "GA",
+    "curated": true
+  },
+  {
+    "name": "Franklin, NC",
+    "mile": 109.6,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Major trail town with full services. Multiple motels and hostels within a mile of the trail.",
+    "access": "Winding Stair Gap, US-64",
+    "offTrailMiles": 10,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "28734",
+    "state": "NC",
+    "curated": true
+  },
+  {
+    "name": "Fontana Dam, NC",
+    "mile": 164.9,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Fontana Village resort just off trail. \"Fontana Hilton\" shelter at dam. Gateway to Smokies.",
+    "access": "NC-28; Fontana Marina",
+    "offTrailMiles": 1.8,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "28733",
+    "state": "NC",
+    "curated": true
+  },
+  {
+    "name": "Hot Springs, NC",
+    "mile": 275.2,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Beloved trail town — AT runs right down main street. Natural hot springs spa, multiple hostels, excellent food options. Major nero/zero destination.",
+    "access": "US-25 & US-70, NC-209",
+    "offTrailMiles": 0,
+    "direction": null,
+    "onTrail": true,
+    "facilities": "RCGLM",
+    "zip": "28743",
+    "state": "NC",
+    "curated": true
+  },
+  {
+    "name": "Erwin, TN",
+    "mile": 344.6,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Full-service town at Nolichucky Gorge. Multiple hostels, shuttles, outfitter. Nolichucky River camping popular.",
+    "access": "Nolichucky River",
+    "offTrailMiles": 3.8,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "37650",
+    "state": "TN",
+    "curated": true
+  },
+  {
+    "name": "Roan Mountain, TN",
+    "mile": 395.6,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "notes": "Small town ~3 mi off trail. Limited services but convenient after Roan Highlands.",
+    "access": "US-19E",
+    "offTrailMiles": 3.4,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGLM",
+    "zip": "37687",
+    "state": "TN",
+    "curated": true
+  },
+  {
+    "name": "Hampton, TN",
+    "mile": 428.9,
+    "services": [
+      "resupply",
+      "hostel",
+      "restaurant",
+      "shuttle"
+    ],
+    "notes": "Small community near Watauga Lake. Kincora Hostel is legendary for hospitality.",
+    "access": "US-321",
+    "offTrailMiles": 2.6,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "37658",
+    "state": "TN",
+    "curated": true
+  },
+  {
+    "name": "Shady Valley, TN",
+    "mile": 456,
+    "services": [
+      "resupply",
+      "restaurant",
+      "water"
+    ],
+    "access": "Low Gap, US-421",
+    "offTrailMiles": 3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGMw",
+    "zip": "37688",
+    "state": "TN",
+    "curated": false
+  },
+  {
+    "name": "Damascus, VA",
+    "mile": 471,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "\"Trail Town USA\" — AT, Virginia Creeper, and other trails converge here. Multiple hostels, full outfitter, excellent community. Home of Trail Days festival. Major zero/nero stop for nearly all thru-hikers.",
+    "access": null,
+    "offTrailMiles": 0,
+    "direction": null,
+    "onTrail": true,
+    "facilities": "RGLM",
+    "zip": "24236",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Sugar Grove, VA",
+    "mile": 534.6,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "VA-16",
+    "offTrailMiles": 3.1,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "24375",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Atkins, VA",
+    "mile": 546,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "VA-683, US-11, I-81",
+    "offTrailMiles": 0,
+    "direction": null,
+    "onTrail": true,
+    "facilities": "RGLM",
+    "zip": "24311",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Bastian, VA",
+    "mile": 592.1,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "US-52",
+    "offTrailMiles": 2.7,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "24314",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Pearisburg, VA",
+    "mile": 637.4,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Full-service trail town on the New River. Good resupply, multiple lodging options, outfitter. Significant climb back to trail.",
+    "access": "VA 100",
+    "offTrailMiles": 1.3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "24134",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Daleville, VA",
+    "mile": 731.1,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "AT passes through a commercial strip with a grocery, hotel, and outfitter. McAfee Knob nearby. One of the easiest town stops on the trail.",
+    "access": "US-220",
+    "offTrailMiles": 0,
+    "direction": null,
+    "onTrail": true,
+    "facilities": "RGLM",
+    "zip": "24083",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Troutville, VA",
+    "mile": 732.6,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "AT passes through a commercial strip with a grocery, hotel, and outfitter. McAfee Knob nearby. One of the easiest town stops on the trail.",
+    "access": "Norfolk Southern Railway, US-11",
+    "offTrailMiles": 1.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "24175",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Buchanan, VA",
+    "mile": 752.7,
+    "services": [
+      "camping",
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Bearwallow Gap, VA-43; Blue Ridge Parkway, mile 90.9",
+    "offTrailMiles": 5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGLM",
+    "zip": "24066",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Big Island, VA",
+    "mile": 788.1,
+    "services": [
+      "camping",
+      "resupply",
+      "lodging",
+      "restaurant",
+      "shelter"
+    ],
+    "access": "US-501, VA-130",
+    "offTrailMiles": 5.6,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RCGLMS",
+    "zip": "24526",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Buena Vista, VA",
+    "mile": 809.9,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shuttle"
+    ],
+    "notes": "Full-service town ~3 mi off trail. Good grocery and lodging.",
+    "access": "Long Mountain Wayside, US-60",
+    "offTrailMiles": 9.3,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGLM",
+    "zip": "24416",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Montebello, VA",
+    "mile": 828.8,
+    "services": [
+      "camping",
+      "resupply",
+      "lodging"
+    ],
+    "access": "Cash Hollow Road",
+    "offTrailMiles": 4.5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGL",
+    "zip": "24464",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Waynesboro, VA",
+    "mile": 865.1,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Southern gateway to Shenandoah NP. Full resupply, excellent hostel at Grace Church, gear shop. Major milestone — end of southern Virginia.",
+    "access": null,
+    "offTrailMiles": 4.5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "22980",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Front Royal, VA",
+    "mile": 972.9,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shuttle"
+    ],
+    "notes": "Northern end of Shenandoah NP. Full services, good resupply before entering northern Virginia.",
+    "access": null,
+    "offTrailMiles": 4.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "22630",
+    "state": "VA",
+    "curated": true
+  },
+  {
+    "name": "Linden, VA",
+    "mile": 983.6,
+    "services": [
+      "resupply"
+    ],
+    "access": "VA-55",
+    "offTrailMiles": 1,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RG",
+    "zip": "22642",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Bluemont, VA",
+    "mile": 1007,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "Snickers Gap, VA-7, VA-679",
+    "offTrailMiles": 1,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "20135",
+    "state": "VA",
+    "curated": false
+  },
+  {
+    "name": "Harpers Ferry, WV",
+    "mile": 1026.5,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower"
+    ],
+    "notes": "ATC headquarters — get your thru-hiker photo taken here. Historic town, strong community. Psychological midpoint of the AT. Amtrak stop for getting in/out.",
+    "access": "Appalachian Trail Conservancy Side Trail",
+    "offTrailMiles": 1.1,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "25425",
+    "state": "WV",
+    "curated": true
+  },
+  {
+    "name": "Boonsboro, MD",
+    "mile": 1044.6,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "Turners Gap, US Alt. 40",
+    "offTrailMiles": 1.6,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "21713",
+    "state": "MD",
+    "curated": false
+  },
+  {
+    "name": "Smithsburg, MD",
+    "mile": 1058.1,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Wolfsville Road (MD-17)",
+    "offTrailMiles": 2.4,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "21783",
+    "state": "MD",
+    "curated": false
+  },
+  {
+    "name": "Cascade, MD",
+    "mile": 1067.9,
+    "services": [
+      "resupply",
+      "restaurant",
+      "water"
+    ],
+    "access": "Pen Mar Park",
+    "offTrailMiles": 1.6,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGMw",
+    "zip": "21719",
+    "state": "MD",
+    "curated": false
+  },
+  {
+    "name": "Blue Ridge Summit, PA",
+    "mile": 1070.7,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": null,
+    "offTrailMiles": 1.3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "17214",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Rouzerville, PA",
+    "mile": 1070.7,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": null,
+    "offTrailMiles": 2.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "17250",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Waynesboro, PA",
+    "mile": 1070.7,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Southern gateway to Shenandoah NP. Full resupply, excellent hostel at Grace Church, gear shop. Major milestone — end of southern Virginia.",
+    "access": null,
+    "offTrailMiles": 5.7,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "17268",
+    "state": "PA",
+    "curated": true
+  },
+  {
+    "name": "South Mountain, PA",
+    "mile": 1081.3,
+    "services": [
+      "camping",
+      "resupply",
+      "restaurant"
+    ],
+    "access": "PA-233",
+    "offTrailMiles": 1.3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RCGM",
+    "zip": "17261",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Fayetteville, PA",
+    "mile": 1086,
+    "services": [
+      "camping",
+      "resupply",
+      "lodging",
+      "restaurant",
+      "water"
+    ],
+    "access": "US-30, Caledonia State Park, Thaddeus Stevens Museum",
+    "offTrailMiles": 2.3,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGLMw",
+    "zip": "17222",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Gardners, PA",
+    "mile": 1114.5,
+    "services": [
+      "resupply"
+    ],
+    "access": "Hunters Run Road (PA-34)",
+    "offTrailMiles": 0.2,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RG",
+    "zip": "17324",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Mount Holly Springs, PA",
+    "mile": 1116.3,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "PA-94",
+    "offTrailMiles": 2.5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "17065",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Boiling Springs, PA",
+    "mile": 1125.1,
+    "services": [
+      "resupply",
+      "restaurant",
+      "lodging"
+    ],
+    "notes": "Charming town with ATC mid-Atlantic office. Limited but walkable services.",
+    "access": null,
+    "offTrailMiles": 0.1,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "17007",
+    "state": "PA",
+    "curated": true
+  },
+  {
+    "name": "Carlisle, PA",
+    "mile": 1134,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "US-11",
+    "offTrailMiles": 1.3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "17013",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Duncannon, PA",
+    "mile": 1150.8,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower"
+    ],
+    "notes": "Classic trail town with the legendary Doyle Hotel (hiker-friendly, no-frills). Good pub food, solid resupply options.",
+    "access": null,
+    "offTrailMiles": 0.6,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "17020",
+    "state": "PA",
+    "curated": true
+  },
+  {
+    "name": "Pine Grove, PA",
+    "mile": 1197.7,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "shelter",
+      "water"
+    ],
+    "access": "PA-501",
+    "offTrailMiles": 4.3,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMSw",
+    "zip": "17963",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Shartlesville, PA",
+    "mile": 1216.7,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Shartlesville Cross-Mountain Road",
+    "offTrailMiles": 3.6,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "19554",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Port Clinton, PA",
+    "mile": 1221.4,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower"
+    ],
+    "notes": "Small town on Schuylkill River. Pavilion camping in town, Port Clinton Hotel is a hiker institution.",
+    "access": null,
+    "offTrailMiles": 3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLMS",
+    "zip": "19549",
+    "state": "PA",
+    "curated": true
+  },
+  {
+    "name": "Ashfield, PA",
+    "mile": 1255.7,
+    "services": [
+      "resupply",
+      "water"
+    ],
+    "access": null,
+    "offTrailMiles": 2.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGw",
+    "zip": "18212",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Slatington, PA",
+    "mile": 1261.4,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Lehigh Gap, PA-873",
+    "offTrailMiles": 2,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "18080",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Palmerton, PA",
+    "mile": 1261.5,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": null,
+    "offTrailMiles": 2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "18071",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Danielsville, PA",
+    "mile": 1267,
+    "services": [
+      "resupply",
+      "restaurant",
+      "water"
+    ],
+    "access": "Little Gap",
+    "offTrailMiles": 1.5,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGMw",
+    "zip": "18038",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Wind Gap, PA",
+    "mile": 1282.4,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "PA-33",
+    "offTrailMiles": 1,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "18091",
+    "state": "PA",
+    "curated": false
+  },
+  {
+    "name": "Delaware Water Gap, PA",
+    "mile": 1297.9,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "End of Pennsylvania. AT runs through town. DWG Presbyterian Church hostel is beloved. Great pizza, full resupply, easy hitching. Major milestone entering NJ/NE states.",
+    "access": null,
+    "offTrailMiles": 3.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "18327",
+    "state": "PA",
+    "curated": true
+  },
+  {
+    "name": "Branchville, NJ",
+    "mile": 1326.4,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Culvers Gap, US-206",
+    "offTrailMiles": 1.6,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "07826",
+    "state": "NJ",
+    "curated": false
+  },
+  {
+    "name": "Unionville, NY",
+    "mile": 1350.6,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "Lott Road",
+    "offTrailMiles": 0.4,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "10988",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Glenwood, NJ",
+    "mile": 1359.8,
+    "services": [
+      "resupply",
+      "lodging"
+    ],
+    "access": "County 565",
+    "offTrailMiles": 0.7,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGL",
+    "zip": "07418",
+    "state": "NJ",
+    "curated": false
+  },
+  {
+    "name": "Vernon, NJ",
+    "mile": 1361.4,
+    "services": [
+      "resupply",
+      "restaurant",
+      "lodging",
+      "shuttle"
+    ],
+    "notes": "Small NJ trail town. Basic resupply and restaurant options.",
+    "access": "NJ-94",
+    "offTrailMiles": 2.4,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "07462",
+    "state": "NJ",
+    "curated": true
+  },
+  {
+    "name": "New Milford, NY",
+    "mile": 1364.5,
+    "services": [
+      "resupply"
+    ],
+    "access": "Barrett Road",
+    "offTrailMiles": 1.8,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RG",
+    "zip": "10959",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Hewitt, NJ",
+    "mile": 1370.5,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "State Line Trail, New York-New Jersey Line",
+    "offTrailMiles": 3.7,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "GM",
+    "zip": "07421",
+    "state": "NJ",
+    "curated": false
+  },
+  {
+    "name": "Greenwood Lake, NY",
+    "mile": 1376.5,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "NY-17A",
+    "offTrailMiles": 1.6,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "10925",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Arden, NY",
+    "mile": 1388.7,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "NY-17",
+    "offTrailMiles": 1.8,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "10910",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Fort Montgomery, NY",
+    "mile": 1409.6,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "Bear Mountain Bridge",
+    "offTrailMiles": 0.7,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "10922",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Peekskill, NY",
+    "mile": 1415.6,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "US-9, NY-403",
+    "offTrailMiles": 4.8,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "10566",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Stormville, NY",
+    "mile": 1441.5,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "NY-52",
+    "offTrailMiles": 2.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "12582",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Poughquag, NY",
+    "mile": 1451.5,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "NY-55",
+    "offTrailMiles": 3.6,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "12570",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Pawling, NY",
+    "mile": 1454.9,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower"
+    ],
+    "notes": "AT passes through town. Metro-North train access to NYC. Good hostel, walkable services.",
+    "access": "County 20 (West Dover Road)",
+    "offTrailMiles": 3.1,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGCMw",
+    "zip": "12564",
+    "state": "NY",
+    "curated": true
+  },
+  {
+    "name": "Wingdale, NY",
+    "mile": 1461.8,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "Hoyt Road, Connecticut-New York Line",
+    "offTrailMiles": 3.3,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "12594",
+    "state": "NY",
+    "curated": false
+  },
+  {
+    "name": "Kent, CT",
+    "mile": 1473.7,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry"
+    ],
+    "notes": "Picturesque Connecticut town. Good resupply, outfitter, cafes. AT within walking distance of main street.",
+    "access": "CT-341, Schaghticoke Road",
+    "offTrailMiles": 0.8,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "06757",
+    "state": "CT",
+    "curated": true
+  },
+  {
+    "name": "Cornwall Bridge, CT",
+    "mile": 1485,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "notes": "Small stop with a notable hiker-friendly inn and basic resupply.",
+    "access": "CT-4",
+    "offTrailMiles": 0.9,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGL",
+    "zip": "06754",
+    "state": "CT",
+    "curated": true
+  },
+  {
+    "name": "Salisbury, CT",
+    "mile": 1508,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "laundry"
+    ],
+    "notes": "Lovely New England town. Good resupply, B&Bs, cafes.",
+    "access": "CT-41 (Under Mountain Road)",
+    "offTrailMiles": 0.8,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "06068",
+    "state": "CT",
+    "curated": true
+  },
+  {
+    "name": "South Egremont, MA",
+    "mile": 1524.9,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "notes": "Southern Berkshires stop. Basic services, easy road access.",
+    "access": "MA-41 (Undermountain Road)",
+    "offTrailMiles": 1.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "01258",
+    "state": "MA",
+    "curated": true
+  },
+  {
+    "name": "Sheffield, MA",
+    "mile": 1529.4,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "notes": "Southern Berkshires stop. Basic services, easy road access.",
+    "access": "US-7",
+    "offTrailMiles": 3.3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "01257",
+    "state": "MA",
+    "curated": true
+  },
+  {
+    "name": "Great Barrington, MA",
+    "mile": 1538.1,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "water"
+    ],
+    "access": "MA-23",
+    "offTrailMiles": 3,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "01230",
+    "state": "MA",
+    "curated": false
+  },
+  {
+    "name": "Lee, MA",
+    "mile": 1557.8,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "US-20",
+    "offTrailMiles": 5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "01238",
+    "state": "MA",
+    "curated": false
+  },
+  {
+    "name": "Cheshire, MA",
+    "mile": 1586.9,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "notes": "Small town near Mt Greylock approach. Friendly community, limited but adequate resupply.",
+    "access": null,
+    "offTrailMiles": 0.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGL",
+    "zip": "01225",
+    "state": "MA",
+    "curated": true
+  },
+  {
+    "name": "North Adams, MA",
+    "mile": 1601.9,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shuttle"
+    ],
+    "notes": "Largest town near southern Vermont approach. Full services, MASS MoCA arts destination. Good resupply.",
+    "access": null,
+    "offTrailMiles": 2.5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "01247",
+    "state": "MA",
+    "curated": true
+  },
+  {
+    "name": "Bennington, VT",
+    "mile": 1618.5,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Major southern Vermont trail town ~5 mi off trail. Full services, good gear shop, multiple hostels.",
+    "access": null,
+    "offTrailMiles": 5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "05201",
+    "state": "VT",
+    "curated": true
+  },
+  {
+    "name": "Manchester Center, VT",
+    "mile": 1660.6,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Full-service Vermont trail town. Flagship EMS/outfitter, great grocery, hostels. Popular zero stop.",
+    "access": "VT-11 & VT-30",
+    "offTrailMiles": 5.8,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "05255",
+    "state": "VT",
+    "curated": true
+  },
+  {
+    "name": "Danby, VT",
+    "mile": 1678.4,
+    "services": [
+      "resupply",
+      "restaurant"
+    ],
+    "access": "Danby-Landgrove Road (USFS-10), Black Branch",
+    "offTrailMiles": 3.2,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGM",
+    "zip": "05739",
+    "state": "VT",
+    "curated": false
+  },
+  {
+    "name": "Wallingford, VT",
+    "mile": 1684.7,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "water"
+    ],
+    "access": "VT-140",
+    "offTrailMiles": 2.7,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMw",
+    "zip": "05773",
+    "state": "VT",
+    "curated": false
+  },
+  {
+    "name": "North Clarendon, VT",
+    "mile": 1691,
+    "services": [
+      "resupply"
+    ],
+    "access": "VT-103",
+    "offTrailMiles": 0.8,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RG",
+    "zip": "05759",
+    "state": "VT",
+    "curated": false
+  },
+  {
+    "name": "Killington, VT",
+    "mile": 1708.7,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower"
+    ],
+    "notes": "AT passes near ski resort area. Inn at Long Trail is a Vermont institution — great pub, hiker-friendly.",
+    "access": "US-4",
+    "offTrailMiles": 2.2,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "05751",
+    "state": "VT",
+    "curated": true
+  },
+  {
+    "name": "Woodstock, VT",
+    "mile": 1732.4,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "outfitter"
+    ],
+    "notes": "Charming Vermont town ~4 mi from trail. Full services, quaint New England character.",
+    "access": "VT-12",
+    "offTrailMiles": 4.4,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "05091",
+    "state": "VT",
+    "curated": true
+  },
+  {
+    "name": "South Pomfret, VT",
+    "mile": 1734.6,
+    "services": [
+      "resupply",
+      "water"
+    ],
+    "access": "Woodstock Stage Road",
+    "offTrailMiles": 0.9,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGw",
+    "zip": "05067",
+    "state": "VT",
+    "curated": false
+  },
+  {
+    "name": "Norwich, VT",
+    "mile": 1754,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant",
+      "camping",
+      "shelter",
+      "water"
+    ],
+    "access": null,
+    "offTrailMiles": 0.3,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLMCSw",
+    "zip": "05055",
+    "state": "VT",
+    "curated": false
+  },
+  {
+    "name": "Hanover, NH",
+    "mile": 1755.5,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower"
+    ],
+    "notes": "Dartmouth College town — AT runs through campus. Excellent food and services. Co-op grocery is superb for resupply. Hiker-friendly culture. Major milestone entering NH.",
+    "access": "Dartmouth College",
+    "offTrailMiles": 0,
+    "direction": null,
+    "onTrail": true,
+    "facilities": "RGLM",
+    "zip": "03755",
+    "state": "NH",
+    "curated": true
+  },
+  {
+    "name": "Wentworth, NH",
+    "mile": 1789.1,
+    "services": [
+      "resupply"
+    ],
+    "access": "NH-25A",
+    "offTrailMiles": 4.3,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RG",
+    "zip": "03282",
+    "state": "NH",
+    "curated": false
+  },
+  {
+    "name": "Warren, NH",
+    "mile": 1793.9,
+    "services": [
+      "resupply",
+      "restaurant",
+      "water"
+    ],
+    "access": "NH-25C",
+    "offTrailMiles": 4,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RGMw",
+    "zip": "03279",
+    "state": "NH",
+    "curated": false
+  },
+  {
+    "name": "North Woodstock, NH",
+    "mile": 1824.6,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Gateway to Franconia Notch and the Whites. Full services ~5 mi from trail. Popular base for White Mountains prep. Important re-supply before the Presidential Range.",
+    "access": "Franconia Notch, US-3, Lafayette Place Campground",
+    "offTrailMiles": 5.8,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RCGLM",
+    "zip": "03262",
+    "state": "NH",
+    "curated": true
+  },
+  {
+    "name": "Gorham, NH",
+    "mile": 1899.4,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "outfitter",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Full-service northern NH trail town. Multiple hostels, good outfitter, motel options. Northern exit from the Whites. Major milestone for most section hikers.",
+    "access": "US-2",
+    "offTrailMiles": 3.6,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGLMw",
+    "zip": "03581",
+    "state": "NH",
+    "curated": true
+  },
+  {
+    "name": "Andover, ME",
+    "mile": 1940.8,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Small Maine town with great hiker vibe. Pine Ellis Hostel is excellent. Good food, warm community.",
+    "access": "East B Hill Road",
+    "offTrailMiles": 8,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "RCGM",
+    "zip": "04216",
+    "state": "ME",
+    "curated": true
+  },
+  {
+    "name": "Oquossoc, ME",
+    "mile": 1964.2,
+    "services": [
+      "resupply",
+      "lodging",
+      "restaurant"
+    ],
+    "access": "ME-17",
+    "offTrailMiles": 11,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "04964",
+    "state": "ME",
+    "curated": false
+  },
+  {
+    "name": "Rangeley, ME",
+    "mile": 1977.3,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Maine lake town ~9 mi from trail. Full resupply, multiple lodging options, strong hiker community.",
+    "access": "ME-4",
+    "offTrailMiles": 9,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RCGLM",
+    "zip": "04970",
+    "state": "ME",
+    "curated": true
+  },
+  {
+    "name": "Stratton, ME",
+    "mile": 2009.5,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Small but hiker-focused town. White Wolf Inn is popular with hikers. Good resupply before Bigelow.",
+    "access": "ME-27",
+    "offTrailMiles": 5,
+    "direction": "W",
+    "onTrail": false,
+    "facilities": "RGLM",
+    "zip": "04982",
+    "state": "ME",
+    "curated": true
+  },
+  {
+    "name": "Monson, ME",
+    "mile": 2079.9,
+    "services": [
+      "resupply",
+      "hostel",
+      "lodging",
+      "restaurant",
+      "laundry",
+      "shower",
+      "shuttle"
+    ],
+    "notes": "Last trail town before the 100-Mile Wilderness. Shaw's Hostel is legendary — critically important resupply stop. Most hikers carry 7–10 days of food from here to Abol Bridge/Millinocket. DO NOT leave without a full resupply.",
+    "access": null,
+    "offTrailMiles": 2,
+    "direction": "E",
+    "onTrail": false,
+    "facilities": "CGLM",
+    "zip": "04464",
+    "state": "ME",
+    "curated": true
+  }
+]

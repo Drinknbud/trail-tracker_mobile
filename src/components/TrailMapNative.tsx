@@ -18,6 +18,8 @@ import {
   CAMPSITE_COLLECTION,
   COVERAGE_DATA,
   COVERAGE_HATCH_PATTERN,
+  TOWN_COLLECTION,
+  TOWN_MINZOOM,
   KM_MARKER_COLLECTION,
   KM_MARKER_TIERS,
   MILE_MARKER_COLLECTION,
@@ -33,11 +35,13 @@ import {
   tileRasterPaint,
   type MapPhotoResolved,
   type PoiProperties,
+  type TownProperties,
 } from "@/lib/map-data";
 import { carrierCoverageKey, carrierLabel } from "@/lib/carriers";
 import { CoverageInfoSheet } from "@/components/CoverageInfoSheet";
 import { MapScaleLegend } from "@/components/MapScaleLegend";
 import { PoiDetailSheet, type PoiSelection } from "@/components/PoiDetailSheet";
+import { TownDetailSheet } from "@/components/TownDetailSheet";
 import { PhotoDetailSheet, type PhotoSelection } from "@/components/PhotoDetailSheet";
 import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
@@ -64,6 +68,8 @@ const POI_IMAGES = {
   "poi-parking": require("../../assets/images/poi/poi-parking.png"),
   "poi-water": require("../../assets/images/poi/poi-water.png"),
   "poi-privy": require("../../assets/images/poi/poi-privy.png"),
+  // Resupply towns (ATC Data Book) — violet house badge, matches the web app.
+  "poi-town": require("../../assets/images/poi/poi-town.png"),
   // White rounded "sign" stretched behind the stacked mile-marker digits via
   // icon-text-fit — reproduces web's bordered divIcon box (see MILE_MARKER
   // layers below), replacing the bare haloed text this used to render.
@@ -96,6 +102,7 @@ export function TrailMapNative({ layers, mapStyle, sections, photos, carrier }: 
   const [selectedPoi, setSelectedPoi] = useState<PoiSelection | null>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<PhotoSelection | null>(null);
   const [coverageInfoOpen, setCoverageInfoOpen] = useState(false);
+  const [selectedTown, setSelectedTown] = useState<TownProperties | null>(null);
   // Drives MapScaleLegend — defaults roughly match the whole-trail initial
   // fit (see AT_BOUNDS) until the first onRegionDidChange settles moments
   // after mount.
@@ -127,6 +134,12 @@ export function TrailMapNative({ layers, mapStyle, sections, photos, carrier }: 
     const props = feature.properties as PoiProperties;
     const [lon, lat] = feature.geometry.coordinates as [number, number];
     setSelectedPoi({ ...props, lat, lon });
+  }, []);
+
+  const handleTownPress = useCallback((e: NativeSyntheticEvent<PressEventWithFeatures>) => {
+    const feature = e.nativeEvent.features[0];
+    if (!feature) return;
+    setSelectedTown(feature.properties as TownProperties);
   }, []);
 
   // Photo markers carry their group's photos as a JSON string (MapLibre can't
@@ -299,6 +312,18 @@ export function TrailMapNative({ layers, mapStyle, sections, photos, carrier }: 
           />
         </GeoJSONSource>
 
+        {/* Resupply towns — at the trail mile where you leave for the town.
+            Above the POI icons: a town is a bigger planning landmark than an
+            individual privy or water source. */}
+        <GeoJSONSource id="at-towns" data={TOWN_COLLECTION} onPress={handleTownPress}>
+          <Layer
+            id="at-town-icons"
+            type="symbol"
+            minzoom={TOWN_MINZOOM}
+            layout={{ "icon-image": "poi-town", "icon-size": 0.42, "icon-allow-overlap": true, visibility: layers.towns ? "visible" : "none" }}
+          />
+        </GeoJSONSource>
+
         {/* Photo markers — camera badges, on top of the POI icons (matches web). */}
         <GeoJSONSource id="at-photos" data={photoCollection} onPress={handlePhotoPress}>
           <Layer
@@ -366,6 +391,8 @@ export function TrailMapNative({ layers, mapStyle, sections, photos, carrier }: 
       <MapScaleLegend zoom={viewState.zoom} latitude={viewState.latitude} />
 
       <PoiDetailSheet poi={selectedPoi} onClose={() => setSelectedPoi(null)} />
+
+      <TownDetailSheet town={selectedTown} visible={selectedTown !== null} onClose={() => setSelectedTown(null)} />
       <PhotoDetailSheet photos={selectedPhotos} onClose={() => setSelectedPhotos(null)} />
       <CoverageInfoSheet
         visible={coverageInfoOpen}

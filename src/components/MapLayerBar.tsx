@@ -18,6 +18,7 @@ export type LayerVisibility = {
   privies: boolean;
   photos: boolean;
   fccCoverage: boolean;
+  towns: boolean;
 };
 
 export const DEFAULT_LAYERS: LayerVisibility = {
@@ -31,6 +32,7 @@ export const DEFAULT_LAYERS: LayerVisibility = {
   privies: true,
   photos: true,
   fccCoverage: true,
+  towns: true,
 };
 
 const PLANNED_PILL_COLOR = "#3B82F6";
@@ -38,6 +40,7 @@ const PLANNED_PILL_COLOR = "#3B82F6";
 const poiIcons = {
   shelter: require("../../assets/images/poi/poi-shelter.png"),
   campsite: require("../../assets/images/poi/poi-campsite.png"),
+  town: require("../../assets/images/poi/poi-town.png"),
   parking: require("../../assets/images/poi/poi-parking.png"),
   water: require("../../assets/images/poi/poi-water.png"),
   privy: require("../../assets/images/poi/poi-privy.png"),
@@ -157,6 +160,7 @@ export function MapLayerBar({
         <Pill active={layers.parking} onPress={() => onToggle("parking")} activeColor="#1D4ED8" icon={<PoiIcon name="parking" />} label="Parking" />
         <Pill active={layers.water} onPress={() => onToggle("water")} activeColor="#0EA5E9" icon={<PoiIcon name="water" />} label="Water" />
         <Pill active={layers.privies} onPress={() => onToggle("privies")} activeColor="#78716C" icon={<PoiIcon name="privy" />} label="Privies" />
+        <Pill active={layers.towns} onPress={() => onToggle("towns")} activeColor="#7C3AED" icon={<PoiIcon name="town" />} label="Towns" />
         <Pill active={layers.photos} onPress={() => onToggle("photos")} activeColor="#60A5FA" icon={<Text style={{ fontSize: 11 }}>📷</Text>} label="Photos" />
         <Pressable
           onPress={() => carrier && onToggle("fccCoverage")}

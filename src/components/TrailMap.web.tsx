@@ -10,6 +10,8 @@ import {
   CAMPSITE_COLLECTION,
   COVERAGE_DATA,
   COVERAGE_HATCH_PATTERN,
+  TOWN_COLLECTION,
+  TOWN_MINZOOM,
   COVERAGE_HATCH_TIERS,
   KM_MARKER_COLLECTION,
   KM_MARKER_TIERS,
@@ -26,11 +28,13 @@ import {
   tileRasterPaint,
   type MapPhotoResolved,
   type PoiProperties,
+  type TownProperties,
 } from "@/lib/map-data";
 import { carrierCoverageKey, carrierLabel } from "@/lib/carriers";
 import { CoverageInfoSheet } from "@/components/CoverageInfoSheet";
 import { MapScaleLegend } from "@/components/MapScaleLegend";
 import { PoiDetailSheet, type PoiSelection } from "@/components/PoiDetailSheet";
+import { TownDetailSheet } from "@/components/TownDetailSheet";
 import { PhotoDetailSheet, type PhotoSelection } from "@/components/PhotoDetailSheet";
 import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
@@ -42,6 +46,8 @@ const POI_IMAGE_MODULES: Record<string, number> = {
   "poi-parking": require("../../assets/images/poi/poi-parking.png"),
   "poi-water": require("../../assets/images/poi/poi-water.png"),
   "poi-privy": require("../../assets/images/poi/poi-privy.png"),
+  // Resupply towns (ATC Data Book) — violet house badge, matches the web app.
+  "poi-town": require("../../assets/images/poi/poi-town.png"),
   // White rounded "sign" stretched behind the stacked mile-marker digits via
   // icon-text-fit — mirrors TrailMapNative and web's bordered divIcon box.
   "mile-marker-sign": require("../../assets/images/map/mile-marker-sign.png"),
@@ -97,6 +103,7 @@ export function TrailMap({ layers, mapStyle, sections, photos, carrier }: TrailM
   const [selectedPoi, setSelectedPoi] = useState<PoiSelection | null>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<PhotoSelection | null>(null);
   const [coverageInfoOpen, setCoverageInfoOpen] = useState(false);
+  const [selectedTown, setSelectedTown] = useState<TownProperties | null>(null);
   // Drives MapScaleLegend — defaults roughly match the whole-trail initial
   // fit (see AT_BOUNDS) until the first "move" event settles moments after mount.
   const [viewState, setViewState] = useState({ zoom: 5, latitude: 39.85 });
@@ -267,6 +274,25 @@ export function TrailMap({ layers, mapStyle, sections, photos, carrier }: TrailM
         map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
       }
 
+      // Resupply towns — placed at the trail mile where you leave for the town.
+      // Painted above the POI icons: a town is a bigger planning landmark than
+      // an individual privy or water source.
+      await loadIcon("poi-town");
+      map.addSource("at-towns", { type: "geojson", data: TOWN_COLLECTION as GeoJSON.GeoJSON });
+      map.addLayer({
+        id: "at-town-icons",
+        type: "symbol",
+        source: "at-towns",
+        minzoom: TOWN_MINZOOM,
+        layout: { "icon-image": "poi-town", "icon-size": 0.42, "icon-allow-overlap": true, visibility: layersRef.current.towns ? "visible" : "none" },
+      });
+      map.on("click", "at-town-icons", (e) => {
+        const props = e.features?.[0]?.properties as TownProperties | undefined;
+        if (props) setSelectedTown(props);
+      });
+      map.on("mouseenter", "at-town-icons", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "at-town-icons", () => { map.getCanvas().style.cursor = ""; });
+
       // Photo markers — camera badges on top of the POI icons (matches web app).
       await loadIcon("photo-marker");
       map.addSource("at-photos", { type: "geojson", data: buildPhotoCollection(photosRef.current) as GeoJSON.GeoJSON });
@@ -375,6 +401,7 @@ export function TrailMap({ layers, mapStyle, sections, photos, carrier }: TrailM
       setVis("at-water-icons", layers.water);
       setVis("at-privies-icons", layers.privies);
       setVis("at-photo-icons", layers.photos);
+      setVis("at-town-icons", layers.towns);
       setVis("coverage-deadzone-fill", layers.fccCoverage);
       setVis("coverage-deadzone-outline", layers.fccCoverage);
       const campsiteSource = map.getSource("at-campsites") as maplibregl.GeoJSONSource | undefined;
@@ -493,6 +520,8 @@ export function TrailMap({ layers, mapStyle, sections, photos, carrier }: TrailM
       <MapScaleLegend zoom={viewState.zoom} latitude={viewState.latitude} />
       <PoiDetailSheet poi={selectedPoi} onClose={() => setSelectedPoi(null)} />
       <PhotoDetailSheet photos={selectedPhotos} onClose={() => setSelectedPhotos(null)} />
+      <TownDetailSheet town={selectedTown} visible={selectedTown !== null} onClose={() => setSelectedTown(null)} />
+
       <CoverageInfoSheet
         visible={coverageInfoOpen}
         carrierLabel={carrierLabel(carrier)}
