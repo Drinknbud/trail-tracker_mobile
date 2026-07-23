@@ -19,6 +19,7 @@ import {
   COVERAGE_DATA,
   COVERAGE_HATCH_PATTERN,
   TOWN_COLLECTION,
+  TOWN_LINK_COLLECTION,
   TOWN_MINZOOM,
   KM_MARKER_COLLECTION,
   KM_MARKER_TIERS,
@@ -315,6 +316,16 @@ export function TrailMapNative({ layers, mapStyle, sections, photos, carrier }: 
         {/* Resupply towns — at the trail mile where you leave for the town.
             Above the POI icons: a town is a bigger planning landmark than an
             individual privy or water source. */}
+        <GeoJSONSource id="at-town-links" data={TOWN_LINK_COLLECTION}>
+          <Layer
+            id="at-town-links-line"
+            type="line"
+            minzoom={TOWN_MINZOOM}
+            layout={{ "line-cap": "round", visibility: layers.towns ? "visible" : "none" }}
+            paint={{ "line-color": "#7C3AED", "line-width": 2, "line-opacity": 0.85, "line-dasharray": [2, 2] }}
+          />
+        </GeoJSONSource>
+
         <GeoJSONSource id="at-towns" data={TOWN_COLLECTION} onPress={handleTownPress}>
           <Layer
             id="at-town-icons"

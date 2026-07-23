@@ -11,6 +11,7 @@ import {
   COVERAGE_DATA,
   COVERAGE_HATCH_PATTERN,
   TOWN_COLLECTION,
+  TOWN_LINK_COLLECTION,
   TOWN_MINZOOM,
   COVERAGE_HATCH_TIERS,
   KM_MARKER_COLLECTION,
@@ -278,6 +279,16 @@ export function TrailMap({ layers, mapStyle, sections, photos, carrier }: TrailM
       // Painted above the POI icons: a town is a bigger planning landmark than
       // an individual privy or water source.
       await loadIcon("poi-town");
+      // Leader line first so it draws beneath the town badge.
+      map.addSource("at-town-links", { type: "geojson", data: TOWN_LINK_COLLECTION as GeoJSON.GeoJSON });
+      map.addLayer({
+        id: "at-town-links-line",
+        type: "line",
+        source: "at-town-links",
+        minzoom: TOWN_MINZOOM,
+        layout: { "line-cap": "round", visibility: layersRef.current.towns ? "visible" : "none" },
+        paint: { "line-color": "#7C3AED", "line-width": 2, "line-opacity": 0.85, "line-dasharray": [2, 2] },
+      });
       map.addSource("at-towns", { type: "geojson", data: TOWN_COLLECTION as GeoJSON.GeoJSON });
       map.addLayer({
         id: "at-town-icons",
@@ -402,6 +413,7 @@ export function TrailMap({ layers, mapStyle, sections, photos, carrier }: TrailM
       setVis("at-privies-icons", layers.privies);
       setVis("at-photo-icons", layers.photos);
       setVis("at-town-icons", layers.towns);
+      setVis("at-town-links-line", layers.towns);
       setVis("coverage-deadzone-fill", layers.fccCoverage);
       setVis("coverage-deadzone-outline", layers.fccCoverage);
       const campsiteSource = map.getSource("at-campsites") as maplibregl.GeoJSONSource | undefined;

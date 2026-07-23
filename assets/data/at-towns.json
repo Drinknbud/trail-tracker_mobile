@@ -14,7 +14,10 @@
     "facilities": "RCGw",
     "zip": "30572",
     "state": "GA",
-    "curated": false
+    "curated": false,
+    "lat": 34.728115,
+    "lon": -84.066128,
+    "geocode": "zip"
   },
   {
     "name": "Helen, GA",
@@ -32,7 +35,10 @@
     "facilities": "RCGLM",
     "zip": "30545",
     "state": "GA",
-    "curated": false
+    "curated": false,
+    "lat": 34.701713,
+    "lon": -83.726684,
+    "geocode": "zip"
   },
   {
     "name": "Hiawassee, GA",
@@ -54,7 +60,10 @@
     "facilities": "RGLMw",
     "zip": "30546",
     "state": "GA",
-    "curated": true
+    "curated": true,
+    "lat": 34.927426,
+    "lon": -83.736653,
+    "geocode": "zip"
   },
   {
     "name": "Franklin, NC",
@@ -77,7 +86,10 @@
     "facilities": "RGLMw",
     "zip": "28734",
     "state": "NC",
-    "curated": true
+    "curated": true,
+    "lat": 35.181175,
+    "lon": -83.385357,
+    "geocode": "zip"
   },
   {
     "name": "Fontana Dam, NC",
@@ -97,7 +109,10 @@
     "facilities": "RGLM",
     "zip": "28733",
     "state": "NC",
-    "curated": true
+    "curated": true,
+    "lat": 35.434755,
+    "lon": -83.822545,
+    "geocode": "zip"
   },
   {
     "name": "Hot Springs, NC",
@@ -120,7 +135,10 @@
     "facilities": "RCGLM",
     "zip": "28743",
     "state": "NC",
-    "curated": true
+    "curated": true,
+    "lat": 35.890859,
+    "lon": -82.831077,
+    "geocode": "on-trail"
   },
   {
     "name": "Erwin, TN",
@@ -143,7 +161,10 @@
     "facilities": "RGLM",
     "zip": "37650",
     "state": "TN",
-    "curated": true
+    "curated": true,
+    "lat": 36.105038,
+    "lon": -82.496291,
+    "geocode": "offset-fallback"
   },
   {
     "name": "Roan Mountain, TN",
@@ -161,7 +182,10 @@
     "facilities": "RCGLM",
     "zip": "37687",
     "state": "TN",
-    "curated": true
+    "curated": true,
+    "lat": 36.188222,
+    "lon": -82.083144,
+    "geocode": "zip"
   },
   {
     "name": "Hampton, TN",
@@ -180,7 +204,10 @@
     "facilities": "RGLM",
     "zip": "37658",
     "state": "TN",
-    "curated": true
+    "curated": true,
+    "lat": 36.26796,
+    "lon": -82.176248,
+    "geocode": "zip"
   },
   {
     "name": "Shady Valley, TN",
@@ -197,7 +224,10 @@
     "facilities": "RGMw",
     "zip": "37688",
     "state": "TN",
-    "curated": false
+    "curated": false,
+    "lat": 36.534745,
+    "lon": -81.906922,
+    "geocode": "zip"
   },
   {
     "name": "Damascus, VA",
@@ -220,7 +250,10 @@
     "facilities": "RGLM",
     "zip": "24236",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 36.635096,
+    "lon": -81.789627,
+    "geocode": "on-trail"
   },
   {
     "name": "Sugar Grove, VA",
@@ -237,7 +270,10 @@
     "facilities": "RGLM",
     "zip": "24375",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 36.767869,
+    "lon": -81.400251,
+    "geocode": "zip"
   },
   {
     "name": "Atkins, VA",
@@ -254,7 +290,10 @@
     "facilities": "RGLM",
     "zip": "24311",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 36.887638,
+    "lon": -81.371281,
+    "geocode": "on-trail"
   },
   {
     "name": "Bastian, VA",
@@ -271,7 +310,10 @@
     "facilities": "RGLM",
     "zip": "24314",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 37.137269,
+    "lon": -81.09852,
+    "geocode": "offset-fallback"
   },
   {
     "name": "Pearisburg, VA",
@@ -294,7 +336,10 @@
     "facilities": "RGLM",
     "zip": "24134",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 37.293572,
+    "lon": -80.730669,
+    "geocode": "zip"
   },
   {
     "name": "Daleville, VA",
@@ -316,7 +361,10 @@
     "facilities": "RGLM",
     "zip": "24083",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 37.394825,
+    "lon": -79.903955,
+    "geocode": "on-trail"
   },
   {
     "name": "Troutville, VA",
@@ -338,7 +386,10 @@
     "facilities": "RGLM",
     "zip": "24175",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 37.417704,
+    "lon": -79.901427,
+    "geocode": "zip"
   },
   {
     "name": "Buchanan, VA",
@@ -356,7 +407,10 @@
     "facilities": "RCGLM",
     "zip": "24066",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 37.527676,
+    "lon": -79.692389,
+    "geocode": "zip"
   },
   {
     "name": "Big Island, VA",
@@ -375,7 +429,10 @@
     "facilities": "RCGLMS",
     "zip": "24526",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 37.533749,
+    "lon": -79.359754,
+    "geocode": "name"
   },
   {
     "name": "Buena Vista, VA",
@@ -395,7 +452,10 @@
     "facilities": "RCGLM",
     "zip": "24416",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 37.756692,
+    "lon": -79.356253,
+    "geocode": "zip"
   },
   {
     "name": "Montebello, VA",
@@ -412,7 +472,10 @@
     "facilities": "RCGL",
     "zip": "24464",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 37.852006,
+    "lon": -79.122069,
+    "geocode": "zip"
   },
   {
     "name": "Waynesboro, VA",
@@ -435,7 +498,10 @@
     "facilities": "RGLM",
     "zip": "22980",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 38.087523,
+    "lon": -78.919364,
+    "geocode": "zip"
   },
   {
     "name": "Front Royal, VA",
@@ -456,7 +522,10 @@
     "facilities": "RGLM",
     "zip": "22630",
     "state": "VA",
-    "curated": true
+    "curated": true,
+    "lat": 38.956326,
+    "lon": -78.170486,
+    "geocode": "zip"
   },
   {
     "name": "Linden, VA",
@@ -471,7 +540,10 @@
     "facilities": "RG",
     "zip": "22642",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 38.913738,
+    "lon": -78.060936,
+    "geocode": "zip"
   },
   {
     "name": "Bluemont, VA",
@@ -487,7 +559,10 @@
     "facilities": "RGM",
     "zip": "20135",
     "state": "VA",
-    "curated": false
+    "curated": false,
+    "lat": 39.098387,
+    "lon": -77.860552,
+    "geocode": "zip"
   },
   {
     "name": "Harpers Ferry, WV",
@@ -508,7 +583,10 @@
     "facilities": "RGLM",
     "zip": "25425",
     "state": "WV",
-    "curated": true
+    "curated": true,
+    "lat": 39.287473,
+    "lon": -77.777132,
+    "geocode": "zip"
   },
   {
     "name": "Boonsboro, MD",
@@ -524,7 +602,10 @@
     "facilities": "RGM",
     "zip": "21713",
     "state": "MD",
-    "curated": false
+    "curated": false,
+    "lat": 39.51937,
+    "lon": -77.663776,
+    "geocode": "zip"
   },
   {
     "name": "Smithsburg, MD",
@@ -541,7 +622,10 @@
     "facilities": "RGLM",
     "zip": "21783",
     "state": "MD",
-    "curated": false
+    "curated": false,
+    "lat": 39.652391,
+    "lon": -77.579019,
+    "geocode": "zip"
   },
   {
     "name": "Cascade, MD",
@@ -558,7 +642,10 @@
     "facilities": "RGMw",
     "zip": "21719",
     "state": "MD",
-    "curated": false
+    "curated": false,
+    "lat": 39.71363,
+    "lon": -77.481826,
+    "geocode": "zip"
   },
   {
     "name": "Blue Ridge Summit, PA",
@@ -574,7 +661,10 @@
     "facilities": "RGM",
     "zip": "17214",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 39.727132,
+    "lon": -77.469921,
+    "geocode": "zip"
   },
   {
     "name": "Rouzerville, PA",
@@ -591,7 +681,10 @@
     "facilities": "RGLM",
     "zip": "17250",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 39.736707,
+    "lon": -77.524872,
+    "geocode": "zip"
   },
   {
     "name": "Waynesboro, PA",
@@ -614,7 +707,10 @@
     "facilities": "RGLM",
     "zip": "17268",
     "state": "PA",
-    "curated": true
+    "curated": true,
+    "lat": 39.755238,
+    "lon": -77.564228,
+    "geocode": "zip"
   },
   {
     "name": "South Mountain, PA",
@@ -631,7 +727,10 @@
     "facilities": "RCGM",
     "zip": "17261",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 39.817217,
+    "lon": -77.462445,
+    "geocode": "zip"
   },
   {
     "name": "Fayetteville, PA",
@@ -650,7 +749,10 @@
     "facilities": "RCGLMw",
     "zip": "17222",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 39.882917,
+    "lon": -77.533588,
+    "geocode": "zip"
   },
   {
     "name": "Gardners, PA",
@@ -665,7 +767,10 @@
     "facilities": "RG",
     "zip": "17324",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.032109,
+    "lon": -77.212587,
+    "geocode": "zip"
   },
   {
     "name": "Mount Holly Springs, PA",
@@ -681,7 +786,10 @@
     "facilities": "RGM",
     "zip": "17065",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.117204,
+    "lon": -77.193166,
+    "geocode": "zip"
   },
   {
     "name": "Boiling Springs, PA",
@@ -699,7 +807,10 @@
     "facilities": "RGLMw",
     "zip": "17007",
     "state": "PA",
-    "curated": true
+    "curated": true,
+    "lat": 40.151552,
+    "lon": -77.134843,
+    "geocode": "zip"
   },
   {
     "name": "Carlisle, PA",
@@ -716,7 +827,10 @@
     "facilities": "RGLM",
     "zip": "17013",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.200845,
+    "lon": -77.198408,
+    "geocode": "zip"
   },
   {
     "name": "Duncannon, PA",
@@ -737,7 +851,10 @@
     "facilities": "RGLM",
     "zip": "17020",
     "state": "PA",
-    "curated": true
+    "curated": true,
+    "lat": 40.393143,
+    "lon": -77.032575,
+    "geocode": "name"
   },
   {
     "name": "Pine Grove, PA",
@@ -756,7 +873,10 @@
     "facilities": "RGLMSw",
     "zip": "17963",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.557718,
+    "lon": -76.37966,
+    "geocode": "zip"
   },
   {
     "name": "Shartlesville, PA",
@@ -773,7 +893,10 @@
     "facilities": "RGLM",
     "zip": "19554",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.549445,
+    "lon": -76.053396,
+    "geocode": "offset-fallback"
   },
   {
     "name": "Port Clinton, PA",
@@ -794,7 +917,10 @@
     "facilities": "RGLMS",
     "zip": "19549",
     "state": "PA",
-    "curated": true
+    "curated": true,
+    "lat": 40.58073,
+    "lon": -76.026202,
+    "geocode": "zip"
   },
   {
     "name": "Ashfield, PA",
@@ -810,7 +936,10 @@
     "facilities": "RGw",
     "zip": "18212",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.775548,
+    "lon": -75.710128,
+    "geocode": "zip"
   },
   {
     "name": "Slatington, PA",
@@ -827,7 +956,10 @@
     "facilities": "RGLM",
     "zip": "18080",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.781134,
+    "lon": -75.581816,
+    "geocode": "offset-fallback"
   },
   {
     "name": "Palmerton, PA",
@@ -844,7 +976,10 @@
     "facilities": "RGLM",
     "zip": "18071",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.807282,
+    "lon": -75.609169,
+    "geocode": "zip"
   },
   {
     "name": "Danielsville, PA",
@@ -861,7 +996,10 @@
     "facilities": "RGMw",
     "zip": "18038",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.790589,
+    "lon": -75.488309,
+    "geocode": "zip"
   },
   {
     "name": "Wind Gap, PA",
@@ -878,7 +1016,10 @@
     "facilities": "RGLM",
     "zip": "18091",
     "state": "PA",
-    "curated": false
+    "curated": false,
+    "lat": 40.828791,
+    "lon": -75.30668,
+    "geocode": "zip"
   },
   {
     "name": "Delaware Water Gap, PA",
@@ -900,7 +1041,10 @@
     "facilities": "RGLM",
     "zip": "18327",
     "state": "PA",
-    "curated": true
+    "curated": true,
+    "lat": 40.985377,
+    "lon": -75.145085,
+    "geocode": "zip"
   },
   {
     "name": "Branchville, NJ",
@@ -917,7 +1061,10 @@
     "facilities": "RGLM",
     "zip": "07826",
     "state": "NJ",
-    "curated": false
+    "curated": false,
+    "lat": 41.18293,
+    "lon": -74.771678,
+    "geocode": "zip"
   },
   {
     "name": "Unionville, NY",
@@ -933,7 +1080,10 @@
     "facilities": "RGM",
     "zip": "10988",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.300747,
+    "lon": -74.560603,
+    "geocode": "zip"
   },
   {
     "name": "Glenwood, NJ",
@@ -949,7 +1099,10 @@
     "facilities": "RGL",
     "zip": "07418",
     "state": "NJ",
-    "curated": false
+    "curated": false,
+    "lat": 41.227898,
+    "lon": -74.488834,
+    "geocode": "zip"
   },
   {
     "name": "Vernon, NJ",
@@ -968,7 +1121,10 @@
     "facilities": "RGM",
     "zip": "07462",
     "state": "NJ",
-    "curated": true
+    "curated": true,
+    "lat": 41.232953,
+    "lon": -74.439221,
+    "geocode": "offset-fallback"
   },
   {
     "name": "New Milford, NY",
@@ -983,7 +1139,10 @@
     "facilities": "RG",
     "zip": "10959",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.234539,
+    "lon": -74.413766,
+    "geocode": "name"
   },
   {
     "name": "Hewitt, NJ",
@@ -999,7 +1158,10 @@
     "facilities": "GM",
     "zip": "07421",
     "state": "NJ",
-    "curated": false
+    "curated": false,
+    "lat": 41.141714,
+    "lon": -74.310193,
+    "geocode": "name"
   },
   {
     "name": "Greenwood Lake, NY",
@@ -1016,7 +1178,10 @@
     "facilities": "RGLM",
     "zip": "10925",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.211702,
+    "lon": -74.301058,
+    "geocode": "zip"
   },
   {
     "name": "Arden, NY",
@@ -1033,7 +1198,10 @@
     "facilities": "RGLM",
     "zip": "10910",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.281898,
+    "lon": -74.137545,
+    "geocode": "zip"
   },
   {
     "name": "Fort Montgomery, NY",
@@ -1050,7 +1218,10 @@
     "facilities": "RGLM",
     "zip": "10922",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.334303,
+    "lon": -73.988279,
+    "geocode": "zip"
   },
   {
     "name": "Peekskill, NY",
@@ -1067,7 +1238,10 @@
     "facilities": "RGLM",
     "zip": "10566",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.289918,
+    "lon": -73.914896,
+    "geocode": "zip"
   },
   {
     "name": "Stormville, NY",
@@ -1083,7 +1257,10 @@
     "facilities": "RGM",
     "zip": "12582",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.570392,
+    "lon": -73.74548,
+    "geocode": "name"
   },
   {
     "name": "Poughquag, NY",
@@ -1100,7 +1277,10 @@
     "facilities": "RGLM",
     "zip": "12570",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.615467,
+    "lon": -73.683489,
+    "geocode": "zip"
   },
   {
     "name": "Pawling, NY",
@@ -1121,7 +1301,10 @@
     "facilities": "RGCMw",
     "zip": "12564",
     "state": "NY",
-    "curated": true
+    "curated": true,
+    "lat": 41.572631,
+    "lon": -73.598234,
+    "geocode": "zip"
   },
   {
     "name": "Wingdale, NY",
@@ -1137,7 +1320,10 @@
     "facilities": "RGM",
     "zip": "12594",
     "state": "NY",
-    "curated": false
+    "curated": false,
+    "lat": 41.652967,
+    "lon": -73.557715,
+    "geocode": "zip"
   },
   {
     "name": "Kent, CT",
@@ -1157,7 +1343,10 @@
     "facilities": "RGLM",
     "zip": "06757",
     "state": "CT",
-    "curated": true
+    "curated": true,
+    "lat": 41.729497,
+    "lon": -73.457283,
+    "geocode": "zip"
   },
   {
     "name": "Cornwall Bridge, CT",
@@ -1175,7 +1364,10 @@
     "facilities": "RGL",
     "zip": "06754",
     "state": "CT",
-    "curated": true
+    "curated": true,
+    "lat": 41.772684,
+    "lon": -73.364709,
+    "geocode": "zip"
   },
   {
     "name": "Salisbury, CT",
@@ -1194,7 +1386,10 @@
     "facilities": "RGLM",
     "zip": "06068",
     "state": "CT",
-    "curated": true
+    "curated": true,
+    "lat": 42.008997,
+    "lon": -73.410094,
+    "geocode": "zip"
   },
   {
     "name": "South Egremont, MA",
@@ -1212,7 +1407,10 @@
     "facilities": "RGM",
     "zip": "01258",
     "state": "MA",
-    "curated": true
+    "curated": true,
+    "lat": 42.149989,
+    "lon": -73.427806,
+    "geocode": "zip"
   },
   {
     "name": "Sheffield, MA",
@@ -1230,7 +1428,10 @@
     "facilities": "RGLM",
     "zip": "01257",
     "state": "MA",
-    "curated": true
+    "curated": true,
+    "lat": 42.110474,
+    "lon": -73.353336,
+    "geocode": "name"
   },
   {
     "name": "Great Barrington, MA",
@@ -1248,7 +1449,10 @@
     "facilities": "RGLMw",
     "zip": "01230",
     "state": "MA",
-    "curated": false
+    "curated": false,
+    "lat": 42.201819,
+    "lon": -73.360013,
+    "geocode": "zip"
   },
   {
     "name": "Lee, MA",
@@ -1265,7 +1469,10 @@
     "facilities": "RGLM",
     "zip": "01238",
     "state": "MA",
-    "curated": false
+    "curated": false,
+    "lat": 42.307348,
+    "lon": -73.250491,
+    "geocode": "name"
   },
   {
     "name": "Cheshire, MA",
@@ -1283,7 +1490,10 @@
     "facilities": "RGL",
     "zip": "01225",
     "state": "MA",
-    "curated": true
+    "curated": true,
+    "lat": 42.567788,
+    "lon": -73.156843,
+    "geocode": "zip"
   },
   {
     "name": "North Adams, MA",
@@ -1304,7 +1514,10 @@
     "facilities": "RGLM",
     "zip": "01247",
     "state": "MA",
-    "curated": true
+    "curated": true,
+    "lat": 42.692691,
+    "lon": -73.190915,
+    "geocode": "offset-fallback"
   },
   {
     "name": "Bennington, VT",
@@ -1327,7 +1540,10 @@
     "facilities": "RGLMw",
     "zip": "05201",
     "state": "VT",
-    "curated": true
+    "curated": true,
+    "lat": 42.888601,
+    "lon": -73.155693,
+    "geocode": "zip"
   },
   {
     "name": "Manchester Center, VT",
@@ -1350,7 +1566,10 @@
     "facilities": "RGLMw",
     "zip": "05255",
     "state": "VT",
-    "curated": true
+    "curated": true,
+    "lat": 43.17611,
+    "lon": -73.053852,
+    "geocode": "zip"
   },
   {
     "name": "Danby, VT",
@@ -1366,7 +1585,10 @@
     "facilities": "RGM",
     "zip": "05739",
     "state": "VT",
-    "curated": false
+    "curated": false,
+    "lat": 43.345337,
+    "lon": -73.001723,
+    "geocode": "zip"
   },
   {
     "name": "Wallingford, VT",
@@ -1384,7 +1606,10 @@
     "facilities": "RGLMw",
     "zip": "05773",
     "state": "VT",
-    "curated": false
+    "curated": false,
+    "lat": 43.454099,
+    "lon": -72.999893,
+    "geocode": "zip"
   },
   {
     "name": "North Clarendon, VT",
@@ -1399,7 +1624,10 @@
     "facilities": "RG",
     "zip": "05759",
     "state": "VT",
-    "curated": false
+    "curated": false,
+    "lat": 43.554693,
+    "lon": -72.961815,
+    "geocode": "zip"
   },
   {
     "name": "Killington, VT",
@@ -1420,7 +1648,10 @@
     "facilities": "RGLM",
     "zip": "05751",
     "state": "VT",
-    "curated": true
+    "curated": true,
+    "lat": 43.653931,
+    "lon": -72.801435,
+    "geocode": "zip"
   },
   {
     "name": "Woodstock, VT",
@@ -1439,7 +1670,10 @@
     "facilities": "RGLM",
     "zip": "05091",
     "state": "VT",
-    "curated": true
+    "curated": true,
+    "lat": 43.629542,
+    "lon": -72.53571,
+    "geocode": "zip"
   },
   {
     "name": "South Pomfret, VT",
@@ -1455,7 +1689,10 @@
     "facilities": "RGw",
     "zip": "05067",
     "state": "VT",
-    "curated": false
+    "curated": false,
+    "lat": 43.675308,
+    "lon": -72.525366,
+    "geocode": "zip"
   },
   {
     "name": "Norwich, VT",
@@ -1475,7 +1712,10 @@
     "facilities": "RGLMCSw",
     "zip": "05055",
     "state": "VT",
-    "curated": false
+    "curated": false,
+    "lat": 43.739235,
+    "lon": -72.307507,
+    "geocode": "zip"
   },
   {
     "name": "Hanover, NH",
@@ -1497,7 +1737,10 @@
     "facilities": "RGLM",
     "zip": "03755",
     "state": "NH",
-    "curated": true
+    "curated": true,
+    "lat": 43.701081,
+    "lon": -72.28687,
+    "geocode": "on-trail"
   },
   {
     "name": "Wentworth, NH",
@@ -1512,7 +1755,10 @@
     "facilities": "RG",
     "zip": "03282",
     "state": "NH",
-    "curated": false
+    "curated": false,
+    "lat": 43.86431,
+    "lon": -71.904666,
+    "geocode": "zip"
   },
   {
     "name": "Warren, NH",
@@ -1529,7 +1775,10 @@
     "facilities": "RGMw",
     "zip": "03279",
     "state": "NH",
-    "curated": false
+    "curated": false,
+    "lat": 43.922969,
+    "lon": -71.888518,
+    "geocode": "zip"
   },
   {
     "name": "North Woodstock, NH",
@@ -1552,7 +1801,10 @@
     "facilities": "RCGLM",
     "zip": "03262",
     "state": "NH",
-    "curated": true
+    "curated": true,
+    "lat": 44.112905,
+    "lon": -71.585967,
+    "geocode": "offset-fallback"
   },
   {
     "name": "Gorham, NH",
@@ -1575,7 +1827,10 @@
     "facilities": "RCGLMw",
     "zip": "03581",
     "state": "NH",
-    "curated": true
+    "curated": true,
+    "lat": 44.398462,
+    "lon": -71.168498,
+    "geocode": "zip"
   },
   {
     "name": "Andover, ME",
@@ -1597,7 +1852,10 @@
     "facilities": "RCGM",
     "zip": "04216",
     "state": "ME",
-    "curated": true
+    "curated": true,
+    "lat": 44.631279,
+    "lon": -70.740112,
+    "geocode": "zip"
   },
   {
     "name": "Oquossoc, ME",
@@ -1614,7 +1872,10 @@
     "facilities": "RGLM",
     "zip": "04964",
     "state": "ME",
-    "curated": false
+    "curated": false,
+    "lat": 44.94548,
+    "lon": -70.771116,
+    "geocode": "zip"
   },
   {
     "name": "Rangeley, ME",
@@ -1636,7 +1897,10 @@
     "facilities": "RCGLM",
     "zip": "04970",
     "state": "ME",
-    "curated": true
+    "curated": true,
+    "lat": 44.952177,
+    "lon": -70.677647,
+    "geocode": "zip"
   },
   {
     "name": "Stratton, ME",
@@ -1658,7 +1922,10 @@
     "facilities": "RGLM",
     "zip": "04982",
     "state": "ME",
-    "curated": true
+    "curated": true,
+    "lat": 45.136643,
+    "lon": -70.437977,
+    "geocode": "zip"
   },
   {
     "name": "Monson, ME",
@@ -1680,6 +1947,9 @@
     "facilities": "CGLM",
     "zip": "04464",
     "state": "ME",
-    "curated": true
+    "curated": true,
+    "lat": 45.290472,
+    "lon": -69.506304,
+    "geocode": "zip"
   }
 ]

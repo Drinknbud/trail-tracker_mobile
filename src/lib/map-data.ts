@@ -338,6 +338,8 @@ export const PRIVY_COLLECTION = toPointCollection(privies as PoiRecord[], "privy
 type TownRecord = {
   name: string;
   mile: number;
+  lat?: number;
+  lon?: number;
   services?: string[];
   notes?: string;
   access?: string | null;
@@ -379,7 +381,11 @@ export const TOWN_COLLECTION = {
   type: "FeatureCollection" as const,
   features: (towns as TownRecord[])
     .map((town) => {
-      const coord = coordinateAtMile(town.mile);
+      // Real geocoded position where we have one (see the web repo's
+      // scripts/geocode-at-towns.mjs); otherwise fall back to the trail access
+      // point so the town still appears rather than vanishing.
+      const coord: [number, number] | null =
+        town.lat != null && town.lon != null ? [town.lon, town.lat] : coordinateAtMile(town.mile);
       if (!coord) return null;
       return {
         type: "Feature" as const,
@@ -394,6 +400,32 @@ export const TOWN_COLLECTION = {
           notes: town.notes ?? null,
         } satisfies TownProperties,
         geometry: { type: "Point" as const, coordinates: coord },
+      };
+    })
+    .filter((f): f is NonNullable<typeof f> => f !== null),
+};
+
+/**
+ * Dashed leader lines from each off-trail town back to the A.T. mile you leave
+ * from. Without these a town badge floating in the woods gives no clue which
+ * gap it belongs to; with them it reads as "leave the trail here, go there".
+ * On-trail towns (Hot Springs, Damascus, ...) get no line — they sit on the
+ * trail already, and that distinction is the whole point of the layer.
+ */
+export const TOWN_LINK_COLLECTION = {
+  type: "FeatureCollection" as const,
+  features: (towns as TownRecord[])
+    .map((town) => {
+      if (town.onTrail || town.lat == null || town.lon == null) return null;
+      const access = coordinateAtMile(town.mile);
+      if (!access) return null;
+      return {
+        type: "Feature" as const,
+        properties: { name: town.name },
+        geometry: {
+          type: "LineString" as const,
+          coordinates: [access, [town.lon, town.lat] as [number, number]],
+        },
       };
     })
     .filter((f): f is NonNullable<typeof f> => f !== null),
