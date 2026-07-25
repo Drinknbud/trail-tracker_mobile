@@ -335,6 +335,37 @@ export const PARKING_COLLECTION = toPointCollection(parkingSpots as PoiRecord[],
 export const WATER_COLLECTION = toPointCollection(waterSources as PoiRecord[], "water");
 export const PRIVY_COLLECTION = toPointCollection(privies as PoiRecord[], "privy");
 
+export type PoiFeatureCollection = {
+  type: "FeatureCollection";
+  features: { type: "Feature"; properties: PoiProperties; geometry: { type: "Point"; coordinates: [number, number] } }[];
+};
+
+// Grace so a POI right at a section's boundary mile still shows on its map.
+const SECTION_POI_BUFFER_MI = 0.5;
+
+/**
+ * Filter a bundled trail-wide POI collection down to just the features
+ * within a section's own mile range (plus a small buffer) — used by the
+ * section-detail map (SectionMapNative/.web) so it shows only this
+ * section's POIs instead of the whole trail's collection cropped by
+ * viewport (which would still include off-section POIs that happen to fall
+ * within the fitted bounds' rectangular corners).
+ */
+export function filterPoiCollectionByMileRange(
+  collection: PoiFeatureCollection,
+  startMile: number,
+  endMile: number
+): PoiFeatureCollection {
+  const lo = Math.min(startMile, endMile) - SECTION_POI_BUFFER_MI;
+  const hi = Math.max(startMile, endMile) + SECTION_POI_BUFFER_MI;
+  return {
+    type: "FeatureCollection",
+    features: collection.features.filter(
+      (f) => f.properties.atMile != null && f.properties.atMile >= lo && f.properties.atMile <= hi
+    ),
+  };
+}
+
 type TownRecord = {
   name: string;
   mile: number;

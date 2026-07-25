@@ -1,14 +1,24 @@
 import { router, useFocusEffect } from "expo-router";
-import { CheckCircle2, CloudDownload, Plus, WifiOff } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  CloudDownload,
+  Plus,
+  RefreshCw,
+  Trash2,
+  WifiOff,
+} from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 
 import { PickerModal } from "@/components/PickerModal";
 import { Card, Screen } from "@/components/Screen";
 import { tripStore, type SectionRow, type TripDownloadRow } from "@/db";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { downloadTrip } from "@/lib/trip-download";
+import { downloadTrip, removeSection } from "@/lib/trip-download";
 import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
 import { useTheme } from "@/theme/ThemeContext";
@@ -23,8 +33,10 @@ type SectionsResponse = {
   sections: (SectionRow & { startDate: string | null; endDate: string | null })[];
 };
 
+type GroupKey = "planning" | "planned" | "completed";
+
 export default function JournalScreen() {
-  const { colors, fontScale } = useTheme();
+  const { colors, scheme, fontScale } = useTheme();
   const { fmtMiles, fmtDate } = useUnits();
   const { token } = useAuth();
   const { isPremium } = usePremium();
@@ -35,6 +47,15 @@ export default function JournalScreen() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rowErrors, setRowErrors] = useState<Map<string, string>>(new Map());
   const [showAddMenu, setShowAddMenu] = useState(false);
+  // Completed starts collapsed (usually the longest list, and history you
+  // don't need to act on); Planning/Planned start open since they're the
+  // actionable groups.
+  const [openGroups, setOpenGroups] = useState<Record<GroupKey, boolean>>({
+    planning: true,
+    planned: true,
+    completed: false,
+  });
+  const swipeableRefs = useRef(new Map<string, Swipeable | null>());
 
   const loadLocal = useCallback(async () => {
     setSections(await tripStore.listSections());
@@ -48,7 +69,23 @@ export default function JournalScreen() {
       if (!token) return;
       try {
         const res = await apiFetch<SectionsResponse>("/api/mobile/sections", { token });
-        await tripStore.upsertSections(res.sections);
+        // Drop any section that still has an unflushed .../delete outbox
+        // entry — otherwise a swipe-delete made while offline (which removes
+        // the row locally and queues the server delete) gets resurrected the
+        // instant this resync lands before that queued delete has flushed.
+        // A very high maxAttempts pulls in dead rows too, since a delete
+        // that gave up retrying should still stay hidden rather than pop
+        // back into the list.
+        const pending = await tripStore.outboxPending(Number.MAX_SAFE_INTEGER);
+        const pendingDeleteIds = new Set(
+          pending
+            .map((e) => e.endpoint.match(/^\/api\/mobile\/sections\/([^/]+)\/delete$/)?.[1])
+            .filter((id): id is string => !!id)
+        );
+        const filtered = pendingDeleteIds.size
+          ? res.sections.filter((s) => !pendingDeleteIds.has(s.id))
+          : res.sections;
+        await tripStore.upsertSections(filtered);
         setOffline(false);
         await loadLocal();
       } catch {
@@ -86,19 +123,70 @@ export default function JournalScreen() {
     }
   };
 
-  // Still-drafting vs. ready-to-hike — mirrors web's app/log/page.tsx filter
-  // (mobile has no sharedBy field, so that clause is dropped).
-  const planningSections = sections.filter((s) => s.status === "planned" && !s.inJournal);
-  const journalSections = sections.filter(
-    (s) => s.status === "completed" || (s.status === "planned" && s.inJournal)
-  );
+  // Swipe-to-delete removes the section itself (server + local), not just its
+  // offline data — clearing offline data on its own now lives on the section
+  // detail screen instead.
+  const confirmDeleteSection = (s: SectionRow) => {
+    swipeableRefs.current.get(s.id)?.close();
+    Alert.alert(
+      "Delete section?",
+      `Permanently delete "${s.name}"? This removes it and any downloaded data from this device and can't be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await removeSection(s.id, token);
+            await loadLocal();
+          },
+        },
+      ]
+    );
+  };
 
-  const renderSectionCard = (s: SectionRow) => {
+  const toggleGroup = (key: GroupKey) =>
+    setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  // Still-drafting vs. ready-to-hike vs. done — mirrors web's app/log/page.tsx
+  // filter (mobile has no sharedBy field, so that clause is dropped), split
+  // three ways instead of web's two so Planned and Completed each get their
+  // own collapsible section. Each list is sorted most-recent-first.
+  const planningSections = sections
+    .filter((s) => s.status === "planned" && !s.inJournal)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const plannedSections = sections
+    .filter((s) => s.status === "planned" && s.inJournal)
+    .sort((a, b) => (b.startDate ?? b.updatedAt).localeCompare(a.startDate ?? a.updatedAt));
+  const completedSections = sections
+    .filter((s) => s.status === "completed")
+    .sort((a, b) =>
+      (b.endDate ?? b.startDate ?? b.updatedAt).localeCompare(
+        a.endDate ?? a.startDate ?? a.updatedAt
+      )
+    );
+
+  const renderSectionCard = (s: SectionRow, completedStyle: boolean) => {
     const download = downloads.get(s.id);
     const busy = busyId === s.id;
     const rowError = rowErrors.get(s.id);
-    return (
-      <Card key={s.id} style={{ marginBottom: 10, paddingVertical: 12 }}>
+    const hasDownload = !!download;
+
+    const card = (
+      <Card
+        style={{
+          marginBottom: 10,
+          paddingVertical: 12,
+          ...(completedStyle
+            ? {
+                borderColor: colors.completed,
+                borderWidth: 1,
+                backgroundColor:
+                  scheme === "dark" ? "rgba(34,197,94,0.12)" : "rgba(34,197,94,0.08)",
+              }
+            : {}),
+        }}
+      >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Pressable
             onPress={() => router.push(`/section/${s.id}`)}
@@ -127,34 +215,36 @@ export default function JournalScreen() {
               </Text>
             </View>
           </Pressable>
-          {download?.verified ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginRight: 8 }}>
-              <CheckCircle2 color={colors.completed} size={16} />
-              <Text style={{ fontSize: 11 * fontScale, color: colors.completed }}>Offline</Text>
+          {hasDownload ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 3, marginRight: 6 }}>
+              <CheckCircle2 color={colors.completed} size={14} />
+              <Text style={{ fontSize: 10 * fontScale, color: colors.completed }}>Offline</Text>
             </View>
           ) : null}
           <Pressable
             onPress={() => onDownload(s.id)}
             disabled={busy}
+            hitSlop={6}
+            accessibilityLabel={hasDownload ? "Update offline data" : "Download offline data"}
             style={{
-              backgroundColor: colors.accent,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              opacity: busy ? 0.6 : 1,
-              flexDirection: "row",
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              borderWidth: 1,
+              borderColor: colors.border,
               alignItems: "center",
-              gap: 6,
+              justifyContent: "center",
+              opacity: busy ? 0.6 : 1,
+              marginLeft: 6,
             }}
           >
             {busy ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colors.accent} size="small" />
+            ) : hasDownload ? (
+              <RefreshCw color={colors.accent} size={15} />
             ) : (
-              <CloudDownload color="#FFFFFF" size={16} />
+              <CloudDownload color={colors.accent} size={15} />
             )}
-            <Text style={{ color: "#FFFFFF", fontSize: 12 * fontScale, fontWeight: "600" }}>
-              {download?.verified ? "Update" : "Download"}
-            </Text>
           </Pressable>
         </View>
         {rowError ? (
@@ -164,23 +254,88 @@ export default function JournalScreen() {
         ) : null}
       </Card>
     );
+
+    return (
+      <Swipeable
+        key={s.id}
+        ref={(ref) => {
+          swipeableRefs.current.set(s.id, ref);
+        }}
+        overshootRight={false}
+        renderRightActions={() => (
+          <Pressable
+            onPress={() => confirmDeleteSection(s)}
+            style={{
+              backgroundColor: colors.destructiveRed,
+              justifyContent: "center",
+              alignItems: "center",
+              width: 84,
+              borderRadius: 12,
+              marginBottom: 10,
+              marginLeft: 8,
+            }}
+          >
+            <Trash2 color="#FFFFFF" size={18} />
+            <Text
+              style={{
+                color: "#FFFFFF",
+                fontSize: 11 * fontScale,
+                fontWeight: "600",
+                marginTop: 4,
+                textAlign: "center",
+              }}
+            >
+              Delete Section
+            </Text>
+          </Pressable>
+        )}
+      >
+        {card}
+      </Swipeable>
+    );
   };
 
-  const GroupLabel = ({ children }: { children: string }) => (
-    <Text
-      style={{
-        fontSize: 11 * fontScale,
-        fontWeight: "700",
-        color: colors.muted,
-        textTransform: "uppercase",
-        letterSpacing: 0.5,
-        marginBottom: 8,
-        marginTop: 4,
-      }}
+  const GroupHeader = ({
+    groupKey,
+    label,
+    list,
+  }: {
+    groupKey: GroupKey;
+    label: string;
+    list: SectionRow[];
+  }) => (
+    <Pressable
+      onPress={() => toggleGroup(groupKey)}
+      style={{ flexDirection: "row", alignItems: "center", marginBottom: 8, marginTop: 4 }}
     >
-      {children}
-    </Text>
+      <Text
+        style={{
+          fontSize: 11 * fontScale,
+          fontWeight: "700",
+          color: colors.muted,
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+        }}
+      >
+        {label}
+      </Text>
+      <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginLeft: 6 }}>
+        {list.length} · {fmtMiles(Math.round(list.reduce((sum, s) => sum + s.miles, 0) * 10) / 10)}
+      </Text>
+      <View style={{ flex: 1 }} />
+      {openGroups[groupKey] ? (
+        <ChevronUp color={colors.muted} size={16} />
+      ) : (
+        <ChevronDown color={colors.muted} size={16} />
+      )}
+    </Pressable>
   );
+
+  const groups: { key: GroupKey; label: string; list: SectionRow[] }[] = [
+    { key: "planning", label: "Planning", list: planningSections },
+    { key: "planned", label: "Planned", list: plannedSections },
+    { key: "completed", label: "Completed", list: completedSections },
+  ];
 
   return (
     <Screen>
@@ -260,20 +415,14 @@ export default function JournalScreen() {
           </Text>
         </Card>
       ) : (
-        <>
-          {planningSections.length > 0 ? (
-            <View style={{ marginBottom: 16 }}>
-              <GroupLabel>Planning</GroupLabel>
-              {planningSections.map(renderSectionCard)}
+        groups.map(({ key, label, list }) =>
+          list.length > 0 ? (
+            <View key={key} style={{ marginBottom: 16 }}>
+              <GroupHeader groupKey={key} label={label} list={list} />
+              {openGroups[key] ? list.map((s) => renderSectionCard(s, key === "completed")) : null}
             </View>
-          ) : null}
-          {journalSections.length > 0 ? (
-            <View>
-              <GroupLabel>Trail Journal</GroupLabel>
-              {journalSections.map(renderSectionCard)}
-            </View>
-          ) : null}
-        </>
+          ) : null
+        )
       )}
     </Screen>
   );

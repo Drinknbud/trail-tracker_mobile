@@ -3,7 +3,6 @@ import {
   BookOpen,
   Camera,
   ChevronUp,
-  Database,
   HelpCircle,
   LayoutDashboard,
   Mail,
@@ -54,7 +53,6 @@ const FLYOUTS: Record<CategoryKey, FlyoutItem[]> = {
     { icon: Camera, label: "Photos", route: "/photos" },
     { icon: Trophy, label: "Badges", route: "/accomplishments" },
     { icon: Mail, label: "Mail", route: "/trail-mail" },
-    { icon: Database, label: "Trip Status", route: "/trip-status" },
     { icon: Tent, label: "On Trail", onTrailToggle: true },
   ],
   community: [
@@ -70,7 +68,6 @@ const FLYOUTS: Record<CategoryKey, FlyoutItem[]> = {
 const CATEGORY_OF_ROUTE: Record<string, CategoryKey> = {
   journal: "trail",
   map: "trail",
-  "trip-status": "trail",
 };
 
 interface TabBarState {
@@ -186,9 +183,9 @@ export function FlyoutTabBar({ state }: { state: TabBarState }) {
                     go(item.route);
                   }
                 }}
-                style={{ flex: 1, alignItems: "center", opacity: disabled ? 0.4 : 1, paddingVertical: 4 }}
+                style={{ flex: 1, alignItems: "center", opacity: disabled ? 0.4 : 1, paddingVertical: 9 }}
               >
-                <item.icon color={tint} size={21} />
+                <item.icon color={tint} size={25} />
                 <Text
                   style={{
                     fontSize: 9.5 * fontScale,

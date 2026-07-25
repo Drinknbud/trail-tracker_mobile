@@ -12,6 +12,7 @@ import {
   Star,
   Trash2,
   Trophy,
+  WifiOff,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -58,7 +59,9 @@ import {
   type WebUserUpdate,
 } from "@/lib/webApi";
 import { ApiError, apiFetch } from "@/lib/api";
+import { enqueueWrite } from "@/lib/outbox";
 import { getBriefingHour, setBriefingHour } from "@/lib/prefs";
+import { cacheUser, getCachedUser } from "@/lib/userCache";
 import { DEFAULT_ACCENT } from "@/theme/colors";
 import { useTheme, type TextSize, type ThemeMode } from "@/theme/ThemeContext";
 
@@ -93,6 +96,7 @@ function SaveButton({
   saving,
   saved,
   error,
+  offlineNote,
 }: {
   onPress: () => void;
   saving: boolean;
@@ -102,11 +106,19 @@ function SaveButton({
    * looked identical to a successful one: the button just goes back to
    * "Save" with zero indication anything went wrong. */
   error?: string | null;
+  /** Shown instead of `error` when a save couldn't reach the server but was
+   * applied locally and queued to sync automatically once back online —
+   * distinct from `error` so "offline, but handled" doesn't read as a failure. */
+  offlineNote?: string | null;
 }) {
   const { colors, fontScale } = useTheme();
   return (
     <>
-      {error ? (
+      {offlineNote ? (
+        <Text style={{ fontSize: 13 * fontScale, color: colors.offlineAmber, marginBottom: 8 }}>
+          {offlineNote}
+        </Text>
+      ) : error ? (
         <Text style={{ fontSize: 13 * fontScale, color: colors.offlineAmber, marginBottom: 8 }}>
           {error}
         </Text>
@@ -239,16 +251,32 @@ export default function SettingsScreen() {
   const { token } = useAuth();
   const [tab, setTab] = useState<Tab>("trailMode");
   const [user, setUser] = useState<WebUser | null>(null);
+  const [offline, setOffline] = useState(false);
   const [earnedBadgeCount, setEarnedBadgeCount] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
+      // Show the last-known settings immediately (works offline) — replaced
+      // by the live copy below the moment that succeeds.
+      const cached = await getCachedUser();
+      if (cached) setUser(cached);
+
       if (!token) return;
       try {
-        setUser(await apiFetch<WebUser>("/api/user", { token }));
+        const fresh = await apiFetch<WebUser>("/api/user", { token });
+        setUser(fresh);
+        setOffline(false);
+        setLoadError(null);
+        void cacheUser(fresh);
       } catch (err) {
-        setLoadError(err instanceof Error ? err.message : "Couldn't load your profile");
+        if (cached) {
+          // Local copy still stands — just flag it as stale instead of
+          // blocking the whole screen behind a spinner + error.
+          setOffline(true);
+        } else {
+          setLoadError(err instanceof Error ? err.message : "Couldn't load your profile");
+        }
       }
       // Badge count drives the avatar/hero-image/accent-color unlock gates —
       // best-effort, no user-facing error if it fails (gates just stay locked).
@@ -314,6 +342,28 @@ export default function SettingsScreen() {
           <Card style={{ marginBottom: 12 }}>
             <Text style={{ fontSize: 13 * fontScale, color: colors.offlineAmber }}>{loadError}</Text>
           </Card>
+        ) : null}
+        {offline && user ? (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              backgroundColor: colors.surface,
+              borderColor: colors.offlineAmber,
+              borderWidth: 1,
+              borderRadius: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              marginBottom: 12,
+            }}
+          >
+            <WifiOff color={colors.offlineAmber} size={16} />
+            <Text style={{ color: colors.offlineAmber, fontSize: 13 * fontScale, flex: 1 }}>
+              Offline — showing your last-saved settings. Trail Mode, Profile, and Appearance
+              changes still apply and sync once you're back online.
+            </Text>
+          </View>
         ) : null}
         {!user ? (
           <ActivityIndicator color={colors.accent} style={{ marginTop: 40 }} />
@@ -688,6 +738,7 @@ function TrailModeTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [offlineNote, setOfflineNote] = useState<string | null>(null);
 
   useEffect(() => {
     void getBriefingHour().then(setBriefingHourState);
@@ -697,24 +748,43 @@ function TrailModeTab({
     if (!token) return;
     setSaving(true);
     setSaveError(null);
+    setOfflineNote(null);
+    const patch: WebUserUpdate = {
+      onTrailMode,
+      daysAheadForBriefings: daysAhead,
+      gpsTrackingEnabled: gpsEnabled,
+      gpsPowerMode: toWebPowerMode(powerMode),
+    };
     try {
       await setBriefingHour(briefingHour);
-      const updated = await updateWebUser(token, {
-        onTrailMode,
-        daysAheadForBriefings: daysAhead,
-        gpsTrackingEnabled: gpsEnabled,
-        gpsPowerMode: toWebPowerMode(powerMode),
-      });
+      const updated = await updateWebUser(token, patch);
       setUser(updated);
+      void cacheUser(updated);
       // Keep the adaptive tab bar in sync. Use the form value the server just
       // accepted — the PATCH response doesn't echo every field back.
       applyServerValue(onTrailMode);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      // Form state stays editable — but the user needs to actually see this
-      // failed, or a lost connection looks identical to a successful save.
-      setSaveError(err instanceof ApiError ? err.message : "Couldn't save — check your connection and try again.");
+      if (err instanceof ApiError) {
+        // Form state stays editable — but the user needs to actually see this
+        // failed, or a lost connection looks identical to a successful save.
+        setSaveError(err.message);
+      } else {
+        // Network-level failure (offline, not a server rejection): apply the
+        // change locally right away — GPS power mode and on-trail auto-sync
+        // are exactly the settings a hiker needs to adjust with no signal —
+        // and queue the PATCH via the same outbox every other offline mobile
+        // write uses, so it syncs automatically once back online.
+        const optimistic = { ...user, ...patch } as WebUser;
+        setUser(optimistic);
+        void cacheUser(optimistic);
+        applyServerValue(onTrailMode);
+        await enqueueWrite("/api/user", patch, `user-trailmode-${Date.now()}`, token, "PATCH");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        setOfflineNote("Saved on this device — will sync once you're back online.");
+      }
     } finally {
       setSaving(false);
     }
@@ -814,7 +884,7 @@ function TrailModeTab({
         </Pressable>
       </Card>
 
-      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} />
+      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} offlineNote={offlineNote} />
     </View>
   );
 }
@@ -857,32 +927,49 @@ function ProfileTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [offlineNote, setOfflineNote] = useState<string | null>(null);
 
   const save = async () => {
     if (!token) return;
     setSaving(true);
     setSaveError(null);
+    setOfflineNote(null);
+    const patch = {
+      name,
+      trailName,
+      bio,
+      homeZip,
+      carrierProvider: carrier || null,
+      typicalDailyMiles: dailyMiles ? Number(dailyMiles) : null,
+      hikingSpeedMph: speed ? Number(speed) : null,
+      heroImage: heroImage || null,
+      heroImagePosition: heroPosition,
+      ...visibility,
+    } as WebUserUpdate;
     try {
-      const updated = await updateWebUser(token, {
-        name,
-        trailName,
-        bio,
-        homeZip,
-        carrierProvider: carrier || null,
-        typicalDailyMiles: dailyMiles ? Number(dailyMiles) : null,
-        hikingSpeedMph: speed ? Number(speed) : null,
-        heroImage: heroImage || null,
-        heroImagePosition: heroPosition,
-        ...visibility,
-      } as WebUserUpdate);
+      const updated = await updateWebUser(token, patch);
       setUser(updated);
+      void cacheUser(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      // The carrier field (and everything else on this tab) needs visible
-      // failure feedback — silently doing nothing here is exactly what made
-      // a failed save look identical to "the app just isn't saving my choice."
-      setSaveError(err instanceof ApiError ? err.message : "Couldn't save — check your connection and try again.");
+      if (err instanceof ApiError) {
+        // The carrier field (and everything else on this tab) needs visible
+        // failure feedback — silently doing nothing here is exactly what made
+        // a failed save look identical to "the app just isn't saving my choice."
+        setSaveError(err.message);
+      } else {
+        // Network-level failure — the carrier field in particular drives the
+        // offline dead-zone map layer, so it needs to take effect right away
+        // rather than waiting for a round trip that can't happen yet.
+        const optimistic = { ...user, ...patch } as WebUser;
+        setUser(optimistic);
+        void cacheUser(optimistic);
+        await enqueueWrite("/api/user", patch, `user-profile-${Date.now()}`, token, "PATCH");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        setOfflineNote("Saved on this device — will sync once you're back online.");
+      }
     } finally {
       setSaving(false);
     }
@@ -1119,7 +1206,7 @@ function ProfileTab({
         </View>
       </Card>
 
-      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} />
+      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} offlineNote={offlineNote} />
 
       <PickerModal
         visible={carrierPickerOpen}
@@ -1157,6 +1244,7 @@ function AppearanceTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [offlineNote, setOfflineNote] = useState<string | null>(null);
 
   const applyAccent = (hex: string) => {
     setAccentHex(hex);
@@ -1167,23 +1255,42 @@ function AppearanceTab({
     if (!token) return;
     setSaving(true);
     setSaveError(null);
+    setOfflineNote(null);
+    const patch: WebUserUpdate = {
+      distanceUnit,
+      tempUnit,
+      weightUnit,
+      timeFormat,
+      dateFormat,
+      accentColor: accentHex,
+    };
     try {
-      const updated = await updateWebUser(token, {
-        distanceUnit,
-        tempUnit,
-        weightUnit,
-        timeFormat,
-        dateFormat,
-        accentColor: accentHex,
-      });
+      const updated = await updateWebUser(token, patch);
       setUser(updated);
+      void cacheUser(updated);
       // Push the saved prefs into the app-wide units context so every screen
       // reformats immediately without waiting for a refetch.
       applyPrefs({ distanceUnit, tempUnit, weightUnit, timeFormat, dateFormat });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      setSaveError(err instanceof ApiError ? err.message : "Couldn't save — check your connection and try again.");
+      if (err instanceof ApiError) {
+        setSaveError(err.message);
+      } else {
+        // Network-level failure — units are exactly the kind of preference a
+        // hiker wants to change on trail, so apply immediately and queue the
+        // sync for whenever signal returns (theme/text size/accent already
+        // apply instantly above, independent of this Save button; distance/
+        // temp/weight/time/date units are the ones that were waiting on it).
+        const optimistic = { ...user, ...patch } as WebUser;
+        setUser(optimistic);
+        void cacheUser(optimistic);
+        applyPrefs({ distanceUnit, tempUnit, weightUnit, timeFormat, dateFormat });
+        await enqueueWrite("/api/user", patch, `user-appearance-${Date.now()}`, token, "PATCH");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        setOfflineNote("Saved on this device — will sync once you're back online.");
+      }
     } finally {
       setSaving(false);
     }
@@ -1341,7 +1448,7 @@ function AppearanceTab({
         />
       </Card>
 
-      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} />
+      <SaveButton onPress={save} saving={saving} saved={saved} error={saveError} offlineNote={offlineNote} />
     </View>
   );
 }

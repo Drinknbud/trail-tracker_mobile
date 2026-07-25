@@ -2,7 +2,7 @@ import { ChevronRight, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Line, Path, Polyline } from "react-native-svg";
+import Svg, { Circle, Line, Path, Polyline, Text as SvgText } from "react-native-svg";
 
 import { Card } from "@/components/Screen";
 import type { PoiRow } from "@/db";
@@ -58,6 +58,10 @@ function gradeColor(e0: number, e1: number, d0: number, d1: number): string {
 
 // ─── Shared SVG renderer ─────────────────────────────────────────────────────
 
+// px per mile in scrollable mode — mirrors web's SectionElevationChart
+// (190 px/mile), just slightly tighter to fit typical phone widths.
+const PX_PER_MILE = 170;
+
 function ElevSvg({
   points,
   width,
@@ -67,8 +71,12 @@ function ElevSvg({
   gradeColored = false,
   trailMinElevFt,
   trailMaxElevFt,
+  scrollable = false,
+  startMileLabel = 0,
+  dayDividers,
 }: {
   points: ElevPoint[];
+  /** Ignored in scrollable mode — width is data-driven (PX_PER_MILE). */
   width: number;
   height: number;
   pois?: ChartPoi[];
@@ -79,33 +87,68 @@ function ElevSvg({
    * min/max when unavailable. */
   trailMinElevFt?: number | null;
   trailMaxElevFt?: number | null;
+  /** Horizontal-scroll mode: fixed px/mile, mile-tick gridlines + labels,
+   * larger POI badges. Caller is responsible for wrapping this in a
+   * horizontal ScrollView — the SVG itself just renders at its full data
+   * width instead of squeezing to fit `width`. */
+  scrollable?: boolean;
+  /** AT mile at the section start, for the tick labels' "(AT mi N)" line. */
+  startMileLabel?: number;
+  /** Day-divider positions — miles from section start — draws dashed
+   * vertical lines + "Day N" labels (scrollable mode only). */
+  dayDividers?: number[];
 }) {
   const { colors } = useTheme();
-  if (points.length < 2 || width <= 0) return <View style={{ height }} />;
+  const { fmtMiles, distanceUnit } = useUnits();
+  if (points.length < 2 || (!scrollable && width <= 0)) return <View style={{ height }} />;
 
-  const padT = 6;
-  const padB = 6;
-  const padL = 2;
-  const padR = 2;
-  const chartW = width - padL - padR;
-  const chartH = height - padT - padB;
+  const maxDist = points[points.length - 1].dist || 1;
+  const PAD = scrollable ? { t: 34, r: 14, b: 36, l: 46 } : { t: 6, r: 6, b: 6, l: 2 };
+  const W = scrollable ? Math.round(maxDist * PX_PER_MILE) + PAD.l + PAD.r : width;
+  const chartW = W - PAD.l - PAD.r;
+  const chartH = height;
+  const H = scrollable ? chartH + PAD.t + PAD.b : height;
+  const BADGE_R = scrollable ? 7 : 3.5;
 
   const elevs = points.map((p) => p.elev);
   const minElev = trailMinElevFt ?? Math.min(...elevs);
   const maxElev = trailMaxElevFt ?? Math.max(...elevs);
   const range = maxElev - minElev || 1;
-  const maxDist = points[points.length - 1].dist || 1;
 
-  const cx = (d: number) => padL + (d / maxDist) * chartW;
-  const cy = (e: number) => padT + chartH - ((e - minElev) / range) * chartH;
-  const baseline = padT + chartH;
+  const cx = (d: number) => PAD.l + (d / maxDist) * chartW;
+  const cy = (e: number) => PAD.t + chartH - ((e - minElev) / range) * chartH;
+  const baseline = PAD.t + chartH;
 
   const linePts = points.map((p) => `${cx(p.dist).toFixed(1)},${cy(p.elev).toFixed(1)}`).join(" ");
   const lineSegs = points.map((p) => `L ${cx(p.dist).toFixed(1)} ${cy(p.elev).toFixed(1)}`).join(" ");
   const areaPath = `M ${cx(points[0].dist).toFixed(1)} ${baseline.toFixed(1)} ${lineSegs} L ${cx(maxDist).toFixed(1)} ${baseline.toFixed(1)} Z`;
 
+  // Mile/km tick marks — scrollable mode only. AT-mile labels are always in
+  // miles (the trail's own canonical numbering), independent of the user's
+  // distance-unit preference for the top "distance so far" line.
+  const mileTicks: { dist: number; topLabel: string; atLabel: string }[] = [];
+  if (scrollable) {
+    if (distanceUnit === "km") {
+      const maxKm = maxDist * 1.60934;
+      for (let km = 1; km <= maxKm + 0.001; km++) {
+        const distMi = km / 1.60934;
+        if (distMi <= maxDist + 0.001) {
+          mileTicks.push({ dist: distMi, topLabel: `${km} km`, atLabel: `AT mi ${Math.round(startMileLabel + distMi)}` });
+        }
+      }
+    } else {
+      const firstWholeMile = Math.ceil(startMileLabel);
+      for (let atMile = firstWholeMile; atMile <= startMileLabel + maxDist + 0.001; atMile++) {
+        const distFromStart = atMile - startMileLabel;
+        if (distFromStart <= maxDist + 0.001) {
+          mileTicks.push({ dist: distFromStart, topLabel: fmtMiles(distFromStart), atLabel: `AT mi ${atMile}` });
+        }
+      }
+    }
+  }
+
   return (
-    <Svg width={width} height={height}>
+    <Svg width={W} height={H}>
       {gradeColored ? (
         // Grade-banded area segments (the "suck-o-meter" look)
         points.slice(1).map((p, i) => {
@@ -126,9 +169,64 @@ function ElevSvg({
         <Path d={areaPath} fill={colors.trailLight} opacity={0.22} />
       )}
 
-      <Polyline points={linePts} fill="none" stroke={colors.accent} strokeWidth={2} strokeLinejoin="round" />
+      {/* Mile/km gridlines (scrollable only) */}
+      {scrollable && mileTicks.map((t) => (
+        <Line
+          key={`grid-${t.dist}`}
+          x1={cx(t.dist)} y1={PAD.t}
+          x2={cx(t.dist)} y2={PAD.t + chartH}
+          stroke={colors.muted} strokeOpacity={0.18} strokeWidth={0.8}
+        />
+      ))}
 
-      <Line x1={padL} y1={baseline} x2={width - padR} y2={baseline} stroke={colors.muted} strokeOpacity={0.25} strokeWidth={1} />
+      {/* Day-divider lines + "Day N" labels (scrollable only) */}
+      {scrollable && dayDividers && dayDividers.length > 0 && dayDividers.map((m, i) => (
+        <Line
+          key={`day-${i}`}
+          x1={cx(m)} y1={PAD.t - 6}
+          x2={cx(m)} y2={PAD.t + chartH}
+          stroke="#8B5CF6" strokeWidth={1.5} strokeDasharray="5,3" strokeOpacity={0.65}
+        />
+      ))}
+      {scrollable && dayDividers && dayDividers.length > 0 && [0, ...dayDividers].map((start, i, arr) => {
+        const end = i + 1 < arr.length ? arr[i + 1] : maxDist;
+        const midX = (cx(start) + cx(end)) / 2;
+        if (cx(end) - cx(start) < 50) return null;
+        return (
+          <SvgText key={`day-label-${i}`} x={midX} y={14} textAnchor="middle" fontSize={11} fontWeight="600" fill="#8B5CF6" opacity={0.85}>
+            {`Day ${i + 1}`}
+          </SvgText>
+        );
+      })}
+
+      <Polyline points={linePts} fill="none" stroke={colors.accent} strokeWidth={scrollable ? 2.2 : 2} strokeLinejoin="round" />
+
+      <Line x1={PAD.l} y1={baseline} x2={W - PAD.r} y2={baseline} stroke={colors.muted} strokeOpacity={0.25} strokeWidth={1} />
+
+      {/* Y-axis elevation labels (scrollable only — thumbnail keeps its
+          separate min/max text row below the chart instead) */}
+      {scrollable && (
+        <>
+          <SvgText x={PAD.l - 6} y={PAD.t + 4} textAnchor="end" fontSize={11} fill={colors.muted}>
+            {Math.round(maxElev).toLocaleString()}
+          </SvgText>
+          <SvgText x={PAD.l - 6} y={PAD.t + chartH} textAnchor="end" fontSize={11} fill={colors.muted}>
+            {Math.round(minElev).toLocaleString()}
+          </SvgText>
+        </>
+      )}
+
+      {/* X-axis distance labels — two lines: distance-so-far, then AT mile (scrollable only) */}
+      {scrollable && mileTicks.map((t) => (
+        <SvgText key={`tick-top-${t.dist}`} x={cx(t.dist)} y={PAD.t + chartH + 16} textAnchor="middle" fontSize={11} fill={colors.muted}>
+          {t.topLabel}
+        </SvgText>
+      ))}
+      {scrollable && mileTicks.map((t) => (
+        <SvgText key={`tick-at-${t.dist}`} x={cx(t.dist)} y={PAD.t + chartH + 30} textAnchor="middle" fontSize={9.5} fill={colors.muted} opacity={0.7}>
+          {t.atLabel}
+        </SvgText>
+      ))}
 
       {/* POI markers */}
       {pois?.map((poi, i) => {
@@ -140,10 +238,10 @@ function ElevSvg({
             key={`${poi.type}-${i}`}
             cx={cx(poi.distMi)}
             cy={cy(near.elev)}
-            r={3.5}
+            r={BADGE_R}
             fill={POI_COLOR[poi.type] ?? colors.muted}
             stroke="#FFFFFF"
-            strokeWidth={1}
+            strokeWidth={scrollable ? 1.5 : 1}
           />
         );
       })}
@@ -177,6 +275,7 @@ export function SectionElevationProfile({
   gpsDistMi,
   trailMinElevFt,
   trailMaxElevFt,
+  plannedCampMiles,
 }: {
   points: ElevPoint[];
   pois: PoiRow[];
@@ -186,6 +285,9 @@ export function SectionElevationProfile({
   gpsDistMi?: number | null;
   trailMinElevFt?: number | null;
   trailMaxElevFt?: number | null;
+  /** JSON string[] of absolute trail miles (SectionDetailRow.plannedCampMiles)
+   * — draws a "Day N" divider on the expanded chart at each camp stop. */
+  plannedCampMiles?: string | null;
 }) {
   const { colors, fontScale } = useTheme();
   const { fmtMiles, fmtElev } = useUnits();
@@ -199,6 +301,21 @@ export function SectionElevationProfile({
       .map((p) => ({ distMi: Math.abs(p.mile - startMile), type: p.type, name: p.name }))
       .filter((p) => p.distMi >= 0 && p.distMi <= maxDist + 0.1);
   }, [pois, startMile, points]);
+
+  const dayDividers = useMemo<number[]>(() => {
+    if (startMile == null || !plannedCampMiles) return [];
+    let campMiles: (number | null)[];
+    try {
+      campMiles = JSON.parse(plannedCampMiles);
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(campMiles)) return [];
+    return campMiles
+      .filter((m): m is number => typeof m === "number")
+      .map((m) => Math.abs(m - startMile))
+      .sort((a, b) => a - b);
+  }, [plannedCampMiles, startMile]);
 
   if (points.length < 2) return null;
 
@@ -262,10 +379,12 @@ export function SectionElevationProfile({
         points={points}
         pois={chartPois}
         sectionName={sectionName}
+        startMile={startMile ?? 0}
         miles={miles}
         gpsDistMi={gpsDistMi}
         trailMinElevFt={trailMinElevFt}
         trailMaxElevFt={trailMaxElevFt}
+        dayDividers={dayDividers}
       />
     </>
   );
@@ -279,25 +398,29 @@ function ElevationModal({
   points,
   pois,
   sectionName,
+  startMile,
   miles,
   gpsDistMi,
   trailMinElevFt,
   trailMaxElevFt,
+  dayDividers,
 }: {
   visible: boolean;
   onClose: () => void;
   points: ElevPoint[];
   pois: ChartPoi[];
   sectionName: string;
+  startMile: number;
   miles: number;
   gpsDistMi?: number | null;
   trailMinElevFt?: number | null;
   trailMaxElevFt?: number | null;
+  dayDividers?: number[];
 }) {
   const { colors, fontScale } = useTheme();
   const { fmtMiles, fmtElev } = useUnits();
   const insets = useSafeAreaInsets();
-  const [chartWidth, setChartWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
 
   const presentTypes = useMemo(
@@ -310,6 +433,10 @@ function ElevationModal({
   const totalMi = stats.flatMi + stats.easyMi + stats.moderateMi + stats.steepMi;
   const { ups, downs } = computeUpsDowns(points);
   const { ascent, descent } = computeAscentDescent(points);
+
+  const maxDist = points.length ? points[points.length - 1].dist : 0;
+  const chartContentWidth = Math.round(maxDist * PX_PER_MILE) + 46 + 14; // mirrors ElevSvg's scrollable PAD.l/r
+  const needsScrollHint = containerWidth > 0 && chartContentWidth > containerWidth + 8;
 
   const toggle = (t: string) =>
     setHidden((prev) => {
@@ -361,19 +488,30 @@ function ElevationModal({
           </View>
 
           <ScrollView contentContainerStyle={{ paddingBottom: 8 }}>
-            {/* Chart */}
-            <View style={{ paddingHorizontal: 16 }} onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
-              <ElevSvg
-                points={points}
-                width={chartWidth}
-                height={240}
-                pois={visiblePois}
-                gpsDistMi={gpsDistMi}
-                gradeColored
-                trailMinElevFt={trailMinElevFt}
-                trailMaxElevFt={trailMaxElevFt}
-              />
+            {/* Chart — horizontally scrollable at a fixed px/mile so long
+                sections stay legible instead of squeezing to screen width. */}
+            <View onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={needsScrollHint}>
+                <ElevSvg
+                  points={points}
+                  width={containerWidth}
+                  height={220}
+                  pois={visiblePois}
+                  gpsDistMi={gpsDistMi}
+                  gradeColored
+                  trailMinElevFt={trailMinElevFt}
+                  trailMaxElevFt={trailMaxElevFt}
+                  scrollable
+                  startMileLabel={startMile}
+                  dayDividers={dayDividers}
+                />
+              </ScrollView>
             </View>
+            {needsScrollHint ? (
+              <Text style={{ fontSize: 11 * fontScale, color: colors.muted, textAlign: "center", marginTop: 4 }}>
+                ← Scroll for the full profile →
+              </Text>
+            ) : null}
 
             {gpsDistMi != null ? (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, marginTop: 8 }}>

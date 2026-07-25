@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import {
   Calendar,
   ChevronRight,
+  Database,
   Flag,
   Gauge,
   MapPin,
@@ -33,6 +34,7 @@ import { Wordmark } from "@/components/Wordmark";
 import { useAuth } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { heroContentPosition } from "@/lib/heroPosition";
+import { cacheUser, getCachedUser } from "@/lib/userCache";
 import { fetchStats, fetchTrails, fetchWebUser, type WebStats, type WebTrail, type WebUser } from "@/lib/webApi";
 import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
@@ -45,12 +47,19 @@ export default function DashboardScreen() {
 
   const [stats, setStats] = useState<WebStats | null>(null);
   const [user, setUser] = useState<WebUser | null>(null);
+  const [cachedUser, setCachedUser] = useState<WebUser | null>(null);
   const [activeTrail, setActiveTrail] = useState<WebTrail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState("");
   const [savingGoal, setSavingGoal] = useState(false);
+
+  // Last-known profile, offline-safe — falls back to this the moment the
+  // live fetch below fails, instead of the generic wordmark header.
+  useEffect(() => {
+    getCachedUser().then(setCachedUser).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -65,6 +74,7 @@ export default function DashboardScreen() {
       setActiveTrail(trails.find((t) => t.isActive) ?? trails[0] ?? null);
       setAccentColor(u.accentColor);
       setError(null);
+      void cacheUser(u);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't load your trail data");
     }
@@ -109,7 +119,12 @@ export default function DashboardScreen() {
   };
 
   const pct = stats ? Math.round(stats.percentComplete) : 0;
-  const displayName = user?.trailName || user?.name || "Hiker";
+  // Prefer the live user; when offline (user never loaded this session),
+  // fall back to the last-known cached profile instead of the generic header.
+  const displayUser = user ?? cachedUser;
+  const displayName = displayUser?.trailName || displayUser?.name || "Hiker";
+  const heroImage = displayUser?.heroImage ?? null;
+  const heroImagePosition = displayUser?.heroImagePosition ?? "50% 50%";
 
   const headerBadge = <TrailBadge catalogKey={stats?.trailCatalogKey} size={56} />;
 
@@ -122,13 +137,14 @@ export default function DashboardScreen() {
       }
     >
       {/* Hero / header */}
-      {user?.heroImage ? (
+      {heroImage ? (
         <View style={{ height: 220, width: "100%" }}>
           <ExpoImage
-            source={{ uri: user.heroImage }}
+            source={{ uri: heroImage }}
             style={{ position: "absolute", width: "100%", height: "100%" }}
             contentFit="cover"
-            contentPosition={heroContentPosition(user.heroImagePosition ?? "50% 50%")}
+            contentPosition={heroContentPosition(heroImagePosition)}
+            cachePolicy="disk"
           />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.2)", "rgba(0,0,0,0.65)"]}
@@ -406,6 +422,17 @@ export default function DashboardScreen() {
             </Card>
           ) : null}
         </View>
+
+        <Pressable
+          onPress={() => router.push("/trip-status")}
+          style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6 }}
+        >
+          <Database color={colors.muted} size={15} />
+          <Text style={{ flex: 1, fontSize: 12 * fontScale, color: colors.muted, fontWeight: "600" }}>
+            Trip Status
+          </Text>
+          <ChevronRight color={colors.muted} size={14} />
+        </Pressable>
       </View>
     </ScrollView>
   );

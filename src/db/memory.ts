@@ -113,6 +113,27 @@ export const memoryStore: TripStore = {
     );
   },
 
+  async deleteTripDownload(sectionId) {
+    nightLogs.delete(sectionId);
+    dayLogs.delete(sectionId);
+    briefings.delete(sectionId);
+    pois.delete(sectionId);
+    elevations.delete(sectionId);
+    elevationMids.delete(sectionId);
+    downloads.delete(sectionId);
+  },
+
+  async deleteSection(sectionId) {
+    nightLogs.delete(sectionId);
+    dayLogs.delete(sectionId);
+    briefings.delete(sectionId);
+    pois.delete(sectionId);
+    elevations.delete(sectionId);
+    elevationMids.delete(sectionId);
+    downloads.delete(sectionId);
+    sections.delete(sectionId);
+  },
+
   async getTripStatus() {
     return (await this.listTripDownloads()).map(
       (d): TripStatusEntry => ({

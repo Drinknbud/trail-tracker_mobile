@@ -373,6 +373,31 @@ export const nativeStore: TripStore = {
     return rows.map(toDownloadRow);
   },
 
+  async deleteTripDownload(sectionId) {
+    const dbh = getDb();
+    dbh.withTransactionSync(() => {
+      dbh.runSync("DELETE FROM night_logs WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM day_logs WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM briefings WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM pois WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM elevation_profiles WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM trip_downloads WHERE section_id = ?", sectionId);
+    });
+  },
+
+  async deleteSection(sectionId) {
+    const dbh = getDb();
+    dbh.withTransactionSync(() => {
+      dbh.runSync("DELETE FROM night_logs WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM day_logs WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM briefings WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM pois WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM elevation_profiles WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM trip_downloads WHERE section_id = ?", sectionId);
+      dbh.runSync("DELETE FROM sections WHERE id = ?", sectionId);
+    });
+  },
+
   async getTripStatus() {
     const dbh = getDb();
     const downloads = await this.listTripDownloads();

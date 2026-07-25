@@ -3,7 +3,8 @@ import * as Crypto from "expo-crypto";
 import { tripStore, type TripPackage } from "@/db";
 import { API_URL } from "./api";
 import { scheduleBriefingNotifications } from "./briefing-notifications";
-import { downloadSectionTiles } from "./offline-tiles";
+import { deleteSectionTiles, downloadSectionTiles } from "./offline-tiles";
+import { enqueueWrite } from "./outbox";
 
 /**
  * Trip Download (docs §4.2): fetch the section's offline package, verify its
@@ -51,4 +52,33 @@ export async function downloadTrip(sectionId: string, token: string | null): Pro
   } catch (err) {
     console.warn("[trip-download] map tiles not saved:", err);
   }
+}
+
+/**
+ * Undo a trip download: clears the section's local data (logs, briefings,
+ * POIs, elevation profile) and its saved offline map tiles. The section's own
+ * synced row is untouched, so it stays visible in Journal and can be
+ * re-downloaded any time.
+ */
+export async function deleteTripData(sectionId: string): Promise<void> {
+  await tripStore.deleteTripDownload(sectionId);
+  await deleteSectionTiles(sectionId);
+}
+
+/**
+ * Delete a section entirely: clears its local data and offline map tiles
+ * immediately (so it disappears from Journal right away, online or not),
+ * then queues the server-side delete through the outbox — consistent with
+ * every other mobile section write, and safe to fire while offline since the
+ * outbox retries once connectivity returns.
+ */
+export async function removeSection(sectionId: string, token: string | null): Promise<void> {
+  await tripStore.deleteSection(sectionId);
+  await deleteSectionTiles(sectionId);
+  await enqueueWrite(
+    `/api/mobile/sections/${sectionId}/delete`,
+    {},
+    `delete-section-${sectionId}`,
+    token
+  );
 }

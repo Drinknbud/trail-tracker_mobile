@@ -13,9 +13,10 @@ export async function enqueueWrite(
   endpoint: string,
   payload: Record<string, unknown>,
   idempotencyKey: string,
-  token: string | null
+  token: string | null,
+  method: string = "POST"
 ): Promise<void> {
-  await tripStore.outboxEnqueue({ endpoint, method: "POST", payload, idempotencyKey });
+  await tripStore.outboxEnqueue({ endpoint, method, payload, idempotencyKey });
   // Opportunistic immediate flush — succeeds when online, quietly fails when not.
   void flushOutbox(token);
 }

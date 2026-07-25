@@ -337,6 +337,40 @@ export async function fetchTrailheads(catalogKey: string): Promise<WebTrailhead[
   return trailheads;
 }
 
+export type LiveElevationProfile = {
+  points: { dist: number; elev: number }[];
+  coords: [number, number][];
+  mapCoords: [number, number][];
+  avgElevM: number;
+  trailMinElevFt: number | null;
+  trailMaxElevFt: number | null;
+};
+
+/**
+ * Live elevation fetch for a section that hasn't been downloaded yet (no
+ * local `elevation_profiles` row) — typically a still-Planning section. No
+ * auth required (same public endpoint web's own Section Log/share pages
+ * use); needs connectivity, so callers should treat failure as "no profile
+ * to show yet" rather than an error.
+ */
+export async function fetchLiveElevationProfile(params: {
+  catalogKey: string;
+  startMile: number;
+  endMile: number;
+  totalMiles: number;
+}): Promise<LiveElevationProfile> {
+  const qs = new URLSearchParams({
+    catalogKey: params.catalogKey,
+    startMile: String(params.startMile),
+    endMile: String(params.endMile),
+    totalMiles: String(params.totalMiles),
+  });
+  const raw = await apiFetch<LiveElevationProfile & { avgElevM?: number }>(
+    `/api/elevation/profile?${qs}`
+  );
+  return { ...raw, avgElevM: raw.avgElevM ?? 0 };
+}
+
 // ── AI section generation (online, premium) ──────────────────────────────────
 // Each hits a bearer-enabled /api/sections/[id]/generate-* endpoint. The server
 // runs the model, persists to the section, and returns the generated content.

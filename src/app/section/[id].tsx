@@ -11,6 +11,7 @@ import {
   Share2,
   Sun,
   Tent,
+  Trash2,
   Undo2,
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import { Card, Screen } from "@/components/Screen";
 import { SectionAiAssistant } from "@/components/SectionAiAssistant";
 import { SectionCelebration } from "@/components/SectionCelebration";
 import { SectionElevationProfile } from "@/components/SectionElevationProfile";
+import { SectionMapCard } from "@/components/SectionMapCard";
 import {
   tripStore,
   type DayLogRow,
@@ -35,10 +37,19 @@ import { projectGpsToDist } from "@/lib/elevation";
 import { enqueueWrite } from "@/lib/outbox";
 import { capturePhoto } from "@/lib/photos";
 import { exportSectionPdf, pdfExportAvailable } from "@/lib/sectionPdf";
+import { TRAIL_CATALOG } from "@/lib/trailCatalog";
+import { deleteTripData } from "@/lib/trip-download";
 import { miToKm } from "@/lib/units";
 import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
+import { fetchLiveElevationProfile } from "@/lib/webApi";
 import { useTheme } from "@/theme/ThemeContext";
+
+// Single-trail (AT) MVP — same assumption as TRAILHEAD_FILES/SHELTER_FILES
+// elsewhere in this codebase. Used only as the fallback catalogKey/totalMiles
+// for the live elevation fetch when a section has no local trail row yet
+// (never downloaded — see load() below).
+const AT_TOTAL_MILES = TRAIL_CATALOG.find((t) => t.key === "at")?.totalMiles ?? 2198;
 
 const STATUS_COLORS: Record<string, string> = {
   planned: "#3B82F6",
@@ -89,18 +100,41 @@ export default function SectionDetailScreen() {
   const [elevation, setElevation] = useState<ElevationProfile | null>(null);
   const [gpsDistMi, setGpsDistMi] = useState<number | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [hasDownload, setHasDownload] = useState(false);
+  const [elevationLoading, setElevationLoading] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
     await tripStore.init();
-    setSection(await tripStore.getSectionDetail(id));
+    const detail = await tripStore.getSectionDetail(id);
+    setSection(detail);
     setPois(await tripStore.listPois(id));
     setNights(await tripStore.listNightLogs(id));
     setDays(await tripStore.listDayLogs(id));
     setPhotos((await tripStore.photoList()).filter((p) => p.sectionId === id));
+    setHasDownload((await tripStore.listTripDownloads()).some((d) => d.sectionId === id));
 
-    // Elevation profile + "you are here" projection (both offline-safe)
-    const profile = await tripStore.getElevationProfile(id);
+    // Elevation profile: prefer the local copy (offline-safe, from a full
+    // trip download). A section still in Planning has never been downloaded,
+    // so there's no local copy yet — fall back to a live fetch of the same
+    // public endpoint web uses. Best-effort: needs connectivity, and simply
+    // shows no elevation card (same as before) if it fails.
+    let profile: ElevationProfile | null = await tripStore.getElevationProfile(id);
+    if (!profile && detail?.startMile != null && detail?.endMile != null) {
+      setElevationLoading(true);
+      try {
+        profile = await fetchLiveElevationProfile({
+          catalogKey: "at",
+          startMile: detail.startMile,
+          endMile: detail.endMile,
+          totalMiles: AT_TOTAL_MILES,
+        });
+      } catch {
+        // offline or fetch failed — leave profile null, matches prior behavior
+      } finally {
+        setElevationLoading(false);
+      }
+    }
     setElevation(profile);
     if (profile) {
       const gps = await tripStore.gpsLatestPoint();
@@ -199,6 +233,30 @@ export default function SectionDetailScreen() {
       token
     );
     await load();
+  };
+
+  const confirmDeleteDownloadedData = () => {
+    Alert.alert(
+      "Delete offline data?",
+      `This removes "${section.name}"'s downloaded trip data and map tiles from this device. You can download it again anytime.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await deleteTripData(section.id);
+            // Full reload, not just setHasDownload(false) — deleteTripData
+            // also wipes the local night/day logs, POIs, and elevation
+            // profile, all of which are already rendered on this screen and
+            // need to clear along with the "Offline" badge. load() re-runs
+            // the same fallback path used when a section has never been
+            // downloaded (live elevation fetch if online, blank otherwise).
+            await load();
+          },
+        },
+      ]
+    );
   };
 
   const onSharePdf = async () => {
@@ -351,7 +409,38 @@ export default function SectionDetailScreen() {
         </Pressable>
       ) : null}
 
-      {elevation && elevation.points.length >= 2 ? (
+      {hasDownload ? (
+        <Pressable
+          onPress={confirmDeleteDownloadedData}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+            marginTop: 8,
+            paddingVertical: 10,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}
+        >
+          <Trash2 color={colors.destructiveRed} size={15} />
+          <Text style={{ color: colors.destructiveRed, fontSize: 13 * fontScale, fontWeight: "600" }}>
+            Delete Downloaded Data
+          </Text>
+        </Pressable>
+      ) : null}
+
+      <SectionMapCard section={section} />
+
+      {elevationLoading ? (
+        <Card style={{ marginTop: 12, alignItems: "center", paddingVertical: 20 }}>
+          <ActivityIndicator color={colors.accent} />
+          <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 8 }}>
+            Loading elevation profile…
+          </Text>
+        </Card>
+      ) : elevation && elevation.points.length >= 2 ? (
         <SectionElevationProfile
           points={elevation.points}
           pois={pois}
@@ -361,6 +450,7 @@ export default function SectionDetailScreen() {
           gpsDistMi={gpsDistMi}
           trailMinElevFt={elevation.trailMinElevFt}
           trailMaxElevFt={elevation.trailMaxElevFt}
+          plannedCampMiles={section.plannedCampMiles}
         />
       ) : null}
 

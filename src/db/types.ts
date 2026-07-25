@@ -187,6 +187,20 @@ export interface TripStore {
    */
   applyTripPackage(pkg: TripPackage, bytes: number): Promise<void>;
   listTripDownloads(): Promise<TripDownloadRow[]>;
+  /**
+   * Clear a section's downloaded trip data (night/day logs, briefings, POIs,
+   * elevation profile) and its download record, freeing local storage. The
+   * section's own synced row (name/status/dates/etc.) is left untouched —
+   * this only undoes what a trip download added, not the section itself.
+   */
+  deleteTripDownload(sectionId: string): Promise<void>;
+  /**
+   * Permanently remove a section and everything under it (logs, briefings,
+   * POIs, elevation profile, download record) from local storage. Does not
+   * touch the server — callers are responsible for queuing the matching
+   * server-side delete.
+   */
+  deleteSection(sectionId: string): Promise<void>;
   getTripStatus(): Promise<TripStatusEntry[]>;
   getOutboxCount(): Promise<number>;
 
