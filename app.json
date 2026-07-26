@@ -11,7 +11,10 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.trailtracker.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSMotionUsageDescription": "Trail Tracker uses motion data to improve the accuracy of your recorded GPS track and to reduce battery use while you hike."
+      }
     },
     "android": {
       "package": "com.trailtracker.app",
@@ -37,11 +40,41 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       "@maplibre/maplibre-react-native",
       "expo-sqlite",
       "expo-sharing",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Trail Tracker uses your location to show where you are on the trail and to find nearby shelters, water sources, and campsites.",
+          "locationAlwaysAndWhenInUsePermission": "Trail Tracker records your hike as a GPS track, including while the screen is off, so your mileage and route are saved even in areas with no cell service. Tracking starts only when you tap Start Tracking and stops when you tap Stop.",
+          "locationAlwaysPermission": "Trail Tracker records your hike as a GPS track, including while the screen is off, so your mileage and route are saved even in areas with no cell service.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Trail Tracker lets you attach photos from your library to your trail journal entries.",
+          "cameraPermission": "Trail Tracker lets you take photos on the trail and attach them to your journal entries.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#2D6A4F"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
