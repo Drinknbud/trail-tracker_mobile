@@ -245,7 +245,7 @@ export default function MoreScreen() {
 
       <GroupLabel>Community</GroupLabel>
       <TileGrid>
-        <Tile icon={Users} label="Tribes" note="Phase 3" />
+        <Tile icon={Users} label="Tribes" onPress={() => router.push("/tribes")} />
         <Tile icon={MessagesSquare} label="Forum" note="Phase 3" />
         <Tile icon={Repeat} label="Gear Swap" note="Phase 3" />
         <Tile icon={HelpCircle} label="Q&A" note="Phase 3" />
