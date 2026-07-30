@@ -14,6 +14,7 @@ import {
   Share2,
   Tent,
   Trophy,
+  UserPlus,
   Users,
   type LucideIcon,
 } from "lucide-react-native";
@@ -268,6 +269,7 @@ export default function MoreScreen() {
       <TileGrid>
         <Tile icon={Users} label="Tribes" onPress={() => router.push("/tribes")} />
         <Tile icon={MessageCircle} label="Messages" badge={dmUnread} onPress={() => router.push("/dms")} />
+        <Tile icon={UserPlus} label="Trail Buddy" onPress={() => router.push("/buddy")} />
         <Tile icon={MessagesSquare} label="Forum" note="Phase 3" />
         <Tile icon={Repeat} label="Gear Swap" note="Phase 3" />
         <Tile icon={HelpCircle} label="Q&A" note="Phase 3" />
