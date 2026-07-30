@@ -5,6 +5,7 @@ import {
   HelpCircle,
   LogOut,
   Mail,
+  MessageCircle,
   MessageSquare,
   MessagesSquare,
   Repeat,
@@ -22,6 +23,7 @@ import { Pressable, Switch, Text, View } from "react-native";
 import { Card, Screen } from "@/components/Screen";
 import { tripStore } from "@/db";
 import { useAuth } from "@/lib/auth";
+import { fetchDmThreads } from "@/lib/dms";
 import { useOnTrail } from "@/lib/onTrail";
 import { useTheme, type TextSize, type ThemeMode } from "@/theme/ThemeContext";
 
@@ -177,9 +179,10 @@ function Segmented<T extends string>({
 
 export default function MoreScreen() {
   const { colors, fontScale, mode, setMode, textSize, setTextSize } = useTheme();
-  const { signOut } = useAuth();
+  const { signOut, token } = useAuth();
   const { onTrail, setOnTrail, requestOnTrail } = useOnTrail();
   const [mailUnread, setMailUnread] = useState(0);
+  const [dmUnread, setDmUnread] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -197,6 +200,24 @@ export default function MoreScreen() {
         cancelled = true;
       };
     }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!token) return;
+      let cancelled = false;
+      (async () => {
+        try {
+          const threads = await fetchDmThreads(token);
+          if (!cancelled) setDmUnread(threads.reduce((n, t) => n + t.unreadCount, 0));
+        } catch {
+          // Badge is best-effort — DMs are online-only, no cached fallback
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [token]),
   );
 
   return (
@@ -246,6 +267,7 @@ export default function MoreScreen() {
       <GroupLabel>Community</GroupLabel>
       <TileGrid>
         <Tile icon={Users} label="Tribes" onPress={() => router.push("/tribes")} />
+        <Tile icon={MessageCircle} label="Messages" badge={dmUnread} onPress={() => router.push("/dms")} />
         <Tile icon={MessagesSquare} label="Forum" note="Phase 3" />
         <Tile icon={Repeat} label="Gear Swap" note="Phase 3" />
         <Tile icon={HelpCircle} label="Q&A" note="Phase 3" />
