@@ -272,7 +272,7 @@ export default function MoreScreen() {
         <Tile icon={UserPlus} label="Trail Buddy" onPress={() => router.push("/buddy")} />
         <Tile icon={MessagesSquare} label="Forum" note="Phase 3" />
         <Tile icon={Repeat} label="Gear Swap" note="Phase 3" />
-        <Tile icon={HelpCircle} label="Q&A" note="Phase 3" />
+        <Tile icon={HelpCircle} label="Q&A" onPress={() => router.push("/qa")} />
         <Tile icon={Search} label="Find Hikers" note="Phase 3" />
       </TileGrid>
 
