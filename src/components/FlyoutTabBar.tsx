@@ -8,6 +8,7 @@ import {
   Mail,
   MapPin,
   Menu,
+  MessageCircle,
   MessagesSquare,
   Repeat,
   Search,
@@ -15,6 +16,7 @@ import {
   Sun,
   Tent,
   Trophy,
+  UserPlus,
   Users,
   type LucideIcon,
 } from "lucide-react-native";
@@ -56,10 +58,12 @@ const FLYOUTS: Record<CategoryKey, FlyoutItem[]> = {
     { icon: Tent, label: "On Trail", onTrailToggle: true },
   ],
   community: [
-    { icon: Users, label: "Tribes", note: "Phase 3" },
+    { icon: Users, label: "Tribes", route: "/tribes" },
+    { icon: MessageCircle, label: "Messages", route: "/dms" },
+    { icon: UserPlus, label: "Buddy", route: "/buddy" },
+    { icon: HelpCircle, label: "Q&A", route: "/qa" },
     { icon: MessagesSquare, label: "Forum", note: "Phase 3" },
     { icon: Repeat, label: "Swap", note: "Phase 3" },
-    { icon: HelpCircle, label: "Q&A", note: "Phase 3" },
     { icon: Search, label: "Hikers", note: "Phase 3" },
   ],
 };
