@@ -1,5 +1,5 @@
 import * as Crypto from "expo-crypto";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
   Camera as CameraIcon,
@@ -14,9 +14,10 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
 
+import { DatePickerField } from "@/components/DatePickerField";
 import { FormField } from "@/components/FormField";
 import { Card, Screen } from "@/components/Screen";
 import { SectionAiAssistant } from "@/components/SectionAiAssistant";
@@ -42,7 +43,7 @@ import { deleteTripData } from "@/lib/trip-download";
 import { miToKm } from "@/lib/units";
 import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
-import { fetchLiveElevationProfile } from "@/lib/webApi";
+import { fetchLiveElevationProfile, fetchLiveStaticPois } from "@/lib/webApi";
 import { useTheme } from "@/theme/ThemeContext";
 
 // Single-trail (AT) MVP — same assumption as TRAILHEAD_FILES/SHELTER_FILES
@@ -59,8 +60,16 @@ const STATUS_COLORS: Record<string, string> = {
 function Stat({ value, label }: { value: string; label: string }) {
   const { colors, fontScale } = useTheme();
   return (
-    <View style={{ flex: 1, alignItems: "center" }}>
-      <Text style={{ fontSize: 17 * fontScale, fontWeight: "700", color: colors.text }}>
+    // Fixed ~46% width (not flex:1 in a 4-across row) so each stat gets a
+    // full half-screen column to wrap into at larger accessibility text
+    // sizes, instead of squeezing "elev gain"/"AT miles" into a quarter of
+    // the screen where they collide with their neighbors.
+    <View style={{ width: "46%", alignItems: "center", marginBottom: 10 }}>
+      <Text
+        style={{ fontSize: 17 * fontScale, fontWeight: "700", color: colors.text }}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
         {value}
       </Text>
       <Text
@@ -69,6 +78,7 @@ function Stat({ value, label }: { value: string; label: string }) {
           color: colors.muted,
           textTransform: "uppercase",
           letterSpacing: 0.5,
+          textAlign: "center",
         }}
       >
         {label}
@@ -108,7 +118,18 @@ export default function SectionDetailScreen() {
     await tripStore.init();
     const detail = await tripStore.getSectionDetail(id);
     setSection(detail);
-    setPois(await tripStore.listPois(id));
+    const localPois = await tripStore.listPois(id);
+    setPois(localPois);
+    // Local pois are only ever written by a full trip download — a section
+    // still in Planning has none yet. Fall back to a live fetch of the same
+    // curated files the offline-package endpoint reads, same pattern as the
+    // elevation-profile fallback below. Best-effort: no connectivity just
+    // means no POI markers, same as before this fallback existed.
+    if (localPois.length === 0 && detail?.startMile != null && detail?.endMile != null) {
+      fetchLiveStaticPois("at", detail.startMile, detail.endMile)
+        .then((live) => setPois(live.map((p) => ({ ...p, meta: {} }))))
+        .catch(() => {});
+    }
     setNights(await tripStore.listNightLogs(id));
     setDays(await tripStore.listDayLogs(id));
     setPhotos((await tripStore.photoList()).filter((p) => p.sectionId === id));
@@ -146,9 +167,16 @@ export default function SectionDetailScreen() {
     }
   }, [id]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  // Focus, not mount-only: editing this same section (router.push to
+  // /section/new?editId=... then back()) returns to this same screen
+  // instance without remounting it, so a plain useEffect([id]) never
+  // re-fires and every field — not just the date — kept showing whatever
+  // was loaded before the edit.
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
 
   if (!section) {
     return (
@@ -305,19 +333,12 @@ export default function SectionDetailScreen() {
         </Pressable>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
         <Text
           style={{ flex: 1, fontSize: 20 * fontScale, fontWeight: "700", color: colors.text }}
         >
           {section.name}
         </Text>
-        <Pressable
-          onPress={() => router.push(`/section/new?editId=${section.id}`)}
-          hitSlop={8}
-          style={{ padding: 2 }}
-        >
-          <Pencil color={colors.muted} size={16} />
-        </Pressable>
         <View
           style={{
             backgroundColor: statusColor,
@@ -332,7 +353,46 @@ export default function SectionDetailScreen() {
         </View>
       </View>
 
-      <Card style={{ flexDirection: "row", marginTop: 12, paddingVertical: 12 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, gap: 12 }}>
+        {section.startDate ? (
+          <Text style={{ fontSize: 13 * fontScale, color: colors.muted }}>
+            {fmtDate(section.startDate)}
+            {section.endDate && section.endDate !== section.startDate
+              ? ` – ${fmtDate(section.endDate)}`
+              : ""}
+          </Text>
+        ) : null}
+        <Pressable
+          onPress={() => router.push(`/section/new?editId=${section.id}`)}
+          hitSlop={8}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 5,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: colors.accent,
+          }}
+        >
+          <Pencil color={colors.accent} size={13} />
+          <Text style={{ color: colors.accent, fontSize: 12 * fontScale, fontWeight: "700" }}>
+            Edit
+          </Text>
+        </Pressable>
+      </View>
+
+      <Card
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          marginTop: 12,
+          paddingVertical: 12,
+          paddingBottom: 2,
+        }}
+      >
         <Stat value={fmtMiles(section.miles)} label="distance" />
         <Stat value={section.elevGain ? fmtElev(section.elevGain) : "—"} label="elev gain" />
         <Stat value={section.difficulty ?? "—"} label="difficulty" />
@@ -532,11 +592,10 @@ export default function SectionDetailScreen() {
           >
             {nightDraft.id ? "Edit night" : "New night"}
           </Text>
-          <FormField
-            label="Date (YYYY-MM-DD)"
-            value={nightDraft.date?.slice(0, 10) ?? ""}
-            onChangeText={(v) => setNightDraft({ ...nightDraft, date: v })}
-            placeholder="2026-07-10"
+          <DatePickerField
+            label="Date"
+            value={nightDraft.date?.slice(0, 10) ?? null}
+            onChange={(v) => setNightDraft({ ...nightDraft, date: v })}
           />
           <FormField
             label="Camped at"
@@ -651,11 +710,10 @@ export default function SectionDetailScreen() {
           >
             {dayDraft.id ? "Edit day" : "New day"}
           </Text>
-          <FormField
-            label="Date (YYYY-MM-DD)"
-            value={dayDraft.date?.slice(0, 10) ?? ""}
-            onChangeText={(v) => setDayDraft({ ...dayDraft, date: v })}
-            placeholder="2026-07-10"
+          <DatePickerField
+            label="Date"
+            value={dayDraft.date?.slice(0, 10) ?? null}
+            onChange={(v) => setDayDraft({ ...dayDraft, date: v })}
           />
           <FormField
             label="Miles hiked"

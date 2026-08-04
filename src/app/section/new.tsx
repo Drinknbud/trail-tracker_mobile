@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
+import { DatePickerField } from "@/components/DatePickerField";
 import { FormField } from "@/components/FormField";
 import { Card, Screen } from "@/components/Screen";
 import { TrailheadPicker, type TrailheadOption } from "@/components/TrailheadPicker";
@@ -422,19 +423,25 @@ export default function NewSectionScreen() {
 
       <View style={{ flexDirection: "row", gap: 10 }}>
         <View style={{ flex: 1 }}>
-          <FormField
+          <DatePickerField
             label="Start Date (optional)"
-            value={startDate}
-            onChangeText={setStartDate}
-            placeholder="2026-07-10"
+            value={startDate || null}
+            onChange={(v) => {
+              setStartDate(v ?? "");
+              // Auto-bump, don't just block: matches web's PostListingModal
+              // (min= alone only stops picking an invalid end date going
+              // forward — it doesn't retroactively fix an end date that was
+              // already set before the start date moved past it).
+              if (v && endDate && endDate < v) setEndDate(v);
+            }}
           />
         </View>
         <View style={{ flex: 1 }}>
-          <FormField
+          <DatePickerField
             label="End Date (optional)"
-            value={endDate}
-            onChangeText={setEndDate}
-            placeholder="2026-07-12"
+            value={endDate || null}
+            onChange={(v) => setEndDate(v ?? "")}
+            minimumDate={startDate || null}
           />
         </View>
       </View>

@@ -41,7 +41,7 @@ import { useTheme } from "@/theme/ThemeContext";
 
 export default function DashboardScreen() {
   const { colors, fontScale, setAccentColor } = useTheme();
-  const { fmtMiles, fmtElev, distanceUnit } = useUnits();
+  const { fmtMiles, fmtElev, fmtDate, distanceUnit } = useUnits();
   const insets = useSafeAreaInsets();
   const { token } = useAuth();
 
@@ -385,7 +385,7 @@ export default function DashboardScreen() {
               </Text>
               {stats.recentSection.endDate ? (
                 <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 2 }}>
-                  {new Date(stats.recentSection.endDate).toLocaleDateString()}
+                  {fmtDate(stats.recentSection.endDate)}
                 </Text>
               ) : null}
               <Pressable
@@ -416,7 +416,7 @@ export default function DashboardScreen() {
               </Text>
               {stats.nextPlannedSection.startDate ? (
                 <Text style={{ fontSize: 11 * fontScale, color: colors.muted, marginTop: 2 }}>
-                  {new Date(stats.nextPlannedSection.startDate).toLocaleDateString()}
+                  {fmtDate(stats.nextPlannedSection.startDate)}
                 </Text>
               ) : null}
             </Card>

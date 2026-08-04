@@ -57,8 +57,14 @@ export function fmtWeight(lbs: number, unit: WeightUnit): string {
  */
 export function fmtDate(dateStr: string, format: DateFormat): string {
   if (!dateStr) return "";
-  // Normalise to local noon so no timezone shift flips the day
-  const normalized = dateStr.length === 10 ? dateStr + "T12:00:00" : dateStr;
+  // Normalise to local noon so no timezone shift flips the day. Was
+  // previously gated on dateStr.length === 10, which skipped this entirely
+  // for a full ISO timestamp like the stats API's "2025-05-10T00:00:00.000Z"
+  // — that string parses as UTC midnight, and any negative UTC offset then
+  // shows the day before via the local getters below. Slicing to the date
+  // portion first makes this correct for both a bare "YYYY-MM-DD" and any
+  // datetime string, per this function's own doc comment.
+  const normalized = dateStr.slice(0, 10) + "T12:00:00";
   const d = new Date(normalized);
   if (isNaN(d.getTime())) return dateStr;
   const mm = String(d.getMonth() + 1).padStart(2, "0");

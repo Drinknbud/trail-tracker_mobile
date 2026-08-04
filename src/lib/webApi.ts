@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import { API_URL, apiFetch } from "./api";
 
 // These mirror the web app's own /api/stats, /api/user, /api/trails routes
 // (now bearer-token enabled) so the mobile dashboard reuses the exact same
@@ -369,6 +369,51 @@ export async function fetchLiveElevationProfile(params: {
     `/api/elevation/profile?${qs}`
   );
   return { ...raw, avgElevM: raw.avgElevM ?? 0 };
+}
+
+export type LivePoi = { type: string; name: string; mile: number };
+
+// Same 5 curated files + ±2mi buffer as web's offline-package route
+// (app/api/sections/[id]/offline-package/route.ts POI_FILES) — served
+// directly as public static assets under /data, so no auth needed.
+const LIVE_POI_FILES: { suffix: string; type: string }[] = [
+  { suffix: "shelters", type: "shelter" },
+  { suffix: "campsites", type: "campsite" },
+  { suffix: "towns", type: "town" },
+  { suffix: "trailheads", type: "trailhead" },
+  { suffix: "road-crossings", type: "road-crossing" },
+];
+
+/**
+ * Live POI fetch for a section that hasn't been downloaded yet (no local
+ * `pois` rows) — mirrors offline-package's mile-ranged POI lookup against
+ * the same curated /public/data files, fetched directly as static assets
+ * instead of through the bearer-gated offline-package endpoint. Best-effort
+ * per file: a missing/failed category is silently skipped, matching the
+ * server's own try/catch-per-file behavior.
+ */
+export async function fetchLiveStaticPois(
+  catalogKey: string,
+  startMile: number,
+  endMile: number
+): Promise<LivePoi[]> {
+  const lo = Math.min(startMile, endMile) - 2;
+  const hi = Math.max(startMile, endMile) + 2;
+  const results = await Promise.all(
+    LIVE_POI_FILES.map(async ({ suffix, type }) => {
+      try {
+        const res = await fetch(`${API_URL}/data/${catalogKey}-${suffix}.json`);
+        if (!res.ok) return [];
+        const entries = (await res.json()) as Array<{ name: string; mile: number }>;
+        return entries
+          .filter((e) => typeof e.mile === "number" && e.mile >= lo && e.mile <= hi)
+          .map((e) => ({ type, name: e.name, mile: e.mile }));
+      } catch {
+        return [];
+      }
+    })
+  );
+  return results.flat().sort((a, b) => a.mile - b.mile);
 }
 
 // ── AI section generation (online, premium) ──────────────────────────────────
