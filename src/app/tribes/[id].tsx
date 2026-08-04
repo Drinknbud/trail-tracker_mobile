@@ -197,7 +197,7 @@ export default function TribeDetailScreen() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={{ flex: 1, paddingTop: insets.top + 12, paddingHorizontal: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <Pressable onPress={() => router.back()} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -351,7 +351,7 @@ export default function TribeDetailScreen() {
           )}
         </ScrollView>
 
-        <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, paddingTop: 8, paddingBottom: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, paddingTop: 8, paddingBottom: insets.bottom + 12 }}>
           <TextInput
             value={input}
             onChangeText={setInput}

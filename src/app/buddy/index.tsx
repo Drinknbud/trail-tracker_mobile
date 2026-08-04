@@ -465,7 +465,7 @@ export default function TrailBuddyScreen() {
       </Pressable>
 
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <View>
+        <View style={{ flex: 1, marginRight: 12 }}>
           <Text style={{ fontSize: 24 * fontScale, fontWeight: "700", color: colors.text }}>Trail Buddy</Text>
           <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 1 }}>
             Find a hiking partner for your miles and dates
@@ -473,7 +473,7 @@ export default function TrailBuddyScreen() {
         </View>
         <Pressable
           onPress={() => setShowPost((v) => !v)}
-          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: colors.accent }}
+          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: colors.accent, flexShrink: 0 }}
         >
           <Plus color="#FFFFFF" size={16} />
           <Text style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 12 * fontScale }}>Post</Text>

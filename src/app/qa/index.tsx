@@ -110,7 +110,7 @@ export default function QAScreen() {
       </Pressable>
 
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <View>
+        <View style={{ flex: 1, marginRight: 12 }}>
           <Text style={{ fontSize: 24 * fontScale, fontWeight: "700", color: colors.text }}>Trail Q&amp;A</Text>
           <Text style={{ fontSize: 12 * fontScale, color: colors.muted, marginTop: 1 }}>
             Anonymous questions — only your trail name is shared
@@ -118,7 +118,7 @@ export default function QAScreen() {
         </View>
         <Pressable
           onPress={() => setShowAsk((v) => !v)}
-          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: colors.accent }}
+          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, backgroundColor: colors.accent, flexShrink: 0 }}
         >
           <Plus color="#FFFFFF" size={16} />
           <Text style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 12 * fontScale }}>Ask</Text>
