@@ -10,11 +10,11 @@ import type {
 } from "./types";
 
 // v2 added gps_sessions/gps_points; v3 photos_queue/trail_mail; v4 added
-// trail_min_elev_ft/trail_max_elev_ft to elevation_profiles. All DDL is
-// CREATE IF NOT EXISTS, so upgrades are a re-run of the full DDL; the two
-// v4 columns need an explicit ALTER for installs that already have the
-// table (see init()).
-const SCHEMA_VERSION = 4;
+// trail_min_elev_ft/trail_max_elev_ft to elevation_profiles; v5 added
+// trail_alerts. All DDL is CREATE IF NOT EXISTS, so upgrades are a re-run of
+// the full DDL; the two v4 columns need an explicit ALTER for installs that
+// already have the table (see init()).
+const SCHEMA_VERSION = 5;
 
 const DDL = `
 CREATE TABLE IF NOT EXISTS trails (
@@ -86,6 +86,12 @@ CREATE TABLE IF NOT EXISTS trail_mail (
   photo_urls TEXT NOT NULL DEFAULT '[]', is_public INTEGER NOT NULL DEFAULT 0,
   is_read INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS trail_alerts (
+  id TEXT PRIMARY KEY, trail_key TEXT NOT NULL, source TEXT NOT NULL,
+  nps_category TEXT, title TEXT NOT NULL, description TEXT NOT NULL, url TEXT,
+  start_mile REAL, end_mile REAL, affected_areas TEXT, expires_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_trail_alerts_trail_key ON trail_alerts(trail_key);
 `;
 
 let db: SQLiteDatabase | null = null;
@@ -826,5 +832,36 @@ export const nativeStore: TripStore = {
 
   async markTrailMailRead(id) {
     getDb().runSync("UPDATE trail_mail SET is_read = 1 WHERE id = ?", id);
+  },
+
+  async upsertTrailAlerts(trailKey, rows) {
+    const dbh = getDb();
+    dbh.withTransactionSync(() => {
+      dbh.runSync("DELETE FROM trail_alerts WHERE trail_key = ?", trailKey);
+      for (const a of rows) {
+        dbh.runSync(
+          `INSERT INTO trail_alerts (id, trail_key, source, nps_category, title, description, url, start_mile, end_mile, affected_areas, expires_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          a.id, a.trailKey, a.source, a.npsCategory, a.title, a.description,
+          a.url, a.startMile, a.endMile, a.affectedAreas, a.expiresAt
+        );
+      }
+    });
+  },
+
+  async listTrailAlerts(trailKey) {
+    return getDb()
+      .getAllSync<{
+        id: string; trail_key: string; source: string; nps_category: string | null;
+        title: string; description: string; url: string | null;
+        start_mile: number | null; end_mile: number | null;
+        affected_areas: string | null; expires_at: string | null;
+      }>("SELECT * FROM trail_alerts WHERE trail_key = ? ORDER BY id DESC", trailKey)
+      .map((r) => ({
+        id: r.id, trailKey: r.trail_key, source: r.source, npsCategory: r.nps_category,
+        title: r.title, description: r.description, url: r.url,
+        startMile: r.start_mile, endMile: r.end_mile,
+        affectedAreas: r.affected_areas, expiresAt: r.expires_at,
+      }));
   },
 };

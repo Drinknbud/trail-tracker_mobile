@@ -1,3 +1,5 @@
+import type { TrailAlertRow } from "@/db";
+
 import { API_URL, apiFetch } from "./api";
 
 // These mirror the web app's own /api/stats, /api/user, /api/trails routes
@@ -162,6 +164,14 @@ export async function fetchWebUser(token: string): Promise<WebUser> {
 
 export async function fetchTrails(token: string): Promise<WebTrail[]> {
   return apiFetch<WebTrail[]>("/api/trails", { token });
+}
+
+export async function fetchAlerts(token: string, trailKey = "at"): Promise<TrailAlertRow[]> {
+  const res = await apiFetch<{ alerts: TrailAlertRow[] }>(
+    `/api/mobile/alerts?trailKey=${encodeURIComponent(trailKey)}`,
+    { token }
+  );
+  return res.alerts;
 }
 
 export async function addTrail(token: string, catalogKey: string): Promise<WebTrail> {

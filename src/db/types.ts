@@ -165,6 +165,20 @@ export type TrailMailRow = {
   createdAt: string;
 };
 
+export type TrailAlertRow = {
+  id: string;
+  trailKey: string;
+  source: string;
+  npsCategory: string | null;
+  title: string;
+  description: string;
+  url: string | null;
+  startMile: number | null;
+  endMile: number | null;
+  affectedAreas: string | null;
+  expiresAt: string | null;
+};
+
 export type OutboxRow = {
   id: number;
   endpoint: string;
@@ -275,6 +289,13 @@ export interface TripStore {
   upsertTrailMail(rows: TrailMailRow[]): Promise<void>;
   listTrailMail(): Promise<TrailMailRow[]>;
   markTrailMailRead(id: string): Promise<void>;
+
+  // Trail alerts cache — safety-critical, must read offline (closed
+  // shelters/hazards). Each refresh replaces the local set for the given
+  // trailKey so a resolved/expired alert the server stops returning also
+  // disappears locally, matching web's behavior.
+  upsertTrailAlerts(trailKey: string, rows: TrailAlertRow[]): Promise<void>;
+  listTrailAlerts(trailKey: string): Promise<TrailAlertRow[]>;
 
   // Outbox (docs §4.3)
   outboxEnqueue(entry: {

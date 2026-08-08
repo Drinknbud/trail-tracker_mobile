@@ -15,6 +15,7 @@ import { Swipeable } from "react-native-gesture-handler";
 
 import { PickerModal } from "@/components/PickerModal";
 import { Card, Screen } from "@/components/Screen";
+import { TrailAlertBanner } from "@/components/TrailAlertBanner";
 import { tripStore, type SectionRow, type TripDownloadRow } from "@/db";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -380,6 +381,8 @@ export default function JournalScreen() {
         onSelect={(v) => router.push(v === "scout" ? "/scout" : "/section/new")}
         onClose={() => setShowAddMenu(false)}
       />
+
+      <TrailAlertBanner />
 
       {offline ? (
         <View

@@ -13,6 +13,7 @@ import type {
   TrailRow,
   TripCounts,
   TripDownloadRow,
+  TrailAlertRow,
   TrailMailRow,
   TripPackage,
   TripStatusEntry,
@@ -37,6 +38,7 @@ const gpsSessions = new Map<string, Omit<GpsSessionRow, "pointCount">>();
 const gpsPoints = new Map<string, GpsPointRow[]>();
 const photos = new Map<string, PhotoQueueRow>();
 const mail = new Map<string, TrailMailRow>();
+const alerts = new Map<string, TrailAlertRow[]>();
 
 // Sunrise midpoints live on elevation_profiles in SQLite; the memory store
 // keeps them alongside the profile.
@@ -375,6 +377,14 @@ export const memoryStore: TripStore = {
   async markTrailMailRead(id) {
     const m = mail.get(id);
     if (m) mail.set(id, { ...m, isRead: true });
+  },
+
+  async upsertTrailAlerts(trailKey, rows) {
+    alerts.set(trailKey, rows);
+  },
+
+  async listTrailAlerts(trailKey) {
+    return alerts.get(trailKey) ?? [];
   },
 };
 

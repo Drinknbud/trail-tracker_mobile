@@ -29,6 +29,7 @@ import { CompassBadge, DIRECTION_LABEL } from "@/components/CompassBadge";
 import { RingChart } from "@/components/RingChart";
 import { Card } from "@/components/Screen";
 import { StatTile } from "@/components/StatTile";
+import { TrailAlertBanner } from "@/components/TrailAlertBanner";
 import { TrailBadge } from "@/components/TrailBadge";
 import { Wordmark } from "@/components/Wordmark";
 import { useAuth } from "@/lib/auth";
@@ -196,6 +197,8 @@ export default function DashboardScreen() {
             <Text style={{ fontSize: 13 * fontScale, color: colors.offlineAmber }}>{error}</Text>
           </Card>
         ) : null}
+
+        <TrailAlertBanner />
 
         {/* Progress card */}
         <Card>
