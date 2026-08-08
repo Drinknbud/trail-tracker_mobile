@@ -119,16 +119,24 @@ export default function SectionDetailScreen() {
     const detail = await tripStore.getSectionDetail(id);
     setSection(detail);
     const localPois = await tripStore.listPois(id);
-    setPois(localPois);
     // Local pois are only ever written by a full trip download — a section
     // still in Planning has none yet. Fall back to a live fetch of the same
     // curated files the offline-package endpoint reads, same pattern as the
     // elevation-profile fallback below. Best-effort: no connectivity just
     // means no POI markers, same as before this fallback existed.
-    if (localPois.length === 0 && detail?.startMile != null && detail?.endMile != null) {
+    //
+    // This screen instance persists across refocuses (see the useFocusEffect
+    // note below), so load() re-runs on every focus — don't clear pois to []
+    // before the live fetch resolves, or a refocus during a connectivity
+    // blip wipes previously-shown POIs with no retry (the catch is silent).
+    if (localPois.length > 0) {
+      setPois(localPois);
+    } else if (detail?.startMile != null && detail?.endMile != null) {
       fetchLiveStaticPois("at", detail.startMile, detail.endMile)
         .then((live) => setPois(live.map((p) => ({ ...p, meta: {} }))))
         .catch(() => {});
+    } else {
+      setPois([]);
     }
     setNights(await tripStore.listNightLogs(id));
     setDays(await tripStore.listDayLogs(id));

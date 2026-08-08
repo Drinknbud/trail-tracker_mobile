@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { LayoutAnimation, Platform, Pressable, Text, UIManager, View } from "react-native";
+import { LayoutAnimation, Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useOnTrail } from "@/lib/onTrail";
@@ -32,10 +32,11 @@ import { useTheme } from "@/theme/ThemeContext";
 // category slides a second icon row up from the bar. On Trail mode keeps the
 // flat field bar (big one-tap targets, no flyouts). Dismissal: re-tap the
 // category, tap another one, navigate anywhere, or flip On Trail mode.
-
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+//
+// No explicit LayoutAnimation enable step needed — this app only runs under
+// the New Architecture (RN 0.86 dropped the legacy one), where LayoutAnimation
+// is enabled automatically. UIManager.setLayoutAnimationEnabledExperimental()
+// is a permanent no-op there and only exists to warn.
 
 type CategoryKey = "trail" | "community";
 
