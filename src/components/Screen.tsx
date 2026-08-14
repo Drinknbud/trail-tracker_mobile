@@ -46,11 +46,13 @@ export function Screen({
   }
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={topInset}
-    >
+    // behavior="padding" alone is the keyboard-avoidance mechanism here — no
+    // keyboardVerticalOffset (this KAV is anchored at y=0 with no chrome
+    // above it, so the correct offset is 0, not topInset) and no
+    // automaticallyAdjustKeyboardInsets on the ScrollView (that's a second,
+    // independent iOS keyboard-avoidance path; stacking it with KAV's own
+    // padding double-counted the keyboard height).
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.bg }}
         contentContainerStyle={{
@@ -59,7 +61,6 @@ export function Screen({
           paddingBottom: 32,
         }}
         keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
       >
         {header}
         {children}

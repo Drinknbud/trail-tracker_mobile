@@ -21,16 +21,24 @@ import { useTheme } from "@/theme/ThemeContext";
 type SectionRange = { startMile: number | null; endMile: number | null };
 
 function filterAlerts(alerts: TrailAlertRow[], sectionRanges: SectionRange[]): TrailAlertRow[] {
-  const ranged = sectionRanges.filter(
-    (s): s is { startMile: number; endMile: number } => s.startMile != null && s.endMile != null
-  );
+  // Normalize to lo/hi — southbound sections are deliberately stored with
+  // startMile > endMile (see section/new.tsx's applyTrailheadSelection), so
+  // comparing raw startMile/endMile against an alert's range silently drops
+  // every mile-ranged alert for a SOBO section.
+  const ranged = sectionRanges
+    .filter(
+      (s): s is { startMile: number; endMile: number } => s.startMile != null && s.endMile != null
+    )
+    .map((s) => ({ lo: Math.min(s.startMile, s.endMile), hi: Math.max(s.startMile, s.endMile) }));
   const hasRanged = ranged.length > 0;
 
   return alerts.filter((alert) => {
     const isTrailWide = alert.startMile == null || alert.endMile == null;
     if (isTrailWide) return !hasRanged;
     if (!hasRanged) return false;
-    return ranged.some((s) => alert.startMile! <= s.endMile && alert.endMile! >= s.startMile);
+    const aLo = Math.min(alert.startMile!, alert.endMile!);
+    const aHi = Math.max(alert.startMile!, alert.endMile!);
+    return ranged.some((s) => aLo <= s.hi && aHi >= s.lo);
   });
 }
 

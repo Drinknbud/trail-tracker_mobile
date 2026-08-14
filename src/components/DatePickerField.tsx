@@ -56,6 +56,13 @@ export function DatePickerField({
   const { colors, fontScale, scheme } = useTheme();
   const { fmtDate } = useUnits();
   const [show, setShow] = useState(false);
+  // iOS only: the spinner's onChange fires only when the wheel is scrolled,
+  // not on open — parseLocalDate(null) defaults it to "today", so if the
+  // user taps Done without touching the wheel, the visibly-displayed date
+  // never got committed via onChange and the field silently kept its old
+  // value. Tracking the currently-displayed date here lets Done commit it
+  // unconditionally, seeded fresh each time the sheet opens.
+  const [draft, setDraft] = useState<Date>(() => parseLocalDate(value));
 
   const handleChange = (event: DateTimePickerEvent, selected?: Date) => {
     if (Platform.OS === "android") {
@@ -63,7 +70,12 @@ export function DatePickerField({
       if (event.type === "set" && selected) onChange(toDateString(selected));
       return;
     }
-    if (selected) onChange(toDateString(selected));
+    if (selected) setDraft(selected);
+  };
+
+  const openPicker = () => {
+    setDraft(parseLocalDate(value));
+    setShow(true);
   };
 
   return (
@@ -72,7 +84,7 @@ export function DatePickerField({
         {label}
       </Text>
       <Pressable
-        onPress={() => setShow(true)}
+        onPress={openPicker}
         style={{
           flexDirection: "row",
           alignItems: "center",
@@ -139,14 +151,20 @@ export function DatePickerField({
                 <Text style={{ fontSize: 14 * fontScale, fontWeight: "600", color: colors.text }}>
                   {label}
                 </Text>
-                <Pressable onPress={() => setShow(false)} hitSlop={8}>
+                <Pressable
+                  onPress={() => {
+                    onChange(toDateString(draft));
+                    setShow(false);
+                  }}
+                  hitSlop={8}
+                >
                   <Text style={{ color: colors.accent, fontWeight: "700", fontSize: 15 * fontScale }}>
                     Done
                   </Text>
                 </Pressable>
               </View>
               <DateTimePicker
-                value={parseLocalDate(value)}
+                value={draft}
                 mode="date"
                 display="spinner"
                 themeVariant={scheme}

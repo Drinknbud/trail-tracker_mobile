@@ -62,6 +62,11 @@ function gradeColor(e0: number, e1: number, d0: number, d1: number): string {
 // (190 px/mile), just slightly tighter to fit typical phone widths.
 const PX_PER_MILE = 170;
 
+// Matches SectionMapCard's fixed preview Pressable height (180) so the two
+// section-detail preview cards read as the same size side by side in the
+// scroll, instead of the elevation thumbnail looking squat next to the map.
+const PREVIEW_HEIGHT = 180;
+
 function ElevSvg({
   points,
   width,
@@ -106,7 +111,12 @@ function ElevSvg({
   const PAD = scrollable ? { t: 34, r: 14, b: 36, l: 46 } : { t: 6, r: 6, b: 6, l: 2 };
   const W = scrollable ? Math.round(maxDist * PX_PER_MILE) + PAD.l + PAD.r : width;
   const chartW = W - PAD.l - PAD.r;
-  const chartH = height;
+  // Non-scrollable: `height` is the caller's total SVG box (H below), so
+  // chartH must reserve PAD.t/PAD.b within it — previously chartH equaled
+  // height directly, which put baseline (= PAD.t + chartH) 6px below the
+  // bottom of a 180px-tall SVG, clipping the axis line and the bottom of the
+  // filled area path entirely outside the viewport.
+  const chartH = scrollable ? height : height - PAD.t - PAD.b;
   const H = scrollable ? chartH + PAD.t + PAD.b : height;
   const BADGE_R = scrollable ? 7 : 3.5;
 
@@ -344,7 +354,7 @@ export function SectionElevationProfile({
             <ElevSvg
               points={points}
               width={cardWidth}
-              height={110}
+              height={PREVIEW_HEIGHT}
               pois={chartPois}
               gpsDistMi={gpsDistMi}
               trailMinElevFt={trailMinElevFt}

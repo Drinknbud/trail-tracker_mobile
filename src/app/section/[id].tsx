@@ -14,7 +14,7 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-native";
 
 import { DatePickerField } from "@/components/DatePickerField";
@@ -69,6 +69,11 @@ function Stat({ value, label }: { value: string; label: string }) {
         style={{ fontSize: 17 * fontScale, fontWeight: "700", color: colors.text }}
         numberOfLines={1}
         adjustsFontSizeToFit
+        // Floor the shrink at 75% of the *scaled* size — without this, a
+        // long value like "Very Strenuous" at xlarge fontScale (1.5) can
+        // shrink past the standard 17px the accessibility setting was meant
+        // to move away from, silently defeating it for the longest values.
+        minimumFontScale={0.75}
       >
         {value}
       </Text>
@@ -112,6 +117,13 @@ export default function SectionDetailScreen() {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [hasDownload, setHasDownload] = useState(false);
   const [elevationLoading, setElevationLoading] = useState(false);
+  // Caches a successful live elevation fetch across refocuses — this screen
+  // instance persists across them (see the useFocusEffect note below), so
+  // without this every focus of a Planning section (no local profile) would
+  // re-issue the /api/elevation/profile network call and flash a spinner
+  // over an already-rendered chart. A failed fetch deliberately isn't
+  // cached, so the next focus retries (e.g. after connectivity returns).
+  const cachedLiveProfileRef = useRef<ElevationProfile | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -146,10 +158,14 @@ export default function SectionDetailScreen() {
     // Elevation profile: prefer the local copy (offline-safe, from a full
     // trip download). A section still in Planning has never been downloaded,
     // so there's no local copy yet — fall back to a live fetch of the same
-    // public endpoint web uses. Best-effort: needs connectivity, and simply
-    // shows no elevation card (same as before) if it fails.
+    // public endpoint web uses (cached in cachedLiveProfileRef so a refocus
+    // doesn't re-fetch it — see that ref's own comment). Best-effort: needs
+    // connectivity, and simply shows no elevation card (same as before) if
+    // it fails.
     let profile: ElevationProfile | null = await tripStore.getElevationProfile(id);
-    if (!profile && detail?.startMile != null && detail?.endMile != null) {
+    if (!profile && cachedLiveProfileRef.current) {
+      profile = cachedLiveProfileRef.current;
+    } else if (!profile && detail?.startMile != null && detail?.endMile != null) {
       setElevationLoading(true);
       try {
         profile = await fetchLiveElevationProfile({
@@ -158,6 +174,7 @@ export default function SectionDetailScreen() {
           endMile: detail.endMile,
           totalMiles: AT_TOTAL_MILES,
         });
+        cachedLiveProfileRef.current = profile;
       } catch {
         // offline or fetch failed — leave profile null, matches prior behavior
       } finally {
@@ -282,6 +299,14 @@ export default function SectionDetailScreen() {
           style: "destructive",
           onPress: async () => {
             await deleteTripData(section.id);
+            // Explicit clear, not just left to load()'s live-fetch fallback:
+            // load() only overwrites `pois` on a *successful* fetch (see its
+            // comment) so a refocus-driven blip doesn't wipe already-shown
+            // POIs — but that means if this delete happens while offline,
+            // the fetch silently fails and the just-deleted POIs would stay
+            // rendered indefinitely. This is a known-good moment to clear:
+            // the user just explicitly deleted the local data.
+            setPois([]);
             // Full reload, not just setHasDownload(false) — deleteTripData
             // also wipes the local night/day logs, POIs, and elevation
             // profile, all of which are already rendered on this screen and
