@@ -44,6 +44,13 @@ function parseDetails(raw: string | null): SectionDetails | null {
   }
 }
 
+// AI-generated content isn't schema-guaranteed — a field can come back as
+// something other than a plain string (e.g. an array), which would throw on
+// .trim(). Coerce defensively rather than trusting the stored JSON's shape.
+function detailText(v: unknown): string {
+  return typeof v === "string" ? v : "";
+}
+
 export function SectionAiAssistant({
   section,
   onUpdated,
@@ -60,7 +67,7 @@ export function SectionAiAssistant({
 
   const details = parseDetails(section.details);
   const hasDetailContent =
-    !!details && DETAIL_LABELS.some(({ key }) => (details[key] ?? "").trim().length > 0);
+    !!details && DETAIL_LABELS.some(({ key }) => detailText(details[key]).trim().length > 0);
 
   async function run(kind: Kind) {
     if (!token || busy) return;
@@ -162,7 +169,7 @@ export function SectionAiAssistant({
       {hasDetailContent ? (
         <View style={{ marginTop: 14, gap: 12 }}>
           {DETAIL_LABELS.map(({ key, label }) => {
-            const val = (details?.[key] ?? "").trim();
+            const val = detailText(details?.[key]).trim();
             if (!val) return null;
             return (
               <View key={key}>
