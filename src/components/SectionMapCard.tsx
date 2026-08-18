@@ -92,7 +92,14 @@ export function SectionMapCard({ section }: { section: SectionRow }) {
             </Pressable>
           </View>
           <View style={{ flex: 1 }}>
-            <SectionMap section={section} mapStyle={mapStyle} bounds={bounds} />
+            {/* Modal mounts its children even while visible={false} — only
+                mount the full map once actually open, or this and the
+                always-on preview above both mount a native MapLibre Camera
+                view concurrently ("Tried to register two views with the
+                same name MLRNCamera"). */}
+            {modalOpen ? (
+              <SectionMap section={section} mapStyle={mapStyle} bounds={bounds} />
+            ) : null}
           </View>
         </View>
       </Modal>
