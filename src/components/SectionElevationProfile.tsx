@@ -370,7 +370,15 @@ function ElevSvg({
                   strokeWidth={scrollable ? 1.5 : 1}
                 />
               ))}
-              {scrollable && cluster.length === 1 && poiBadgeGlyph(cluster[0].poi.type, cluster[0].px, cluster[0].py, BADGE_R)}
+              {/* Every member of a merged cluster keeps its own glyph on its
+                  own circle (only the tap TARGET is shared) — matches the
+                  legend pills, which always show a glyph, and web's chart,
+                  which never suppresses one for overlap. */}
+              {scrollable && cluster.map((m) => (
+                <G key={`${m.poi.type}-${m.i}-glyph`}>
+                  {poiBadgeGlyph(m.poi.type, m.px, m.py, BADGE_R)}
+                </G>
+              ))}
             </G>
           );
         });
