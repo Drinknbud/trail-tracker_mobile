@@ -2,7 +2,7 @@ import { ChevronRight, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Line, Path, Polyline, Text as SvgText } from "react-native-svg";
+import Svg, { Circle, G, Line, Path, Polyline, Rect, Text as SvgText } from "react-native-svg";
 
 import { Card } from "@/components/Screen";
 import type { PoiRow } from "@/db";
@@ -21,21 +21,43 @@ import { useTheme } from "@/theme/ThemeContext";
 // here" dot fed by projectGpsToDist().
 
 // POI types that ship in the offline package (see offline-package/route.ts).
+// shelter/campsite/town/trailhead/road-crossing come from curated static
+// files; peak/gap/water/parking are baked in from a live Overpass fetch at
+// package-build time. Colors mirror web's SectionElevationChart POI_COLOR.
 const POI_COLOR: Record<string, string> = {
+  peak: "#15803D",
+  gap: "#6B7280",
   shelter: "#78350F",
   campsite: "#D97706",
+  water: "#0EA5E9",
+  parking: "#4F46E5",
   town: "#0EA5E9",
   trailhead: "#4F46E5",
   "road-crossing": "#6B7280",
 };
 const POI_LABEL: Record<string, string> = {
+  peak: "Summits",
+  gap: "Gaps",
   shelter: "Shelters",
   campsite: "Campsites",
+  water: "Water",
+  parking: "Parking",
   town: "Towns",
   trailhead: "Trailheads",
   "road-crossing": "Roads",
 };
-const POI_ORDER = ["shelter", "campsite", "town", "trailhead", "road-crossing"];
+const POI_SINGULAR: Record<string, string> = {
+  peak: "Summit",
+  gap: "Gap/Saddle",
+  shelter: "Shelter",
+  campsite: "Campsite",
+  water: "Water",
+  parking: "Parking",
+  town: "Town",
+  trailhead: "Trailhead",
+  "road-crossing": "Road Crossing",
+};
+const POI_ORDER = ["peak", "gap", "shelter", "campsite", "water", "parking", "town", "trailhead", "road-crossing"];
 
 const GRADE_BANDS = [
   { key: "flatMi", label: "Flat", hex: "#9CA3AF" },
@@ -45,6 +67,47 @@ const GRADE_BANDS = [
 ] as const;
 
 type ChartPoi = { distMi: number; type: string; name: string };
+
+/** Badge glyph matching web's SectionElevationChart icons, drawn at (x, y) with the given badge radius. */
+function poiBadgeGlyph(type: string, x: number, y: number, badgeR: number) {
+  const strokeW = badgeR > 5 ? 1.8 : 1.4;
+  switch (type) {
+    case "shelter":
+      return (
+        <G>
+          <Line x1={x - badgeR * 0.55} y1={y - badgeR * 0.6} x2={x - badgeR * 0.55} y2={y + badgeR * 0.6} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+          <Line x1={x - badgeR * 0.55} y1={y - badgeR * 0.6} x2={x + badgeR * 0.6} y2={y - badgeR * 0.1} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+          <Line x1={x - badgeR * 0.55} y1={y + badgeR * 0.6} x2={x + badgeR * 0.6} y2={y + badgeR * 0.6} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+          <Line x1={x + badgeR * 0.6} y1={y - badgeR * 0.1} x2={x + badgeR * 0.6} y2={y + badgeR * 0.6} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+        </G>
+      );
+    case "campsite":
+      return (
+        <G>
+          <Line x1={x - badgeR * 0.55} y1={y + badgeR * 0.6} x2={x} y2={y - badgeR * 0.65} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+          <Line x1={x} y1={y - badgeR * 0.65} x2={x + badgeR * 0.55} y2={y + badgeR * 0.6} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+          <Line x1={x - badgeR * 0.55} y1={y + badgeR * 0.6} x2={x + badgeR * 0.55} y2={y + badgeR * 0.6} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+          <Line x1={x} y1={y - badgeR * 0.3} x2={x} y2={y + badgeR * 0.6} stroke="#fff" strokeWidth={strokeW} strokeLinecap="round" />
+        </G>
+      );
+    case "water":
+      return <SvgText x={x} y={y + badgeR * 0.4} textAnchor="middle" fontSize={badgeR * 1.3}>{"\u{1F4A7}"}</SvgText>;
+    case "peak":
+      return <SvgText x={x} y={y + badgeR * 0.35} textAnchor="middle" fontSize={badgeR * 1.1} fill="#fff">{"▲"}</SvgText>;
+    case "gap":
+      return <SvgText x={x} y={y + badgeR * 0.35} textAnchor="middle" fontSize={badgeR * 1.1} fill="#fff">{"▽"}</SvgText>;
+    case "parking":
+      return <SvgText x={x} y={y + badgeR * 0.35} textAnchor="middle" fontSize={badgeR * 1.05} fontWeight="800" fill="#fff">P</SvgText>;
+    case "town":
+      return <SvgText x={x} y={y + badgeR * 0.35} textAnchor="middle" fontSize={badgeR} fontWeight="800" fill="#fff">T</SvgText>;
+    case "trailhead":
+      return <SvgText x={x} y={y + badgeR * 0.35} textAnchor="middle" fontSize={badgeR * 0.85} fontWeight="800" fill="#fff">TH</SvgText>;
+    case "road-crossing":
+      return <SvgText x={x} y={y + badgeR * 0.35} textAnchor="middle" fontSize={badgeR} fontWeight="800" fill="#fff">R</SvgText>;
+    default:
+      return null;
+  }
+}
 
 function gradeColor(e0: number, e1: number, d0: number, d1: number): string {
   const distFt = (d1 - d0) * 5280;
@@ -103,8 +166,12 @@ function ElevSvg({
    * vertical lines + "Day N" labels (scrollable mode only). */
   dayDividers?: number[];
 }) {
-  const { colors } = useTheme();
-  const { fmtMiles, distanceUnit } = useUnits();
+  const { colors, fontScale } = useTheme();
+  const { fmtMiles, fmtElev, distanceUnit } = useUnits();
+  // Tap-to-show tooltip on a POI badge — mirrors web's hover tooltip.
+  // Only reachable in scrollable (modal) mode; the preview card wraps this
+  // component in a pointerEvents="none" View so taps never land here.
+  const [selectedPoi, setSelectedPoi] = useState<{ key: string; x: number; y: number; label: string; ele?: number } | null>(null);
   if (points.length < 2 || (!scrollable && width <= 0)) return <View style={{ height }} />;
 
   const maxDist = points[points.length - 1].dist || 1;
@@ -118,7 +185,12 @@ function ElevSvg({
   // filled area path entirely outside the viewport.
   const chartH = scrollable ? height : height - PAD.t - PAD.b;
   const H = scrollable ? chartH + PAD.t + PAD.b : height;
-  const BADGE_R = scrollable ? 7 : 3.5;
+  // Modal (scrollable) badges sized to roughly match the map's own POI
+  // icons (72px source PNGs at icon-size 0.41, ~30px rendered) — the
+  // previous 7px radius (14px badge) read as barely-visible dots next to
+  // that. Preview-card badges stay small; that thumbnail is a non-tappable
+  // 180px-tall overview, not where legibility matters.
+  const BADGE_R = scrollable ? 12 : 3.5;
 
   const elevs = points.map((p) => p.elev);
   const minElev = trailMinElevFt ?? Math.min(...elevs);
@@ -203,7 +275,7 @@ function ElevSvg({
         const midX = (cx(start) + cx(end)) / 2;
         if (cx(end) - cx(start) < 50) return null;
         return (
-          <SvgText key={`day-label-${i}`} x={midX} y={14} textAnchor="middle" fontSize={11} fontWeight="600" fill="#8B5CF6" opacity={0.85}>
+          <SvgText key={`day-label-${i}`} x={midX} y={14} textAnchor="middle" fontSize={11 * fontScale} fontWeight="600" fill="#8B5CF6" opacity={0.85}>
             {`Day ${i + 1}`}
           </SvgText>
         );
@@ -217,10 +289,10 @@ function ElevSvg({
           separate min/max text row below the chart instead) */}
       {scrollable && (
         <>
-          <SvgText x={PAD.l - 6} y={PAD.t + 4} textAnchor="end" fontSize={11} fill={colors.muted}>
+          <SvgText x={PAD.l - 6} y={PAD.t + 4} textAnchor="end" fontSize={11 * fontScale} fill={colors.muted}>
             {Math.round(maxElev).toLocaleString()}
           </SvgText>
-          <SvgText x={PAD.l - 6} y={PAD.t + chartH} textAnchor="end" fontSize={11} fill={colors.muted}>
+          <SvgText x={PAD.l - 6} y={PAD.t + chartH} textAnchor="end" fontSize={11 * fontScale} fill={colors.muted}>
             {Math.round(minElev).toLocaleString()}
           </SvgText>
         </>
@@ -228,33 +300,81 @@ function ElevSvg({
 
       {/* X-axis distance labels — two lines: distance-so-far, then AT mile (scrollable only) */}
       {scrollable && mileTicks.map((t) => (
-        <SvgText key={`tick-top-${t.dist}`} x={cx(t.dist)} y={PAD.t + chartH + 16} textAnchor="middle" fontSize={11} fill={colors.muted}>
+        <SvgText key={`tick-top-${t.dist}`} x={cx(t.dist)} y={PAD.t + chartH + 16} textAnchor="middle" fontSize={11 * fontScale} fill={colors.muted}>
           {t.topLabel}
         </SvgText>
       ))}
       {scrollable && mileTicks.map((t) => (
-        <SvgText key={`tick-at-${t.dist}`} x={cx(t.dist)} y={PAD.t + chartH + 30} textAnchor="middle" fontSize={9.5} fill={colors.muted} opacity={0.7}>
+        <SvgText key={`tick-at-${t.dist}`} x={cx(t.dist)} y={PAD.t + chartH + 30} textAnchor="middle" fontSize={9.5 * fontScale} fill={colors.muted} opacity={0.7}>
           {t.atLabel}
         </SvgText>
       ))}
 
-      {/* POI markers */}
-      {pois?.map((poi, i) => {
-        if (poi.distMi < 0 || poi.distMi > maxDist) return null;
-        // nearest sampled elevation for the marker's y
-        const near = points.reduce((b, p) => (Math.abs(p.dist - poi.distMi) < Math.abs(b.dist - poi.distMi) ? p : b));
-        return (
-          <Circle
-            key={`${poi.type}-${i}`}
-            cx={cx(poi.distMi)}
-            cy={cy(near.elev)}
-            r={BADGE_R}
-            fill={POI_COLOR[poi.type] ?? colors.muted}
-            stroke="#FFFFFF"
-            strokeWidth={scrollable ? 1.5 : 1}
-          />
-        );
-      })}
+      {/* POI markers — tappable to show a name + elevation tooltip (scrollable/modal only) */}
+      {(() => {
+        const HIT_R = BADGE_R + 6;
+        const visuals = (pois ?? [])
+          .map((poi, i) => {
+            if (poi.distMi < 0 || poi.distMi > maxDist) return null;
+            // nearest sampled elevation for the marker's y
+            const near = points.reduce((b, p) => (Math.abs(p.dist - poi.distMi) < Math.abs(b.dist - poi.distMi) ? p : b));
+            return { poi, i, px: cx(poi.distMi), py: cy(near.elev), ele: near.elev, label: poi.name || POI_SINGULAR[poi.type] || poi.type };
+          })
+          .filter((v): v is NonNullable<typeof v> => v !== null);
+
+        // Group POIs whose (larger, transparent) hit circles overlap into a
+        // single shared tap target. react-native-svg's Android hit-testing
+        // (GroupView.hitTest) walks children in reverse paint order and
+        // returns the first hit, not the closest one to the touch — so two
+        // overlapping per-POI hit targets always resolve to whichever POI
+        // was rendered last, regardless of which badge the user actually
+        // tapped. Merging overlapping POIs into one marker sidesteps that
+        // paint-order bug entirely instead of trying to out-guess it.
+        const grouped: (typeof visuals)[] = [];
+        for (const v of visuals) {
+          const host = scrollable
+            ? grouped.find((g) => g.some((m) => Math.hypot(m.px - v.px, m.py - v.py) < HIT_R * 2))
+            : undefined;
+          if (host) host.push(v);
+          else grouped.push([v]);
+        }
+
+        return grouped.map((cluster) => {
+          const gx = cluster.reduce((s, m) => s + m.px, 0) / cluster.length;
+          const gy = cluster.reduce((s, m) => s + m.py, 0) / cluster.length;
+          const key = cluster.map((m) => `${m.poi.type}-${m.i}`).join("+");
+          const label = cluster.map((m) => m.label).join(", ");
+          const ele = Math.round(cluster.reduce((s, m) => s + m.ele, 0) / cluster.length);
+          return (
+            <G
+              key={key}
+              onPress={
+                scrollable
+                  ? () =>
+                      setSelectedPoi((prev) =>
+                        prev?.key === key ? null : { key, x: gx, y: gy, label, ele }
+                      )
+                  : undefined
+              }
+            >
+              {/* Larger transparent hit target than the visual badge(s), for easier tapping */}
+              {scrollable && <Circle cx={gx} cy={gy} r={HIT_R} fill="transparent" />}
+              {cluster.map((m) => (
+                <Circle
+                  key={`${m.poi.type}-${m.i}-badge`}
+                  cx={m.px}
+                  cy={m.py}
+                  r={BADGE_R}
+                  fill={POI_COLOR[m.poi.type] ?? colors.muted}
+                  stroke="#FFFFFF"
+                  strokeWidth={scrollable ? 1.5 : 1}
+                />
+              ))}
+              {scrollable && cluster.length === 1 && poiBadgeGlyph(cluster[0].poi.type, cluster[0].px, cluster[0].py, BADGE_R)}
+            </G>
+          );
+        });
+      })()}
 
       {/* GPS "you are here" dot */}
       {gpsDistMi != null && gpsDistMi >= 0 && gpsDistMi <= maxDist
@@ -270,6 +390,28 @@ function ElevSvg({
             );
           })()
         : null}
+
+      {/* POI tap tooltip */}
+      {scrollable && selectedPoi && (() => {
+        const hasEle = selectedPoi.ele != null;
+        const tw = Math.max(selectedPoi.label.length * 6.5 * fontScale, (hasEle ? 82 : 60) * fontScale);
+        const th = (hasEle ? 36 : 24) * fontScale;
+        const tx = Math.min(Math.max(selectedPoi.x - tw / 2, PAD.l), W - PAD.r - tw);
+        const ty = selectedPoi.y - BADGE_R - th - 8 < PAD.t ? selectedPoi.y + BADGE_R + 8 : selectedPoi.y - BADGE_R - th - 8;
+        return (
+          <G onPress={() => setSelectedPoi(null)}>
+            <Rect x={tx} y={ty} width={tw} height={th} rx={5} fill="rgba(0,0,0,0.8)" />
+            <SvgText x={tx + tw / 2} y={ty + 15 * fontScale} textAnchor="middle" fontSize={11 * fontScale} fill="#fff">
+              {selectedPoi.label}
+            </SvgText>
+            {hasEle && (
+              <SvgText x={tx + tw / 2} y={ty + 29 * fontScale} textAnchor="middle" fontSize={10 * fontScale} fill="#9ca3af">
+                {fmtElev(selectedPoi.ele!)}
+              </SvgText>
+            )}
+          </G>
+        );
+      })()}
     </Svg>
   );
 }
@@ -307,7 +449,19 @@ export function SectionElevationProfile({
   const chartPois = useMemo<ChartPoi[]>(() => {
     if (startMile == null) return [];
     const maxDist = points.length ? points[points.length - 1].dist : 0;
+    // Exact-duplicate guard: the same name+type+mile can appear twice in the
+    // source data (e.g. offline-package's Overpass POIs occasionally include
+    // more than one node for the same real-world feature) — collapse those,
+    // but never merge two distinct POIs that just happen to sit close
+    // together (a real cluster of separate features is still useful info).
+    const seen = new Set<string>();
     return pois
+      .filter((p) => {
+        const key = `${p.type}|${p.name}|${p.mile}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
       .map((p) => ({ distMi: Math.abs(p.mile - startMile), type: p.type, name: p.name }))
       .filter((p) => p.distMi >= 0 && p.distMi <= maxDist + 0.1);
   }, [pois, startMile, points]);
@@ -560,7 +714,10 @@ function ElevationModal({
                           opacity: active ? 1 : 0.5,
                         }}
                       >
-                        <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color, borderWidth: 1, borderColor: "#FFFFFF" }} />
+                        <Svg width={18} height={18}>
+                          <Circle cx={9} cy={9} r={8} fill={color} stroke="#FFFFFF" strokeWidth={1} />
+                          {poiBadgeGlyph(t, 9, 9, 7)}
+                        </Svg>
                         <Text style={{ fontSize: 12 * fontScale, fontWeight: "600", color: active ? color : colors.muted }}>
                           {count} {POI_LABEL[t] ?? t}
                         </Text>
@@ -575,7 +732,7 @@ function ElevationModal({
             {totalMi > 0.1 ? (
               <View style={{ paddingHorizontal: 16, paddingTop: 18 }}>
                 <Text style={{ fontSize: 11 * fontScale, fontWeight: "700", color: colors.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-                  Effort Distribution
+                  Suck-O-Meter (Effort Distribution)
                 </Text>
                 <View style={{ flexDirection: "row", height: 30, borderRadius: 999, overflow: "hidden", gap: 1 }}>
                   {GRADE_BANDS.map(({ key, label, hex }) => {
