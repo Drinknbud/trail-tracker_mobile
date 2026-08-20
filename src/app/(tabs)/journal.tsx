@@ -19,6 +19,8 @@ import { TrailAlertBanner } from "@/components/TrailAlertBanner";
 import { tripStore, type SectionRow, type TripDownloadRow } from "@/db";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { startElevationPrefetch } from "@/lib/elevation-prefetch";
+import { TRAIL_CATALOG } from "@/lib/trailCatalog";
 import { downloadTrip, removeSection } from "@/lib/trip-download";
 import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
@@ -35,6 +37,10 @@ type SectionsResponse = {
 };
 
 type GroupKey = "planning" | "planned" | "completed";
+
+// Single-trail (AT) MVP — same fallback used by section/[id].tsx's own live
+// elevation fetch.
+const AT_TOTAL_MILES = TRAIL_CATALOG.find((t) => t.key === "at")?.totalMiles ?? 2198;
 
 export default function JournalScreen() {
   const { colors, scheme, fontScale } = useTheme();
@@ -191,6 +197,22 @@ export default function JournalScreen() {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Pressable
             onPress={() => router.push(`/section/${s.id}`)}
+            onPressIn={() => {
+              // Fire the same live elevation fetch section/[id].tsx would
+              // otherwise wait on after navigating, so the chart is often
+              // already loaded (or loading) by the time that screen mounts.
+              // Only worth it for sections with no local download — those
+              // already have an offline profile, no network round-trip to
+              // save.
+              if (!hasDownload && s.startMile != null && s.endMile != null) {
+                startElevationPrefetch(s.id, {
+                  catalogKey: "at",
+                  startMile: s.startMile,
+                  endMile: s.endMile,
+                  totalMiles: AT_TOTAL_MILES,
+                });
+              }
+            }}
             style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
           >
             <View

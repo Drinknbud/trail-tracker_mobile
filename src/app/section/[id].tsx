@@ -39,6 +39,7 @@ import { enqueueWrite } from "@/lib/outbox";
 import { capturePhoto } from "@/lib/photos";
 import { exportSectionPdf, pdfExportAvailable } from "@/lib/sectionPdf";
 import { TRAIL_CATALOG } from "@/lib/trailCatalog";
+import { takeElevationPrefetch } from "@/lib/elevation-prefetch";
 import { deleteTripData } from "@/lib/trip-download";
 import { miToKm } from "@/lib/units";
 import { useUnits } from "@/lib/units-context";
@@ -166,14 +167,20 @@ export default function SectionDetailScreen() {
     if (!profile && cachedLiveProfileRef.current) {
       profile = cachedLiveProfileRef.current;
     } else if (!profile && detail?.startMile != null && detail?.endMile != null) {
+      // Journal kicks this same fetch off on press-in, before navigation even
+      // completes (see startElevationPrefetch) — if it's already in flight or
+      // done, ride it instead of issuing a second identical request.
+      const prefetched = takeElevationPrefetch(id);
       setElevationLoading(true);
       try {
-        profile = await fetchLiveElevationProfile({
-          catalogKey: "at",
-          startMile: detail.startMile,
-          endMile: detail.endMile,
-          totalMiles: AT_TOTAL_MILES,
-        });
+        profile =
+          (await (prefetched ??
+            fetchLiveElevationProfile({
+              catalogKey: "at",
+              startMile: detail.startMile,
+              endMile: detail.endMile,
+              totalMiles: AT_TOTAL_MILES,
+            }))) ?? null;
         cachedLiveProfileRef.current = profile;
       } catch {
         // offline or fetch failed — leave profile null, matches prior behavior
