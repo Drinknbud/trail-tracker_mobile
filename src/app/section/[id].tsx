@@ -19,6 +19,7 @@ import { ActivityIndicator, Alert, Image, Pressable, Text, View } from "react-na
 
 import { DatePickerField } from "@/components/DatePickerField";
 import { FormField } from "@/components/FormField";
+import MarkdownText from "@/components/MarkdownText";
 import { Card, Screen } from "@/components/Screen";
 import { SectionAiAssistant } from "@/components/SectionAiAssistant";
 import { SectionCelebration } from "@/components/SectionCelebration";
@@ -41,7 +42,7 @@ import { exportSectionPdf, pdfExportAvailable } from "@/lib/sectionPdf";
 import { TRAIL_CATALOG } from "@/lib/trailCatalog";
 import { takeElevationPrefetch } from "@/lib/elevation-prefetch";
 import { deleteTripData } from "@/lib/trip-download";
-import { miToKm } from "@/lib/units";
+import { fmtMileMarker, miToKm } from "@/lib/units";
 import { useUnits } from "@/lib/units-context";
 import { usePremium } from "@/lib/usePremium";
 import { fetchLiveElevationProfile, fetchLiveStaticPois } from "@/lib/webApi";
@@ -57,6 +58,19 @@ const STATUS_COLORS: Record<string, string> = {
   planned: "#3B82F6",
   completed: "#22C55E",
 };
+
+const POI_LABEL: Record<string, string> = {
+  peak: "Summits",
+  gap: "Gaps",
+  shelter: "Shelters",
+  campsite: "Campsites",
+  water: "Water",
+  parking: "Parking",
+  town: "Towns",
+  trailhead: "Trailheads",
+  "road-crossing": "Roads",
+};
+const POI_ORDER = ["peak", "gap", "shelter", "campsite", "water", "parking", "town", "trailhead", "road-crossing"];
 
 function Stat({ value, label }: { value: string; label: string }) {
   const { colors, fontScale } = useTheme();
@@ -111,6 +125,8 @@ export default function SectionDetailScreen() {
   const [dayDraft, setDayDraft] = useState<DayDraft | null>(null);
   const [celebrate, setCelebrate] = useState(false);
   const [showItinerary, setShowItinerary] = useState(false);
+  const [showPois, setShowPois] = useState(true);
+  const [hiddenPoiTypes, setHiddenPoiTypes] = useState<Set<string>>(new Set());
   const [photos, setPhotos] = useState<PhotoQueueRow[]>([]);
   const [photoNotice, setPhotoNotice] = useState<string | null>(null);
   const [elevation, setElevation] = useState<ElevationProfile | null>(null);
@@ -564,9 +580,9 @@ export default function SectionDetailScreen() {
             </Text>
           </Pressable>
           {showItinerary ? (
-            <Text style={{ fontSize: 13 * fontScale, color: colors.text, marginTop: 8 }}>
-              {section.itinerary}
-            </Text>
+            <View style={{ marginTop: 8 }}>
+              <MarkdownText content={section.itinerary} fontScale={fontScale} />
+            </View>
           ) : null}
         </Card>
       ) : null}
@@ -894,37 +910,100 @@ export default function SectionDetailScreen() {
       {/* POIs */}
       {pois.length > 0 ? (
         <>
-          <Text
-            style={{
-              fontSize: 14 * fontScale,
-              fontWeight: "700",
-              color: colors.text,
-              marginTop: 20,
-              marginBottom: 8,
-            }}
-          >
-            Points of Interest ({pois.length})
-          </Text>
-          <Card style={{ marginBottom: 24 }}>
-            {pois.map((p, i) => (
-              <View
-                key={`${p.type}-${p.name}-${i}`}
-                style={{
-                  flexDirection: "row",
-                  paddingVertical: 6,
-                  borderBottomWidth: i === pois.length - 1 ? 0 : 1,
-                  borderBottomColor: colors.border,
-                }}
-              >
-                <Text style={{ flex: 1, fontSize: 13 * fontScale, color: colors.text }}>
-                  {p.name}
-                </Text>
-                <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>
-                  {p.type} · mi {p.mile}
-                </Text>
-              </View>
-            ))}
-          </Card>
+          {(() => {
+            const availableTypes = POI_ORDER.filter((t) => pois.some((p) => p.type === t));
+            const visiblePois = pois.filter((p) => !hiddenPoiTypes.has(p.type));
+            const togglePoiType = (t: string) => {
+              setHiddenPoiTypes((prev) => {
+                const next = new Set(prev);
+                if (next.has(t)) next.delete(t);
+                else next.add(t);
+                return next;
+              });
+            };
+            return (
+              <>
+                <Pressable
+                  onPress={() => setShowPois((v) => !v)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginTop: 20,
+                    marginBottom: 8,
+                  }}
+                >
+                  <Text style={{ flex: 1, fontSize: 14 * fontScale, fontWeight: "700", color: colors.text }}>
+                    Points of Interest ({visiblePois.length}
+                    {visiblePois.length !== pois.length ? ` of ${pois.length}` : ""})
+                  </Text>
+                  <Text style={{ fontSize: 14 * fontScale, color: colors.muted }}>
+                    {showPois ? "▾" : "▸"}
+                  </Text>
+                </Pressable>
+                {showPois ? (
+                  <>
+                    {availableTypes.length > 1 ? (
+                      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                        {availableTypes.map((t) => {
+                          const active = !hiddenPoiTypes.has(t);
+                          return (
+                            <Pressable
+                              key={t}
+                              onPress={() => togglePoiType(t)}
+                              style={{
+                                paddingVertical: 4,
+                                paddingHorizontal: 10,
+                                borderRadius: 999,
+                                borderWidth: 1,
+                                borderColor: active ? colors.accent : colors.border,
+                                backgroundColor: active ? colors.accent : "transparent",
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 11 * fontScale,
+                                  fontWeight: "600",
+                                  color: active ? "#FFFFFF" : colors.muted,
+                                }}
+                              >
+                                {POI_LABEL[t] ?? t}
+                              </Text>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    ) : null}
+                    {visiblePois.length > 0 ? (
+                      <Card style={{ marginBottom: 24 }}>
+                        {visiblePois.map((p, i) => (
+                          <View
+                            key={`${p.type}-${p.name}-${i}`}
+                            style={{
+                              flexDirection: "row",
+                              paddingVertical: 6,
+                              borderBottomWidth: i === visiblePois.length - 1 ? 0 : 1,
+                              borderBottomColor: colors.border,
+                            }}
+                          >
+                            <Text style={{ flex: 1, fontSize: 13 * fontScale, fontWeight: "700", color: colors.text }}>
+                              {p.name}
+                            </Text>
+                            <Text style={{ fontSize: 12 * fontScale, color: colors.muted }}>
+                              {p.type} · {fmtMileMarker(p.mile, distanceUnit)}
+                            </Text>
+                          </View>
+                        ))}
+                      </Card>
+                    ) : (
+                      <Text style={{ fontSize: 13 * fontScale, color: colors.muted, marginBottom: 24 }}>
+                        All types hidden.
+                      </Text>
+                    )}
+                  </>
+                ) : null}
+              </>
+            );
+          })()}
         </>
       ) : null}
 

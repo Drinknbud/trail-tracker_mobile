@@ -58,7 +58,7 @@ export function Screen({
         contentContainerStyle={{
           paddingTop: topInset + 12,
           paddingHorizontal: 16,
-          paddingBottom: 32,
+          paddingBottom: insets.bottom + 32,
         }}
         keyboardShouldPersistTaps="handled"
       >
