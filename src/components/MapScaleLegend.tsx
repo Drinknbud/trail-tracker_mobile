@@ -1,4 +1,5 @@
 import { Text, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/theme/ThemeContext";
 
@@ -103,6 +104,12 @@ function computeScale(zoom: number, latitude: number, targetBarPx: number) {
 export function MapScaleLegend({ zoom, latitude }: { zoom: number; latitude: number }) {
   const { colors, scheme } = useTheme();
   const { width: screenWidth } = useWindowDimensions();
+  // insets.bottom reflects whatever system nav is actually reserving space —
+  // a thin gesture pill on some Android devices/OS versions, a much taller
+  // 3-button bar on others (or iPhone's home indicator) — read live from the
+  // OS rather than guessed, so the bar clears it under any of them instead
+  // of the fixed pixel value that only happened to clear the thinnest case.
+  const insets = useSafeAreaInsets();
   if (!Number.isFinite(zoom) || !Number.isFinite(latitude)) return null;
 
   // Target the true safe maximum for this screen — bar + padding + axis
@@ -123,7 +130,7 @@ export function MapScaleLegend({ zoom, latitude }: { zoom: number; latitude: num
       style={{
         position: "absolute",
         right: 12,
-        bottom: 28, // clears the MapLibre attribution strip, matches MapProgressCard
+        bottom: 28 + insets.bottom, // clears the MapLibre attribution strip + system nav, matches MapProgressCard
         backgroundColor: bg,
         borderRadius: 8,
         paddingHorizontal: 8,

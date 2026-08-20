@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 
 import { TrailMap } from "@/components/TrailMap";
@@ -13,6 +14,7 @@ import { coordinateAtMile, type MapPhotoResolved, type MapStyleKey } from "@/lib
 
 export default function MapScreen() {
   const { token } = useAuth();
+  const insets = useSafeAreaInsets();
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [mapStyle, setMapStyle] = useState<MapStyleKey>("outdoors");
   const [sections, setSections] = useState<SectionRow[]>([]);
@@ -96,7 +98,7 @@ export default function MapScreen() {
           <Text
             style={{
               position: "absolute",
-              bottom: 32,
+              bottom: 32 + insets.bottom, // same system-nav clearance as MapProgressCard/MapScaleLegend
               left: 8,
               backgroundColor: "rgba(220,38,38,0.85)",
               color: "#FFFFFF",

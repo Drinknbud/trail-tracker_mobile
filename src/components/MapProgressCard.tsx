@@ -1,6 +1,7 @@
 import { Info, X } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useUnits } from "@/lib/units-context";
 import { useTheme } from "@/theme/ThemeContext";
@@ -31,6 +32,7 @@ export function MapProgressCard({
 }) {
   const { colors, fontScale, scheme } = useTheme();
   const { fmtMiles } = useUnits();
+  const insets = useSafeAreaInsets();
   const [expanded, setExpanded] = useState(false);
   const pct = totalMiles > 0 ? Math.min(100, Math.round((completedMiles / totalMiles) * 100)) : 0;
   const track = scheme === "dark" ? "#374151" : "#E5E7EB"; // gray-700 / gray-200, matching web
@@ -43,7 +45,7 @@ export function MapProgressCard({
         style={{
           position: "absolute",
           left: 12,
-          bottom: 28, // clears the MapLibre attribution strip, matches MapScaleLegend
+          bottom: 28 + insets.bottom, // clears the MapLibre attribution strip + system nav, matches MapScaleLegend
           width: 32,
           height: 32,
           borderRadius: 16,
@@ -69,7 +71,7 @@ export function MapProgressCard({
       style={{
         position: "absolute",
         left: 12,
-        bottom: 28,
+        bottom: 28 + insets.bottom,
         minWidth: 160,
         maxWidth: 220,
         paddingHorizontal: 12,
